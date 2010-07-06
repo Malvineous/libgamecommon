@@ -1,0 +1,12 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: libgamecommon
+Description: Common routes used by most Camoto libraries
+URL: http://www.shikadi.net/camoto/
+#Requires: boost >= 1.37
+Version: @VERSION@
+Libs: -L${libdir} -lgamecommon
+Cflags: -I${includedir}/@camoto_release@
