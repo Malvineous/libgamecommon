@@ -1,0 +1,12 @@
+lib_LTLIBRARIES = libgamecommon.la
+
+libgamecommon_la_SOURCES = iostream_helpers.cpp
+libgamecommon_la_SOURCES += segmented_stream.cpp
+libgamecommon_la_SOURCES += substream.cpp
+
+AM_CPPFLAGS = $(DEBUG_CPPFLAGS) $(BOOST_CPPFLAGS) -I $(top_srcdir)/include
+AM_CXXFLAGS = $(DEBUG_CXXFLAGS)
+
+libgamecommon_la_LDFLAGS = $(AM_LDFLAGS) -release @VERSION@ -version-info 0
+#libgamecommon_la_LIBADD = $(BOOST_SYSTEM_LIBS) $(BOOST_FILESYSTEM_LIBS)
+libgamecommon_la_LIBADD = $(BOOST_SYSTEM_LIBS)
