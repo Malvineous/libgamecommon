@@ -1,10 +1,11 @@
-/*
- * segmented_stream_device.hpp - Class declaration for a C++ iostream that allows
- *   blocks of data to be inserted or removed at any point in the underlying
- *   stream, shifting data around as necessary.  Data is not modified in the
- *   underlying stream until commit() is called.  Do not modify the underlying
- *   stream while it is being used by segmented_stream_device as some changes will
- *   not be picked up and others will cause data corruption.
+/**
+ * @file segmented_stream.hpp
+ * @brief C++ iostream allowing blocks of data to be inserted and removed at
+ *   any point in the underlying stream, shifting data around as necessary.
+ *   Data is not modified in the underlying stream until commit() is called.
+ *   Do not modify the underlying stream while it is being used by the
+ *   segmented_stream as some changes will not be picked up and others will
+ *   cause data corruption.
  *
  * Copyright (C) 2010 Adam Nielsen <malvineous@shikadi.net>
  *
@@ -37,13 +38,16 @@ namespace camoto {
 
 namespace io = boost::iostreams;
 
-// This class implements a Boost iostreams device, which can act as both a
-// Sink and a Source.  It implements additional functions to provide the
-// segmented functionality, but these are not public to prevent them from
-// being accessed directly.  (If they were accessed directly they would be out
-// of sync with the iostreams' build in cache, causing data corruption.)  To
-// work around this, a segmented_stream class is defined later which provides
-// a wrapper around the functions and flushes the cache as necessary.
+/// C++ iostream allowing blocks of data to be inserted and removed.
+/**
+ * This class implements a Boost iostreams device, which can act as both a
+ * Sink and a Source.  It implements additional functions to provide the
+ * segmented functionality, but these are not public to prevent them from
+ * being accessed directly.  (If they were accessed directly they would be out
+ * of sync with the iostreams' build in cache, causing data corruption.)  To
+ * work around this, a segmented_stream class is defined later which provides
+ * a wrapper around the functions and flushes the cache as necessary.
+ */
 class segmented_stream_device
 {
 	public:
@@ -51,22 +55,25 @@ class segmented_stream_device
 		typedef io::seekable_device_tag category;
 
 	private:
-		io::stream_offset poffFirstStart; // Offsets into parent stream ("poff")
+		io::stream_offset poffFirstStart; ///< Offsets into parent stream ("poff")
 		io::stream_offset poffFirstEnd;
 		iostream_sptr psFirst;
 		std::vector<uint8_t> vcSecond;
 		segmented_stream_device *psegThird;
 
 		// When offPos == 0, the parent stream file pointer is at poffFirstStart
-		io::stream_offset offPos;  // Offset into self ("off", starts at 0)
+		io::stream_offset offPos;  ///< Offset into self ("off", starts at 0)
 
 		segmented_stream_device()
 			throw ();
 
 	public:
-		// psBase now becomes the underlying stream providing data.  This means it
-		// shouldn't be accessed while the segmented_stream_device has control of it, or
-		// the data will probably be corrupted.
+		/// Constructor
+		/**
+		 * @param  psBase  This now becomes the underlying stream providing data.  This
+		 * means it shouldn't be accessed while the segmented_stream_device has control
+		 * of it, or the data will probably be corrupted.
+		 */
 		segmented_stream_device(iostream_sptr psBase)
 			throw ();
 
@@ -76,36 +83,61 @@ class segmented_stream_device
 		~segmented_stream_device()
 			throw ();
 
+		/// boost::iostreams function
 		std::streamsize read(char_type *s, std::streamsize n);
+
+		/// boost::iostreams function
 		std::streamsize write(const char_type *s, std::streamsize n);
+
+		/// boost::iostreams function
 		io::stream_offset seek(io::stream_offset off, std::ios_base::seekdir way);
 
+		/// Return the total length of the stream
 		std::streamsize getLength();
 
 	protected:
-		// Insert a block of data at the current seek position, shifting the rest
-		// of the data forward, out of the way.  Seek position remains unchanged,
-		// but stream size will have enlarged by lenInsert bytes.
-		// Before: AAAABBBB
-		// After:  AAAA____BBBB
-		//             ^ Seek position, lenInsert == 4
+		/// Insert a block of data at the current seek position.
+		/**
+		 * The rest of the data is shifted forward, out of the way.  Seek position
+		 * remains unchanged, but stream size will have enlarged by lenInsert bytes.
+		 *
+		 * @code
+		 * Before: AAAABBBB
+		 * After:  AAAA____BBBB
+		 *             ^ Seek position, lenInsert == 4
+		 * @endcode
+		 *
+		 * @param  lenInsert  Number of bytes to insert.
+		 */
 		void insert(std::streamsize lenInsert);
 
-		// Remove a chunk of data from the current seek position, pulling the rest
-		// of the data back.  All data from the current seek position to lenRemove
-		// bytes after it are lost.  The seek position remains unchanged, but the
-		// stream size will have shrunk by lenRemove bytes.
-		// Before: AAAAXXXXBBBB
-		// After:  AAAABBBB
-		//             ^ Seek position, lenRemove == 4
+		/// Remove a chunk of data from the current seek position.
+		/**
+		 * The rest of the data is shifted back.  All data from the current seek
+		 * position to lenRemove bytes after it are lost.  The seek position remains
+		 * unchanged, but the stream size will have shrunk by lenRemove bytes.
+		 *
+		 * @code
+		 * Before: AAAAXXXXBBBB
+		 * After:  AAAABBBB
+		 *             ^ Seek position, lenRemove == 4
+		 * @endcode
+		 *
+		 * @param  lenRemove  Number of bytes to remove.
+		 */
 		void remove(std::streamsize lenRemove);
 
-		// Write out all the changes to the underlying stream.  On completion
-		// vcSecond and psegThird will be empty.
+		/// Write out all the changes to the underlying stream.
+		/**
+		 * On completion vcSecond and psegThird will be empty.
+		 *
+		 * @param  fnTruncate  A callback function to adjust the size of the underlying
+		 *         stream.
+		 */
 		void commit(FN_TRUNCATE fnTruncate);
 
 	private:
-		// Actual commit function where the destination offset can be specified.
+		/// Actual commit function where the destination offset can be specified.
 		void commit(io::stream_offset poffWriteFirst);
 
 		// Split the segstream at the current seek position.  Upon return the first
@@ -137,8 +169,13 @@ class segmented_stream: public io::stream<segmented_stream_device>
 		segmented_stream(const segmented_stream_device& orig)
 			throw ();
 
+		/// See segmented_stream_device::insert(std::streamsize)
 		void insert(std::streamsize lenInsert);
+
+		/// See segmented_stream_device::remove(std::streamsize)
 		void remove(std::streamsize lenRemove);
+
+		/// See segmented_stream_device::commit(FN_TRUNCATE)
 		void commit(FN_TRUNCATE fnTruncate);
 };
 
