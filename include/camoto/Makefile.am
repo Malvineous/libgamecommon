@@ -6,3 +6,6 @@ nobase_library_include_HEADERS += debug.hpp
 nobase_library_include_HEADERS += iostream_helpers.hpp
 nobase_library_include_HEADERS += segmented_stream.hpp
 nobase_library_include_HEADERS += substream.hpp
+nobase_library_include_HEADERS += bitstream.hpp
+nobase_library_include_HEADERS += lzw.hpp
+nobase_library_include_HEADERS += filteredstream.hpp

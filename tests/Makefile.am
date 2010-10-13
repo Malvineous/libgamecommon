@@ -6,6 +6,9 @@ tests_SOURCES += test-iostream_helpers.cpp
 tests_SOURCES += test-streamMove.cpp
 tests_SOURCES += test-substream.cpp
 tests_SOURCES += test-segmented_stream.cpp
+tests_SOURCES += test-bitstream.cpp
+tests_SOURCES += test-lzw.cpp
+tests_SOURCES += test-filteredstream.cpp
 
 EXTRA_tests_SOURCES = tests.hpp
 
