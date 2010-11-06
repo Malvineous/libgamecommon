@@ -28,6 +28,12 @@
 /// Main namespace
 namespace camoto {
 
+/// Shared pointer to an istream
+typedef boost::shared_ptr<std::istream> istream_sptr;
+
+/// Shared pointer to an ostream
+typedef boost::shared_ptr<std::ostream> ostream_sptr;
+
 /// Shared pointer to an iostream
 typedef boost::shared_ptr<std::iostream> iostream_sptr;
 
