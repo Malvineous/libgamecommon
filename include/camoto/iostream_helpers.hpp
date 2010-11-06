@@ -1,5 +1,6 @@
-/*
- * iostream_helpers.hpp - Functions to get variables in and out of a stream.
+/**
+ * @file   iostream_helpers.hpp
+ * @brief  Functions to get variables in and out of a stream.
  *
  * Copyright (C) 2010 Adam Nielsen <malvineous@shikadi.net>
  *
@@ -33,39 +34,11 @@ namespace camoto {
 
 namespace io = boost::iostreams;
 
+/// Copy possibly overlapping data from one position in a stream to another.
 void streamMove(std::iostream& ps, io::stream_offset offFrom,
 	io::stream_offset offTo, io::stream_offset szLength);
 
-inline uint32_t u32le_from_buf(const uint8_t *pbuf)
-{
-	return le32toh(*((uint32_t *)pbuf));
-}
-
-inline std::string string_from_buf(const uint8_t *pbuf, int maxlen)
-{
-	// Find any terminating NULLs which will shorten the string
-	for (int i = 0; i < maxlen; i++) {
-		if (!pbuf[i]) {
-			maxlen = i;
-			break;
-		}
-	}
-	// Create and return the string
-	return std::string((char *)pbuf, maxlen);
-}
-
-// nullPadded will pad a string with nulls when writing it to a stream, e.g.
-//   file << nullPadded("hello", 10);  // write 10 bytes, "hello" and five nulls
-// It is an error for the string ("hello") to be longer than the pad (10),
-// this will cause an assertion failure at runtime.
-// It can also be used when reading from a stream, e.g.
-//   file >> nullPadded(str, 10);  // read 10 bytes, store until first null
-// In this case 10 bytes will always be read, but they will only be stored in
-// str until the first null is encountered.  If there are no null bytes then
-// the final string will be the full 10 chars (std::string will provide the
-// null termination in this case.)
-
-
+/// @sa null_padded
 struct null_padded_read {
 	null_padded_read(std::string& r, std::streamsize len, bool chop);
 	void read(std::istream& s) const;
@@ -76,6 +49,7 @@ struct null_padded_read {
 		bool chop;
 };
 
+/// @sa null_padded
 struct null_padded_write {
 	null_padded_write(const std::string& r, std::streamsize len);
 	void write(std::ostream& s) const;
@@ -85,10 +59,32 @@ struct null_padded_write {
 		std::streamsize len;
 };
 
+/// @sa null_padded
 struct null_padded_const: public null_padded_write {
 	null_padded_const(const std::string& r, std::streamsize len);
 };
 
+/**
+ * nullPadded will pad a string with nulls when writing it to a stream, e.g.
+ *
+ * @code
+ * file << nullPadded("hello", 10);  // write 10 bytes, "hello" and five nulls
+ * @endcode
+ *
+ * It is an error for the string ("hello") to be longer than the pad (10), this
+ * will cause an assertion failure at runtime.
+ *
+ * It can also be used when reading from a stream, e.g.
+ *
+ * @code
+ * file >> nullPadded(str, 10);
+ * @endcode
+ *
+ * In this case 10 bytes will always be read, but they will only be stored in
+ * str until the first null is encountered.  If there are no null bytes then
+ * the final string will be the full 10 chars (std::string will provide the
+ * null termination in this case.)
+ */
 struct null_padded: public null_padded_read, public null_padded_write {
 	null_padded(std::string& r, std::streamsize len, bool chop);
 };
