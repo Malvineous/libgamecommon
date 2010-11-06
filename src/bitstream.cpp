@@ -197,23 +197,53 @@ int bitstream::write(fn_putnextchar fnNextChar, int bits, int in)
 io::stream_offset bitstream::seek(io::stream_offset off, std::ios_base::seekdir way)
 	throw (std::ios::failure)
 {
-	this->parent->seekg(off / 8, way);
-	switch (way) {
-		case std::ios::beg:
-			//this->parent->seekg(off / 8, std::ios::beg);
-			this->curBitPos = off % 8;
-			break;
-		case std::ios::end:
-			//this->parent->seekg(off / 8, std::ios::end);
-			this->curBitPos = (8 - (off % 8)) % 8;
-			break;
-		case std::ios::cur:
-			//this->parent->seekg(off / 8, std::ios::cur);
-			this->curBitPos += (off % 8);
-			break;
+	if (way == std::ios::cur) {
+		// Take into account the parent seek position will be on the following
+		// byte boundary, even if we're still half way through the previous byte.
+		off -= 8 - this->curBitPos;
 	}
+	int bitOffset = off % 8;
+	if (bitOffset < 0) {
+		this->parent->seekg(off / 8 - 1, way);
+		bitOffset += 8;
+	} else {
+		this->parent->seekg(off / 8, way);
+	}
+	assert(bitOffset >= 0);
+	this->flushByte();
+	int dummy;
+	this->read(bitOffset, &dummy); // read in the last few bits to set all the state vars
 	io::stream_offset byte = this->parent->tellg();
 	return (byte * 8) + this->curBitPos;
+}
+
+void bitstream::clear()
+	throw (std::ios::failure)
+{
+	this->parent->clear();
+	return;
+}
+
+void bitstream::changeEndian(bitstream::endian endianType)
+	throw ()
+{
+	this->endianType = endianType;
+	this->seek(0, std::ios::cur); // flush caches
+	return;
+}
+
+bitstream::endian bitstream::getEndian()
+	throw ()
+{
+	return this->endianType;
+}
+
+void bitstream::flushByte()
+	throw ()
+{
+	this->bufBits = 0; // flush the bit buffer
+	this->curBitPos = 0; // reset to the start of the byte boundary
+	return;
 }
 
 } // namespace camoto

@@ -91,6 +91,9 @@ class bitstream {
 		 *   function is only intended to be used in Boost iostream filters, which
 		 *   supply the source stream as a parameter to the read() function rather
 		 *   that at object construction time.
+		 *
+		 * @note Obviously the seek() function cannot be used in combination with
+		 *   this particular function.
 		 */
 		int read(fn_getnextchar fnNextChar, int bits, int *out)
 			throw (std::ios::failure);
@@ -106,18 +109,44 @@ class bitstream {
 		 *   function is only intended to be used in Boost iostream filters, which
 		 *   supply the source stream as a parameter to the read() function rather
 		 *   that at object construction time.
+		 *
+		 * @note Obviously the seek() function cannot be used in combination with
+		 *   this particular function.
 		 */
 		int write(fn_putnextchar fnNextChar, int bits, int in)
 			throw (std::ios::failure);
 
 		/// Seek to a given bit position within the stream.
 		/**
+		 * @note This only works with the read() and write() function which do NOT
+		 *   take an fnNextChar parameter.
+		 *
 		 * @param off  Bit offset (e.g. 0 == first byte, 8 == second byte)
 		 * @param way  Seek direction - std::ios::beg/cur/end
 		 * @return Current offset (in bits from start of file)
 		 */
 		io::stream_offset seek(io::stream_offset off, std::ios_base::seekdir way)
 			throw (std::ios::failure);
+
+		/// Reset any errors preventing access (e.g. EOF)
+		void clear()
+			throw (std::ios::failure);
+
+		/// Alter the endian type without affecting the current seek position.
+		void changeEndian(endian endianType)
+			throw ();
+
+		/// Return the current endian setting.
+		endian getEndian()
+			throw ();
+
+		/// Flush the byte currently cached.
+		/**
+		 * This will cause the next read operation to start at the following byte
+		 * boundary.
+		 */
+		void flushByte()
+			throw ();
 
 };
 

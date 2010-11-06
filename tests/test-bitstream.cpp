@@ -200,19 +200,21 @@ BOOST_FIXTURE_TEST_SUITE(bitstream_read_suite, bitstream_read_sample)
 
 
 #define READ_BITS(n) \
+{ \
 	int val, b; \
 	while ((b = bit->read(n, &val)) == n) { \
 		this->result.push_back(val); \
 	} \
-	if (b > 0) this->result.push_back(val);
+	if (b > 0) this->result.push_back(val); \
+}
 
 #define TEST_LE(n) \
 BOOST_AUTO_TEST_CASE(bitstream_read_ ## n ## bit_le) \
 { \
 	BOOST_TEST_MESSAGE("Read " __STRING(n) "-bit LE values"); \
- \
+\
 	READ_BITS(n); \
- \
+\
 	BOOST_CHECK_MESSAGE(is_equal(make_vector(values_ ## n ## le)), \
 		"Reading " __STRING(n) "-bit LE values failed"); \
 }
@@ -223,9 +225,9 @@ BOOST_AUTO_TEST_CASE(bitstream_read_ ## n ## bit_be) \
 	BOOST_TEST_MESSAGE("Read " __STRING(n) "-bit BE values"); \
 \
 	bit.reset(new camoto::bitstream(psBase, camoto::bitstream::bigEndian)); \
- \
+\
 	READ_BITS(n); \
- \
+\
 	BOOST_CHECK_MESSAGE(is_equal(make_vector(values_ ## n ## be)), \
 		"Reading " __STRING(n) "-bit BE values failed"); \
 }
@@ -257,9 +259,9 @@ BOOST_FIXTURE_TEST_SUITE(bitstream_write_suite, bitstream_write_sample)
 BOOST_AUTO_TEST_CASE(bitstream_write_ ## n ## bit_le) \
 { \
 	BOOST_TEST_MESSAGE("Write " __STRING(n) "-bit LE values"); \
- \
+\
 	WRITE_BITS(n, values_ ## n ## le); \
- \
+\
 	BOOST_CHECK_MESSAGE(is_equal(std::string(DATA_BYTES PAD ## n, sizeof(DATA_BYTES PAD ## n)-1), \
 		this->psstrBase->str()), \
 		"Writing " __STRING(n) "-bit LE values failed"); \
@@ -271,9 +273,9 @@ BOOST_AUTO_TEST_CASE(bitstream_write_ ## n ## bit_be) \
 	BOOST_TEST_MESSAGE("Write " __STRING(n) "-bit BE values"); \
 \
 	bit.reset(new camoto::bitstream(psBase, camoto::bitstream::bigEndian)); \
- \
+\
 	WRITE_BITS(n, values_ ## n ## be); \
- \
+\
 	BOOST_CHECK_MESSAGE(is_equal(std::string(DATA_BYTES PAD ## n, sizeof(DATA_BYTES PAD ## n)-1), \
 		this->psstrBase->str()), \
 		"Writing " __STRING(n) "-bit BE values failed"); \
@@ -289,5 +291,65 @@ TEST_LE(9)
 TEST_BE(9)
 TEST_LE(17)
 TEST_BE(17)
+
+BOOST_AUTO_TEST_SUITE_END()
+
+
+BOOST_FIXTURE_TEST_SUITE(bitstream_seek_suite, bitstream_read_sample)
+
+#define TEST_SEEK(b, d, o) \
+BOOST_AUTO_TEST_CASE(bitstream_seek_ ## b ## d ## o) \
+{ \
+	BOOST_TEST_MESSAGE("Seek to " __STRING(o) "@" __STRING(d) " - " __STRING(b) "-bit"); \
+\
+	int dummy; \
+	bit->read(8+3, &dummy); \
+\
+	this->bit->seek(o, std::ios::d); \
+	READ_BITS(b); \
+\
+	BOOST_CHECK_MESSAGE(is_equal(make_vector(values_ ## b ## d ## o)), \
+		"Seek to " __STRING(o) "@" __STRING(d) " - " __STRING(b) "-bit failed"); \
+}
+
+#define TEST_NEG_SEEK(b, d, o) \
+BOOST_AUTO_TEST_CASE(bitstream_seek_ ## b ## d ## neg ## o) \
+{ \
+	BOOST_TEST_MESSAGE("Seek to -" __STRING(o) "@" __STRING(d) " - " __STRING(b) "-bit"); \
+\
+	int dummy; \
+	bit->read(8+3, &dummy); \
+\
+	this->bit->seek(-o, std::ios::d); \
+	READ_BITS(b); \
+\
+	BOOST_CHECK_MESSAGE(is_equal(make_vector(values_ ## b ## d ## neg ## o)), \
+		"Seek to -" __STRING(o) "@" __STRING(d) " - " __STRING(b) "-bit failed"); \
+}
+
+int values_8beg16[] = {0x56, 0x78, 0x9a};
+TEST_SEEK(8, beg, 16);
+
+int values_8beg32[] = {0x9a};
+TEST_SEEK(8, beg, 32);
+
+// Start at the offset of 3 in the test, seek +5, end up at byte offset 1
+int values_8cur5[] = {0x56, 0x78, 0x9a};
+TEST_SEEK(8, cur, 5);
+
+int values_8cur13[] = {0x78, 0x9a};
+TEST_SEEK(8, cur, 13);
+
+int values_8curneg3[] = {0x34, 0x56, 0x78, 0x9a};
+TEST_NEG_SEEK(8, cur, 3);
+
+int values_8curneg11[] = {0x12, 0x34, 0x56, 0x78, 0x9a};
+TEST_NEG_SEEK(8, cur, 11);
+
+int values_8endneg16[] = {0x78, 0x9a};
+TEST_NEG_SEEK(8, end, 16);
+
+int values_8endneg4[] = {0x9};
+TEST_NEG_SEEK(8, end, 4);
 
 BOOST_AUTO_TEST_SUITE_END()
