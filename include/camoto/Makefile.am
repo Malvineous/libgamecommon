@@ -9,3 +9,4 @@ nobase_library_include_HEADERS += substream.hpp
 nobase_library_include_HEADERS += bitstream.hpp
 nobase_library_include_HEADERS += lzw.hpp
 nobase_library_include_HEADERS += filteredstream.hpp
+nobase_library_include_HEADERS += exceptions.hpp

@@ -6,6 +6,7 @@ libgamecommon_la_SOURCES += substream.cpp
 libgamecommon_la_SOURCES += bitstream.cpp
 libgamecommon_la_SOURCES += lzw.cpp
 libgamecommon_la_SOURCES += filteredstream.cpp
+libgamecommon_la_SOURCES += exceptions.cpp
 
 AM_CPPFLAGS = $(DEBUG_CPPFLAGS) $(BOOST_CPPFLAGS) -I $(top_srcdir)/include
 AM_CXXFLAGS = $(DEBUG_CXXFLAGS)

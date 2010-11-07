@@ -32,26 +32,11 @@
 
 #include <camoto/bitstream.hpp>
 #include <camoto/types.hpp>
+#include <camoto/exceptions.hpp>
 
 namespace camoto {
 
 namespace io = boost::iostreams;
-
-/// Exception thrown when invalid data is encountered during decompression.
-class ECorruptedData: virtual public std::exception {
-	protected:
-		std::string msg;
-
-	public:
-		ECorruptedData(const std::string& msg)
-			throw ();
-
-		~ECorruptedData()
-			throw ();
-
-		virtual const char *what() const
-			throw ();
-};
 
 #define LZW_LITTLE_ENDIAN     0x00 ///< Read bytes in little-endian order
 #define LZW_BIG_ENDIAN        0x01 ///< Read bytes in big-endian order
