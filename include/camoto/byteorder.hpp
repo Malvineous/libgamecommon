@@ -69,10 +69,80 @@
 
 #include <stdint.h>
 
+#if defined(linux) || defined(_BSD_SOURCE)
+
 #ifndef _BSD_SOURCE
 #define _BSD_SOURCE
 #endif
 #include <endian.h>
+
+// Default OS (no specific functions)
+#else
+
+#define ___swab16(x) \
+	((uint16_t)( \
+		(((uint16_t)(x) & (uint16_t)0x00ffU) << 8) | \
+		(((uint16_t)(x) & (uint16_t)0xff00U) >> 8) ))
+
+#define ___swab32(x) \
+	((uint32_t)( \
+		(((uint32_t)(x) & (uint32_t)0x000000ffUL) << 24) | \
+		(((uint32_t)(x) & (uint32_t)0x0000ff00UL) <<  8) | \
+		(((uint32_t)(x) & (uint32_t)0x00ff0000UL) >>  8) | \
+		(((uint32_t)(x) & (uint32_t)0xff000000UL) >> 24) ))
+
+#define ___swab64(x) \
+	((uint64_t)( \
+		(uint64_t)(((uint64_t)(x) & (uint64_t)0x00000000000000ffULL) << 56) | \
+		(uint64_t)(((uint64_t)(x) & (uint64_t)0x000000000000ff00ULL) << 40) | \
+		(uint64_t)(((uint64_t)(x) & (uint64_t)0x0000000000ff0000ULL) << 24) | \
+		(uint64_t)(((uint64_t)(x) & (uint64_t)0x00000000ff000000ULL) <<  8) | \
+		(uint64_t)(((uint64_t)(x) & (uint64_t)0x000000ff00000000ULL) >>  8) | \
+		(uint64_t)(((uint64_t)(x) & (uint64_t)0x0000ff0000000000ULL) >> 24) | \
+		(uint64_t)(((uint64_t)(x) & (uint64_t)0x00ff000000000000ULL) >> 40) | \
+		(uint64_t)(((uint64_t)(x) & (uint64_t)0xff00000000000000ULL) >> 56) ))
+
+// Little endian
+#if defined(__WIN__) || defined(__CYGWIN32__)
+
+#define le16toh(x)  (x)
+#define le32toh(x)  (x)
+#define le64toh(x)  (x)
+
+#define htole16(x)  (x)
+#define htole32(x)  (x)
+#define htole64(x)  (x)
+
+#define be16toh(x)  ___swab16(x)
+#define be32toh(x)  ___swab32(x)
+#define be64toh(x)  ___swab64(x)
+
+#define htobe16(x)  ___swab16(x)
+#define htobe32(x)  ___swab32(x)
+#define htobe64(x)  ___swab64(x)
+
+// Big endian
+#else
+
+#define le16toh(x)  ___swab16(x)
+#define le32toh(x)  ___swab32(x)
+#define le64toh(x)  ___swab64(x)
+
+#define htole16(x)  ___swab16(x)
+#define htole32(x)  ___swab32(x)
+#define htole64(x)  ___swab64(x)
+
+#define be16toh(x)  (x)
+#define be32toh(x)  (x)
+#define be64toh(x)  (x)
+
+#define htobe16(x)  (x)
+#define htobe32(x)  (x)
+#define htobe64(x)  (x)
+
+#endif
+
+#endif
 
 // Create some strongly-typed functions that call the correct endian conversion
 // routines based on the given C++ type.
