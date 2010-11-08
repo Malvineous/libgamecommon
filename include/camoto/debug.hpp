@@ -1,5 +1,6 @@
-/*
- * debug.hpp - Helper functions to assist with debugging.
+/**
+ * @file   debug.hpp
+ * @brief  Helper functions to assist with debugging.
  *
  * Copyright (C) 2009 Adam Nielsen <malvineous@shikadi.net>
  *
@@ -26,9 +27,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-
-#define TOSTRING_X(x)  #x
-#define TOSTRING(x)    TOSTRING_X(x)
 
 #define CLR_NORM   "\e[22;39m"
 #define CLR_GREY   "\e[1;30m"

@@ -25,6 +25,9 @@
 #include <iostream>
 #include <sstream>
 
+#define TOSTRING_X(x)  #x
+#define TOSTRING(x)    TOSTRING_X(x)
+
 /// Main namespace
 namespace camoto {
 
@@ -50,7 +53,7 @@ inline boost::shared_ptr<std::ostringstream> _createStream(void)
  * @example createString std::string str = createString("The value is " << iValue);
  */
 #define createString(a) \
-  (static_cast<const std::ostringstream&>(*_createStream().get() << a).str())
+  (static_cast<const std::ostringstream&>(*camoto::_createStream().get() << a).str())
 // The first variable after the ostringstream constructor always gets printed
 // as a number, so we need to add some null-output value instead - ios::dec
 // does the job nicely, and allows 'a' to start off with something that isn't a
