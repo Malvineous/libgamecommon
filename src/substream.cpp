@@ -34,6 +34,16 @@ substream_device::substream_device(iostream_sptr psParent, std::streamsize iOffs
 		iCurPos(0)
 {
 	assert(psParent);
+
+	// Sanity check: Make sure the substream doesn't go past the parent's EOF
+	this->psParent->seekp(0, std::ios::end);
+	if (!(this->psParent->tellp() >= this->iOffset + this->iLength)) {
+		std::cerr << "ERROR: Parent stream is " << this->psParent->tellp()
+			<< " bytes long, but substream ends past parent's EOF, at offset "
+			<< this->iOffset + this->iLength << "!" << std::endl;
+	}
+	assert(this->psParent->tellp() >= this->iOffset + this->iLength);
+
 	refcount_qenterclass(substream_device);
 }
 
@@ -82,8 +92,15 @@ std::streamsize substream_device::read(char_type *s, std::streamsize n)
 
 std::streamsize substream_device::write(const char_type *s, std::streamsize n)
 {
-	if (this->iCurPos >= this->iLength)
-		throw std::ios_base::failure("no space left in archive slot");
+	if (this->iCurPos >= this->iLength) {
+#ifdef DEBUG
+		std::cerr << "substream::write(): no space left in substream (writing "
+			<< n << " bytes @ offset " << this->iCurPos << ", len is "
+			<< this->iLength << ")" << std::endl;
+		//throw std::ios_base::failure("no space left in substream");
+		return 0;
+#endif
+	}
 
 	if ((this->iCurPos + n) > this->iLength) {
 		n = this->iLength - this->iCurPos;
@@ -95,6 +112,7 @@ std::streamsize substream_device::write(const char_type *s, std::streamsize n)
 	this->iCurPos += iLen;
 
 	// Make sure these bytes actually were written to the stream
+	assert(this->psParent->good());
 	assert(this->psParent->tellp() == this->iOffset + this->iCurPos);
 	return iLen;
 }
@@ -144,6 +162,12 @@ void substream_device::setSize(io::stream_offset len)
 
 	// Sanity check: Make sure the size doesn't go past the parent's EOF
 	this->psParent->seekp(0, std::ios::end);
+	if (!(this->psParent->tellp() >= this->iOffset + this->iLength)) {
+		std::cerr << "ERROR: Parent stream is " << this->psParent->tellp()
+			<< " bytes long, but substream has just been resized to " << len
+			<< " bytes long so that it now ends past parent's EOF, at offset "
+			<< this->iOffset + this->iLength << "!" << std::endl;
+	}
 	assert(this->psParent->tellp() >= this->iOffset + this->iLength);
 
 	return;
