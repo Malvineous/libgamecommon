@@ -44,6 +44,7 @@ namespace io = boost::iostreams;
 #define LZW_NO_BITSIZE_RESET  0x04 ///< Leave the codeword bit length unchanged after dictionary reset
 #define LZW_EOF_PARAM_VALID   0x08 ///< Is the EOF parameter (to c'tor) valid?
 #define LZW_RESET_PARAM_VALID 0x10 ///< Is the reset parameter (to c'tor) valid?
+#define LZW_FLUSH_ON_RESET    0x20 ///< Jump to next word boundary on reset
 
 typedef char byte;
 // The string element:

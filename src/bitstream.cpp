@@ -228,7 +228,6 @@ void bitstream::changeEndian(bitstream::endian endianType)
 	throw ()
 {
 	this->endianType = endianType;
-	this->seek(0, std::ios::cur); // flush caches
 	return;
 }
 

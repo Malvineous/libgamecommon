@@ -37,8 +37,10 @@ void Dictionary::fillDecodedString(unsigned code)
 	throw (ECorruptedData)
 {
 	decodedString.clear();
+	int safety = 0;
+	int tableSize = table.size();
 	while (code != ~0U) {
-		if (code >= table.size()) throw ECorruptedData("LZW data is corrupted - "
+		if (code >= tableSize) throw ECorruptedData("LZW data is corrupted - "
 			"codeword was larger than the number of entries in the dictionary!");
 		const CodeString& cs = table[code];
 		decodedString.push_back(cs.k);
@@ -49,6 +51,11 @@ void Dictionary::fillDecodedString(unsigned code)
 			"codeword's prefix is itself, cannot continue as this would cause an "
 			"infinite loop!");
 		code = cs.prefixIndex;
+
+		if (++safety > tableSize * 2) {
+			throw ECorruptedData("LZW data is corrupted - searched through the "
+				"dictionary twice but the code never mapped to a byte value!");
+		}
 	}
 }
 
@@ -187,10 +194,17 @@ getNextCodeword:
 	// See if the code we just got is a special one that will reset the dictionary
 	if ((this->flags & LZW_RESET_PARAM_VALID) && (this->code == this->curResetCode)) {
 		this->resetDictionary();
+		if (this->flags & LZW_FLUSH_ON_RESET) {
+			int dummy;
+			this->data.flushByte();
+			// We can't use seek here because cbNext might not be from the stream
+			//this->data.read(cbNext, num*8, &dummy);
+		}
 		goto getNextCodeword;
 	}
 
 	this->dictionary.decode(this->oldCode, this->code, this->buffer);
+
 
 	if (this->dictionary.size() > this->maxCode) {
 		if (this->currentBits == this->maxBits) {
