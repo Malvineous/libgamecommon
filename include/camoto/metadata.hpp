@@ -44,6 +44,7 @@ class Metadata {
 		enum MetadataType {
 			Description,     ///< File description
 			PaletteFilename, ///< Palette filename
+			Version,         ///< Version/revision number
 		};
 
 		/// Vector of metadata item types.
