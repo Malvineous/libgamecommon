@@ -1,8 +1,7 @@
 /**
  * @file   filteredstream.hpp
  * @brief  C++ iostream providing transparent seekable access to a filtered
- *         stream via an in-memory buffer. LZW compression and decompression
- *         via a memory buffer and LZW filters.
+ *         stream via an in-memory buffer.
  *
  * Copyright (C) 2010 Adam Nielsen <malvineous@shikadi.net>
  *
@@ -50,23 +49,28 @@ typedef boost::shared_ptr<io::filtering_ostream> filtering_ostream_sptr;
  */
 class filteredstream_device {
 	private:
+		/// Set to true if a write has occurred and we should copy the data back
+		/// to the stream on flush().
+		bool doFlush;
+
 		/// Parent stream, where the actual data is read from and written to.
 		iostream_sptr parent;
 		filtering_ostream_sptr outFilter;
 
 		boost::shared_ptr<std::stringstream> cache;
 
-		/// Current seek position.
-		io::stream_offset iCurPos;
-
 	public:
 		typedef char char_type;
-		typedef io::seekable_device_tag category;
+		struct category: io::seekable_device_tag, io::flushable_tag { };
 
 		/// Create a filteredstream out of the given stream
 		/**
-		 * @param psParent Parent stream, where the data comes from
-		 * @param iOffset Offset into the parent stream where the filteredstream starts
+		 * @param parent
+		 *   Parent stream, where the data comes from
+		 *
+		 * @param iOffset
+		 *   Offset into the parent stream where the filteredstream starts
+		 *
 		 * @param iLength Size of filteredstream in bytes
 		 */
 		filteredstream_device(iostream_sptr parent, filtering_istream_sptr inFilter,
@@ -88,24 +92,16 @@ class filteredstream_device {
 		/// boost::iostream callback function
 		io::stream_offset seek(io::stream_offset off, std::ios_base::seekdir way);
 
-	friend class filteredstream;
+		/// Write out the cached data to the underlying stream, passing it through
+		/// the output filter.
+		bool flush();
 
 };
 
+/// C++ iostream class for applying filters to a stream without seeking.
+typedef io::stream<filteredstream_device> filteredstream;
 
-/// C++ iostream class for accessing a portion of another stream.
-class filteredstream: public io::stream<filteredstream_device>
-{
-	public:
-		/// @copydoc filteredstream_device::filteredstream_device()
-		filteredstream(iostream_sptr parent, filtering_istream_sptr inFilter,
-			filtering_ostream_sptr outFilter)
-			throw (std::exception);
-
-		filteredstream(const filteredstream_device& orig)
-			throw ();
-};
-
+/// Shared pointer to filteredstream
 typedef boost::shared_ptr<filteredstream> filteredstream_sptr;
 
 } // namespace camoto

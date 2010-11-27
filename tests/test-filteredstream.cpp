@@ -28,26 +28,9 @@
 
 #include "tests.hpp"
 
-//namespace io = boost::iostreams;
 using namespace camoto;
 
-struct filteredstream_sample: public default_sample {
-
-	filteredstream_sample()
-	{
-	}
-
-	boost::test_tools::predicate_result is_equal(const char *cExpected, const char *cActual)
-	{
-		// See if the stringstream now matches what we expected
-		std::string strExpected = cExpected;
-		std::string strActual = cActual;
-		return this->default_sample::is_equal(strExpected, strActual);
-	}
-
-};
-
-BOOST_FIXTURE_TEST_SUITE(filteredstream_suite, filteredstream_sample)
+BOOST_FIXTURE_TEST_SUITE(filteredstream_suite, default_sample)
 
 BOOST_AUTO_TEST_CASE(filteredstream_read)
 {
@@ -68,7 +51,7 @@ BOOST_AUTO_TEST_CASE(filteredstream_read)
 	dec->read(buf, 10);
 	BOOST_REQUIRE_EQUAL(dec->gcount(), 10);
 
-	BOOST_CHECK_MESSAGE(is_equal("KLMNOPQRST", buf),
+	BOOST_CHECK_MESSAGE(is_equal("KLMNOPQRST", std::string(buf, 10)),
 		"Read from filteredstream failed");
 }
 
@@ -89,8 +72,9 @@ BOOST_AUTO_TEST_CASE(filteredstream_write)
 	BOOST_REQUIRE_EQUAL(dec->good(), true);
 
 	dec->write("1234567890", 10);
+	dec->flush();
 
-	BOOST_CHECK_MESSAGE(is_equal("ABCDEFGHIJ1234567890UVWXYZ", ss->str().c_str()),
+	BOOST_CHECK_MESSAGE(is_equal("ABCDEFGHIJ1234567890UVWXYZ", ss->str()),
 		"Write to filteredstream failed");
 }
 
