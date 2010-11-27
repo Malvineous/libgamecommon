@@ -39,7 +39,33 @@ typedef boost::shared_ptr<std::iostream> iostream_sptr;
 
 /// Truncate function callback (to truncate an iostream)
 /**
- * @see gamearchive::Archive::fnTruncate
+ * This function is called with a single unsigned long parameter when a stream
+ * needs to be shrunk or enlarged to the given size.  It must be set to a valid
+ * function before any calls can be made which modify stream data.
+ *
+ * The actual stream to be modified is wrapped up in the function call, so the
+ * stream does not need to be passed to this function.  Usually boost::bind is
+ * used to create this "wrapping".
+ *
+ * The function signature is:
+ * @code
+ * void fnTruncate(unsigned long newLength);
+ * @endcode
+ *
+ * This example uses boost::bind to package up a call to the Linux
+ * truncate() function (which requires both a filename and size) such that
+ * the filename is supplied in advance and not required when the FN_TRUNCATE
+ * call is made.
+ *
+ * @code
+ * FN_TRUNCATE fnTruncate = boost::bind<void>(truncate, "graphics.dat", _1);
+ * Image *img = ...
+ * img->fromStandard(...);  // calls truncate("graphics.dat", 123)
+ * @endcode
+ *
+ * Unfortunately since there is no cross-platform method for changing a file's
+ * size via its iostream, this is a necessary evil to avoid passing filenames
+ * and substream details around all over the place.
  */
 typedef boost::function<void(unsigned long)> FN_TRUNCATE;
 

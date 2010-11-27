@@ -94,6 +94,8 @@ class bitstream {
 		 *
 		 * @note Obviously the seek() function cannot be used in combination with
 		 *   this particular function.
+		 *
+		 * @return The number of *bits* read, or < 0 on error (e.g. EOF/-1)
 		 */
 		int read(fn_getnextchar fnNextChar, int bits, int *out)
 			throw (std::ios::failure);
