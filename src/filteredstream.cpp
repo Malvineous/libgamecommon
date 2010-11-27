@@ -40,6 +40,7 @@ filteredstream_device::filteredstream_device(iostream_sptr parent,
 	inFilter->push(*this->parent);
 	boost::iostreams::copy(*inFilter, *this->cache);
 	this->cache->seekg(0, std::ios::beg);
+	this->cache->seekp(0, std::ios::beg);
 	assert(this->cache->good());
 
 	this->parent->seekp(0, std::ios::beg);
@@ -97,6 +98,7 @@ bool filteredstream_device::flush()
 			this->outFilter->rdbuf()->sputn(buf, len);
 		}
 		this->outFilter->flush();
+		this->parent->flush();
 		this->doFlush = false;
 	}
 	return true;
