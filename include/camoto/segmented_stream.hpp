@@ -26,6 +26,7 @@
 #ifndef _CAMOTO_SEGMENTED_STREAM_HPP_
 #define _CAMOTO_SEGMENTED_STREAM_HPP_
 
+#include <vector>
 #include <iosfwd>                           // streamsize, seekdir
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/categories.hpp>   // seekable_device_tag

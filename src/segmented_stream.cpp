@@ -26,7 +26,6 @@
 #include <boost/iostreams/categories.hpp>   // seekable_device_tag
 #include <boost/iostreams/positioning.hpp>  // stream_offset
 #include <boost/shared_ptr.hpp>
-#include <vector>
 
 #include <camoto/iostream_helpers.hpp>      // streamMove
 #include <camoto/segmented_stream.hpp>
@@ -434,7 +433,6 @@ void segmented_stream_device::remove(std::streamsize lenRemove)
 // of this.
 void segmented_stream_device::commit(FN_TRUNCATE fnTruncate)
 {
-std::cerr << "commit(): psFirst is " << this->psFirst << std::endl;
 	assert(fnTruncate);
 	assert(this->psFirst->good());
 
@@ -448,7 +446,6 @@ std::cerr << "commit(): psFirst is " << this->psFirst << std::endl;
 
 	// This could fail if we're committing to an empty stringstream, in that
 	// case write a byte to the stringstream first (C++ bug.)
-std::cerr << "in commit(), done seek" << std::endl;
 	assert(this->psFirst->good());
 
 	io::stream_offset lenTotal = this->getLength();
