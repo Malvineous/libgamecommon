@@ -59,6 +59,8 @@ inline boost::shared_ptr<std::ostringstream> _createStream(void)
 // does the job nicely, and allows 'a' to start off with something that isn't a
 // number (e.g. a char.)
 
+void stringStreamTruncate(std::stringstream *ss, int len);
+
 } // namespace camoto
 
 #endif // _CAMOTO_UTIL_HPP_

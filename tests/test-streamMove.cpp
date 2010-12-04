@@ -25,6 +25,7 @@
 #include <iostream>
 
 #include <camoto/iostream_helpers.hpp>
+#include <camoto/util.hpp>
 
 #include "tests.hpp"
 
@@ -132,7 +133,7 @@ BOOST_AUTO_TEST_CASE(streamMove_extend)
 {
 	BOOST_TEST_MESSAGE("Stream move past EOF");
 
-	stringStreamTruncate(&data, 30); // extend stringstream to make room
+	camoto::stringStreamTruncate(&data, 30); // extend stringstream to make room
 
 	camoto::streamMove(data, 5, 20, 10);
 
@@ -144,7 +145,7 @@ BOOST_AUTO_TEST_CASE(streamMove_extend_overlap)
 {
 	BOOST_TEST_MESSAGE("Overlapping stream move past EOF");
 
-	stringStreamTruncate(&data, 35); // extend stringstream to make room
+	camoto::stringStreamTruncate(&data, 35); // extend stringstream to make room
 
 	camoto::streamMove(data, 5, 15, 20);
 

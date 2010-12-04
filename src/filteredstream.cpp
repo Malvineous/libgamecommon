@@ -21,7 +21,7 @@
 
 #include <boost/iostreams/copy.hpp>
 #include <camoto/filteredstream.hpp>
-#include <camoto/debug.hpp>
+#include <camoto/util.hpp>
 
 namespace camoto {
 

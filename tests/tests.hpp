@@ -38,6 +38,4 @@ struct default_sample {
 
 };
 
-void stringStreamTruncate(std::stringstream *ss, int len);
-
 #endif // _CAMOTO_TESTS_HPP_

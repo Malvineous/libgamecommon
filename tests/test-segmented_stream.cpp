@@ -28,6 +28,7 @@
 #include <camoto/substream.hpp>
 #include <camoto/segmented_stream.hpp>
 #include <camoto/iostream_helpers.hpp>
+#include <camoto/util.hpp>
 
 #include "tests.hpp"
 
@@ -57,7 +58,8 @@ struct segstream_sample: public default_sample {
 	boost::test_tools::predicate_result is_equal(int pos, const std::string& strExpected)
 	{
 		// Write the segmented_stream out to the underlying stringstream
-		camoto::FN_TRUNCATE tr = boost::bind<void>(stringStreamTruncate, this->psstrBase, _1);
+		camoto::FN_TRUNCATE tr = boost::bind<void>(camoto::stringStreamTruncate,
+			this->psstrBase, _1);
 		this->pss->commit(tr);
 
 		// Make sure the file offset hasn't changed after a commit (-1 is passed
