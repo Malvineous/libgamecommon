@@ -42,10 +42,33 @@ class bitstream {
 		/// Parent stream, where the actual data is read from and written to.
 		iostream_sptr parent;
 
-		/// Current seek position within the current byte (0-7)
+		/// Current offset into parent stream.
+		/**
+		 * It would be nicer not to have to use this, but the logic gets so
+		 * complicated when the C++ standard requires a seek operation before
+		 * switching between reading and writing, and we don't have the current
+		 * offset.
+		 */
+		io::stream_offset offset;
+
+		/// Current seek position within bufByte (0-7), or 8 if bufByte has been
+		/// entirely used and must be updated on the next read/write.
 		uint8_t curBitPos;
+
+		/// This contains the currently buffered byte, i.e. when the read/write
+		/// operation ends within a byte, this contains the value of that byte.
 		uint8_t bufByte;
-		uint8_t bufBits;
+
+		/// The value of bufByte as read from the parent stream
+		/**
+		 * If this is different to bufByte then a write operation occurred and
+		 * bufByte must be written back to the parent stream.  If this is
+		 * WASNT_BUFFERED (-1) then the bufByte was never read in, which would
+		 * happen when the last operation was a write operation and it went over a
+		 * byte boundary.  If this is INITIAL_VALUE (-2) then it's the first read
+		 * operation and no writes have occurred.
+		 */
+		int origBufByte;
 
 	public:
 
@@ -57,43 +80,64 @@ class bitstream {
 
 		/// Create a bitstream out of the given stream
 		/**
-		 * @param parent  Parent stream, where the data comes from
-		 * @param isLittleEndian  Whether the bytes are in little or big endian
-		 *   order.  To represent 0x102 as a nine-bit number, in little endian it
-		 *   would be written out as 02 80, in big endian it would be written as
-		 *   81 00.
+		 * @param parent
+		 *   Parent stream, where the data comes from.
+		 *
+		 * @param endianType
+		 *   Whether the bytes are in little or big endian order.  To represent
+		 *   0x102 as a nine-bit number, in little endian it would be written out
+		 *   as 02 80, in big endian it would be written as 81 00.
 		 */
 		bitstream(iostream_sptr parent, endian endianType)
 			throw ();
 
 		/// Stream-less constructor for using variant of read() with stream as
 		/// a parameter.
+		/**
+		 * @param et
+		 *   Endian type.
+		 */
 		bitstream(endian et)
 			throw ();
 
+		/// Destructor.
 		~bitstream()
 			throw ();
 
-		/// Callback function which will read in the next char from %parent.
-		int nextCharFromParent(uint8_t *out);
-
-		/// Callback function which will write the given char to %parent.
-		int nextCharToParent(uint8_t in);
-
 		/// Read some bits in from the stream.
+		/**
+		 * @param bits
+		 *   Number of bits to read, e.g. 8 to read a byte.
+		 *
+		 * @param out
+		 *   Where to store the value read.
+		 *
+		 * @return The number of bits actually read.  Will be the same as the bits
+		 *   parameter if the read completed fully.
+		 */
 		int read(int bits, int *out)
 			throw (std::ios::failure);
 
 		/// Read some bits from a particular stream.
 		/**
+		 * This function is only intended to be used in Boost iostream filters,
+		 * which supply the source stream as a parameter to the read() function
+		 * rather than at object construction time.
+		 *
 		 * @note The internal state is not stream-specific, so if you pass different
-		 *   streams to this function the results will be quite strange.  This
-		 *   function is only intended to be used in Boost iostream filters, which
-		 *   supply the source stream as a parameter to the read() function rather
-		 *   that at object construction time.
+		 *   streams to this function the results will be quite strange.
 		 *
 		 * @note Obviously the seek() function cannot be used in combination with
 		 *   this particular function.
+		 *
+		 * @param fnNextChar
+		 *   The function to call to read the next byte.
+		 *
+		 * @param bits
+		 *   Number of bits to read, e.g. 8 to read a byte.
+		 *
+		 * @param out
+		 *   Where to store the value read.
 		 *
 		 * @return The number of *bits* read, or < 0 on error (e.g. EOF/-1)
 		 */
@@ -101,19 +145,43 @@ class bitstream {
 			throw (std::ios::failure);
 
 		/// Write some bits out to the stream.
+		/**
+		 * @param bits
+		 *   Number of bits to write, e.g. 8 to write a byte.
+		 *
+		 * @param in
+		 *   The value to write.  This must be small enough to fit in the number of
+		 *   bits being written, otherwise an assertion failure will result.
+		 *
+		 * @return The number of bits written.  Will be the same as the bits
+		 *   parameter if the write completed fully.
+		 */
 		int write(int bits, int in)
 			throw (std::ios::failure);
 
 		/// Write some bits to a particular stream.
 		/**
+		 * This function is only intended to be used in Boost iostream filters,
+		 * which supply the source stream as a parameter to the write() function
+		 * rather than at object construction time.
+		 *
 		 * @note The internal state is not stream-specific, so if you pass different
-		 *   streams to this function the results will be quite strange.  This
-		 *   function is only intended to be used in Boost iostream filters, which
-		 *   supply the source stream as a parameter to the read() function rather
-		 *   that at object construction time.
+		 *   streams to this function the results will be quite strange.
 		 *
 		 * @note Obviously the seek() function cannot be used in combination with
 		 *   this particular function.
+		 *
+		 * @param fnNextChar
+		 *   The function to call to write the next byte.
+		 *
+		 * @param bits
+		 *   Number of bits to write, e.g. 8 to write a byte.
+		 *
+		 * @param in
+		 *   The value to write.  This must be small enough to fit in the number of
+		 *   bits being written, otherwise an assertion failure will result.
+		 *
+		 * @return The number of *bits* written, or < 0 on error (e.g. EOF/-1)
 		 */
 		int write(fn_putnextchar fnNextChar, int bits, int in)
 			throw (std::ios::failure);
@@ -123,11 +191,23 @@ class bitstream {
 		 * @note This only works with the read() and write() function which do NOT
 		 *   take an fnNextChar parameter.
 		 *
-		 * @param off  Bit offset (e.g. 0 == first byte, 8 == second byte)
-		 * @param way  Seek direction - std::ios::beg/cur/end
+		 * @param off
+		 *   Bit offset (e.g. 0 == first byte, 8 == second byte)
+		 *
+		 * @param way
+		 *   Seek direction - std::ios::beg/cur/end
+		 *
 		 * @return Current offset (in bits from start of file)
 		 */
 		io::stream_offset seek(io::stream_offset off, std::ios_base::seekdir way)
+			throw (std::ios::failure);
+
+		/// Write out any partially written byte to the underlying stream.
+		/**
+		 * @note Uses this->parent, so it only works with the read() and write()
+		 *   functions which do NOT take an fnNextChar parameter.
+		 */
+		void flush()
 			throw (std::ios::failure);
 
 		/// Reset any errors preventing access (e.g. EOF)
@@ -135,10 +215,17 @@ class bitstream {
 			throw (std::ios::failure);
 
 		/// Alter the endian type without affecting the current seek position.
+		/**
+		 * @param endianType
+		 *   New endian type.
+		 */
 		void changeEndian(endian endianType)
 			throw ();
 
-		/// Return the current endian setting.
+		/// Get the current endian setting.
+		/**
+		 * @return Current endian type.
+		 */
 		endian getEndian()
 			throw ();
 
@@ -149,6 +236,14 @@ class bitstream {
 		 */
 		void flushByte()
 			throw ();
+
+		/// Write bufByte out to the parent stream if it has changed.
+		/**
+		 * @note Uses this->parent, so it only works with the read() and write()
+		 *   functions which do NOT take an fnNextChar parameter.
+		 */
+		void writeBufByte()
+			throw (std::ios::failure);
 
 };
 

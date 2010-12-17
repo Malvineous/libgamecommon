@@ -19,15 +19,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * @todo Add a flush function for when the last bits written don't end on a
- * byte boundary
- *
- * @todo Implement seek code (w/ tests)
- */
-
 #include <boost/bind.hpp>
 #include <camoto/bitstream.hpp>
+
+/// origBufByte value: The last operation was a write, so the bufByte wasn't updated
+#define WASNT_BUFFERED  -1
+/// origBufByte value: This is the first read operation, don't write out the bufByte
+#define INITIAL_VALUE   -2
 
 namespace camoto {
 
@@ -37,18 +35,21 @@ bitstream::bitstream(iostream_sptr parent, bitstream::endian endianType)
 	throw () :
 		parent(parent),
 		endianType(endianType),
-		curBitPos(0),
+		offset(0),
+		curBitPos(8), // 8 means update bufByte on next operation
 		bufByte(0),
-		bufBits(0)
+		origBufByte(INITIAL_VALUE)
 {
 }
 
 bitstream::bitstream(bitstream::endian endianType)
 	throw () :
+		parent(),
 		endianType(endianType),
-		curBitPos(0),
+		offset(0),
+		curBitPos(8), // 8 means update bufByte on next operation
 		bufByte(0),
-		bufBits(0)
+		origBufByte(INITIAL_VALUE)
 {
 }
 
@@ -57,21 +58,11 @@ bitstream::~bitstream()
 {
 }
 
-int bitstream::nextCharFromParent(uint8_t *out)
-{
-	this->parent->read((char *)out, 1);
-	return this->parent->gcount();
-}
-
-int bitstream::nextCharToParent(uint8_t in)
-{
-	return this->parent->rdbuf()->sputn((char *)&in, 1);
-}
-
 int bitstream::read(int bits, int *out)
 	throw (std::ios::failure)
 {
-	return this->read(boost::bind(&bitstream::nextCharFromParent, this, _1), bits, out);
+	assert(this->parent);
+	return this->read(NULL, bits, out);
 }
 
 int bitstream::read(fn_getnextchar fnNextChar, int bits, int *out)
@@ -79,10 +70,61 @@ int bitstream::read(fn_getnextchar fnNextChar, int bits, int *out)
 {
 	*out = 0;
 	int bitsread = 0;
+
+	// This check is out here so that read(0) will cause it to run.  This is used
+	// by flush().
+	if (this->origBufByte == WASNT_BUFFERED) {
+		// We're half way through a byte, but we crossed into this byte during a
+		// write operation so the value was never read in (because if we kept
+		// writing we would never have needed it.)  But now we do need it, so we
+		// have to read it in and merge it in with whatever has been written so
+		// far, so that we don't lose any data previously written.
+		int r;
+		uint8_t b;
+		if (fnNextChar == NULL) {
+			this->parent->seekg(this->offset, std::ios::beg);
+			this->parent->read((char *)&b, 1);
+			r = this->parent->gcount();
+		} else {
+			r = fnNextChar(&b);
+		}
+		if (r <= 0) {
+			// EOF or WOULD_BLOCK
+			if (bitsread == 0) return r;
+			if (this->endianType == bitstream::bigEndian) {
+				// Big endian needs to be padded with zero data first
+				// to make the output number correct.
+				*out <<= bits;
+				bitsread += bits;
+			}
+			return bitsread;
+		}
+		this->origBufByte = b;
+		this->offset++;
+
+		// Combine the bits already written with those just read.
+		int mask;
+		if (this->endianType == bitstream::littleEndian) {
+			mask = 0xff << this->curBitPos;
+		} else {
+			mask = 0xff >> this->curBitPos;
+		}
+		this->bufByte = (this->bufByte & ~mask) | (this->origBufByte & mask);
+	}
+
 	while (bits > 0) {
 		// If the bit buffer is empty, refill it.
-		if (this->bufBits == 0) {
-			int r = fnNextChar(&this->bufByte);
+		if (this->curBitPos == 8) {
+			if (this->parent) this->writeBufByte();
+
+			int r;
+			if (fnNextChar == NULL) {
+				this->parent->seekg(this->offset, std::ios::beg);
+				this->parent->read((char *)&this->bufByte, 1);
+				r = this->parent->gcount();
+			} else {
+				r = fnNextChar(&this->bufByte);
+			}
 			if (r <= 0) {
 				// EOF or WOULD_BLOCK
 				if (bitsread == 0) return r;
@@ -94,12 +136,15 @@ int bitstream::read(fn_getnextchar fnNextChar, int bits, int *out)
 				}
 				return bitsread;
 			}
-			this->bufBits = 8;
+			this->origBufByte = this->bufByte;
+			this->offset++;
+			this->curBitPos = 0;
 		}
 
 		// Read at most whatever is left in the buffer, which will always be
 		// eight bits or less.
-		int bitsNow = (bits > this->bufBits) ? this->bufBits : bits;
+		int bufBitsRemaining = 8 - this->curBitPos;
+		int bitsNow = (bits > bufBitsRemaining) ? bufBitsRemaining : bits;
 
 		// Figure out which bits in the buffered byte we're interested in
 		int exval;
@@ -122,10 +167,11 @@ int bitstream::read(fn_getnextchar fnNextChar, int bits, int *out)
 			*out <<= bitsNow;
 			*out |= exval;
 		}
-		this->bufBits -= bitsNow;
+
 		bits -= bitsNow;
 		bitsread += bitsNow;
-		this->curBitPos = (this->curBitPos + bitsNow) % 8;
+		this->curBitPos += bitsNow;
+		assert(this->curBitPos <= 8); // 8 means next byte will be read later
 	}
 	return bitsread;
 }
@@ -133,7 +179,8 @@ int bitstream::read(fn_getnextchar fnNextChar, int bits, int *out)
 int bitstream::write(int bits, int in)
 	throw (std::ios::failure)
 {
-	return this->write(boost::bind(&bitstream::nextCharToParent, this, _1), bits, in);
+	assert(this->parent);
+	return this->write(NULL, bits, in);
 }
 
 int bitstream::write(fn_putnextchar fnNextChar, int bits, int in)
@@ -145,51 +192,67 @@ int bitstream::write(fn_putnextchar fnNextChar, int bits, int in)
 	int bitswritten = 0;
 	while (bitswritten < bits) {
 
-		// Read at most whatever space is left in the buffer, which will
+		// If the bit buffer is full, write out the byte.
+		if (this->curBitPos == 8) {
+			if (fnNextChar == NULL) {
+				this->writeBufByte();
+			} else {
+				int r = fnNextChar(this->bufByte);
+				//this->offset++; // unused here (no seeking allowed)
+				if (r <= 0) {
+					// EOF or WOULD_BLOCK
+					if (bitswritten) return bitswritten;
+					return r;
+				}
+			}
+			this->origBufByte = WASNT_BUFFERED;
+			this->curBitPos = 0;
+		}
+
+		// Write at most whatever space is left in the buffer, which will
 		// always be eight bits or less.
-		int bitsNow = (bits-bitswritten > (8 - this->bufBits)) ? (8 - this->bufBits) : bits-bitswritten;
+		int bufBitsRemaining = 8 - this->curBitPos;
+		int bitsNow = (bits-bitswritten > bufBitsRemaining) ? bufBitsRemaining : bits-bitswritten;
 
-
-		int writeVal;
+		int writeVal, writeMask;
 		if (this->endianType == bitstream::littleEndian) {
 			// Extract the next bits we will be writing.
-			writeVal = (in & ~(0xff << bitsNow)) & 0xff;
-			writeVal <<= this->bufBits;
+			writeMask = (~(0xff << bitsNow)) & 0xff;
+			writeMask <<= this->curBitPos;
+			writeVal = (in << this->curBitPos) & writeMask;
 
 			in >>= bitsNow;
 		} else {
 			// Extract the next bits we will be writing.
-			int mask = (1 << bits)-1;
-			writeVal = in & ~(mask >> bitsNow);
+
+			int mask = (1 << bits)-1; // could be up to sizeof(int)
+			// Isolate the bits in the input data (in) that we are interested in.
+			// These might be the upper two bits in a 9-bit number, for instance.
+			writeMask = ~(mask >> bitsNow) & mask;
+			writeVal = in & writeMask;
 
 			// Shift the number left as far as we can without cutting it off.
 			writeVal >>= bits - bitsNow;
-			writeVal <<= 8-bitsNow-this->bufBits;
+			writeMask>>= bits - bitsNow;
+
+			// Now we have the bits we're interested in as a raw value, i.e. the
+			// bits have been shifted down so if we'd been looking at the top two
+			// bits, now we have a two-bit number.
+
+			// Shift the number up to where it will be written in the current
+			// cached byte.
+			writeVal <<= 8-bitsNow-this->curBitPos;
+			writeMask<<= 8-bitsNow-this->curBitPos;
 
 			in = (in << bitsNow) & mask;
 		}
 
 		assert(writeVal < 256); // make sure we're not writing more than 8 bits
-		this->bufByte |= writeVal;
+		this->bufByte = (this->bufByte & ~writeMask) | writeVal;
 
-		assert(this->bufBits < 8);
-
-		this->bufBits += bitsNow;
-		//bits -= bitsNow;
 		bitswritten += bitsNow;
-		this->curBitPos = (this->curBitPos + bitsNow) % 8;
-
-		// If the bit buffer is full, write out the byte.
-		if (this->bufBits == 8) {
-			int r = fnNextChar(this->bufByte);
-			if (r <= 0) {
-				// EOF or WOULD_BLOCK
-				if (bitswritten) return bitswritten;
-				return r;
-			}
-			this->bufBits = 0;
-			this->bufByte = 0;
-		}
+		this->curBitPos += bitsNow;
+		assert(this->curBitPos <= 8); // 8 means next byte will be read later
 	}
 	return bitswritten;
 }
@@ -197,29 +260,73 @@ int bitstream::write(fn_putnextchar fnNextChar, int bits, int in)
 io::stream_offset bitstream::seek(io::stream_offset off, std::ios_base::seekdir way)
 	throw (std::ios::failure)
 {
-	if (way == std::ios::cur) {
-		// Take into account the parent seek position will be on the following
-		// byte boundary, even if we're still half way through the previous byte.
-		off -= 8 - this->curBitPos;
-	}
+	assert(this->parent);
+	this->flush();
+
 	int bitOffset = off % 8;
-	if (bitOffset < 0) {
-		this->parent->seekg(off / 8 - 1, way);
-		bitOffset += 8;
-	} else {
-		this->parent->seekg(off / 8, way);
+	switch (way) {
+		case std::ios::beg:
+			this->offset = off / 8;
+			break;
+		case std::ios::end:
+			this->parent->seekg(off / 8, std::ios::end);
+			this->offset = this->parent->tellg();
+			break;
+		case std::ios::cur:
+			// Undo the effect of reading the latest cache byte
+			if (this->origBufByte >= 0) this->offset--;
+
+			this->offset += off / 8;
+			bitOffset += this->curBitPos;// += bitOffset;
+			/*if (bitOffset < 0) {
+				this->offset--;
+				bitOffset += 8;
+			} else */if (bitOffset > 7) {
+				this->offset++;
+				bitOffset -= 8;
+			}
+			break;
 	}
-	assert(bitOffset >= 0);
-	this->flushByte();
+	if (bitOffset < 0) {
+		this->offset--;
+		bitOffset += 8;
+	}
+
+	// Reset the caches so that the next read operation will start afresh
+	this->origBufByte = INITIAL_VALUE;
+	this->curBitPos = 8;
+
+	// Read in the last few bits if the seek destination is inside a byte
+	int origOffset = this->offset;
 	int dummy;
-	this->read(bitOffset, &dummy); // read in the last few bits to set all the state vars
-	io::stream_offset byte = this->parent->tellg();
-	return (byte * 8) + this->curBitPos;
+	this->read(bitOffset, &dummy);
+
+	return origOffset * 8 + (this->curBitPos % 8);
+}
+
+void bitstream::flush()
+	throw (std::ios::failure)
+{
+	assert(this->parent);
+
+	if (this->origBufByte == INITIAL_VALUE) return; // nothing to flush
+
+	if (this->curBitPos < 8) {
+		// Partial byte.  Read the rest of the byte to trigger a merge.
+		int dummy;
+		this->read(0, &dummy);
+	}
+
+	// Write out the buf byte (if it has been changed)
+	this->writeBufByte();
+	this->parent->flush();
+	return;
 }
 
 void bitstream::clear()
 	throw (std::ios::failure)
 {
+	assert(this->parent);
 	this->parent->clear();
 	return;
 }
@@ -240,8 +347,43 @@ bitstream::endian bitstream::getEndian()
 void bitstream::flushByte()
 	throw ()
 {
-	this->bufBits = 0; // flush the bit buffer
-	this->curBitPos = 0; // reset to the start of the byte boundary
+	// Write out the buf byte (if it has been changed)
+	if (this->parent) this->writeBufByte();
+	this->origBufByte = INITIAL_VALUE;
+	this->curBitPos = 8; // reset to the start of the byte boundary
+	return;
+}
+
+void bitstream::writeBufByte()
+	throw (std::ios::failure)
+{
+	assert(this->parent);
+	if (
+		(this->origBufByte != INITIAL_VALUE) && // if not first read
+		(this->bufByte != this->origBufByte)    // and bufbyte has been modified
+	) {
+		// The currently buffered byte has been modified and needs to be
+		// written back to the stream, or the current byte buffer was never
+		// read in (origBufByte == -1, which means the byte buffer was filled
+		// entirely by writes, so we'll just write them out now.)
+
+		if (this->origBufByte >= 0) {
+			// Since we know the original value of this byte (before any writes
+			// may have changed it) that means we read it in earlier.  So we
+			// need to adjust the seek position now, to make sure it goes into
+			// the right spot when we write out the new value.
+			this->offset--;
+		}
+		// else the previous operation should have been a write, so we don't
+		// need to perform a seek (since C++ seems to require a seek when switching
+		// between read and write operations on the same stream.)
+
+		// Write the updated byte to the parent stream
+		this->parent->seekp(this->offset, std::ios::beg);
+		this->parent->write((char *)&this->bufByte, 1);
+		this->offset++;
+		this->origBufByte = this->bufByte; // bufByte now matches on-disk version
+	} // else no modification, or the prev byte hadn't been cached
 	return;
 }
 
