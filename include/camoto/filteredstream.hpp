@@ -3,7 +3,7 @@
  * @brief  C++ iostream providing transparent seekable access to a filtered
  *         stream via an in-memory buffer.
  *
- * Copyright (C) 2010 Adam Nielsen <malvineous@shikadi.net>
+ * Copyright (C) 2010-2011 Adam Nielsen <malvineous@shikadi.net>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 #ifndef _CAMOTO_FILTEREDSTREAM_HPP_
 #define _CAMOTO_FILTEREDSTREAM_HPP_
 
+#include <vector>
 #include <sstream>
 #include <iosfwd>                           // streamsize, seekdir
 #include <boost/iostreams/stream.hpp>
@@ -35,8 +36,42 @@ namespace camoto {
 
 namespace io = boost::iostreams;
 
-typedef boost::shared_ptr<io::filtering_istream> filtering_istream_sptr;
-typedef boost::shared_ptr<io::filtering_ostream> filtering_ostream_sptr;
+/// filtering_stream that can have shared stream pointers pushed onto it
+template <typename T, typename X>
+class filtered_Xstream: virtual public X {
+	protected:
+		typedef boost::shared_ptr<T> Xstream_sptr; ///< Shared pointer to stream type
+		std::vector<Xstream_sptr> streams;         ///< List of active streams
+
+	public:
+
+		/// Flush on destruct
+		~filtered_Xstream()
+		{
+			// Flush and close stream before destruction.  Without this
+			// boost::iostreams will flush *after* destruction causing a segfault!
+			this->reset();
+		}
+
+		/// Add a shared pointer to the filter chain.
+		/**
+		 * @param stream
+		 *   Stream to add
+		 */
+		void pushShared(Xstream_sptr stream)
+		{
+			this->streams.push_back(stream); // mark as in-use
+			return this->push(*stream);
+		}
+};
+
+typedef filtered_Xstream<std::iostream, io::filtering_stream<io::seekable> > filtered_iostream;
+typedef filtered_Xstream<std::istream, io::filtering_istream > filtered_istream;
+typedef filtered_Xstream<std::ostream, io::filtering_ostream > filtered_ostream;
+
+typedef boost::shared_ptr<filtered_istream> filtered_istream_sptr;
+typedef boost::shared_ptr<filtered_ostream> filtered_ostream_sptr;
+typedef boost::shared_ptr<filtered_iostream> filtered_iostream_sptr;
 
 /// boost::iostream class for wrapping iostream filters around another iostream,
 /// using memory as a buffer so that the data can be seeked and read/written
@@ -49,14 +84,13 @@ typedef boost::shared_ptr<io::filtering_ostream> filtering_ostream_sptr;
  */
 class filteredstream_device {
 	private:
-		/// Set to true if a write has occurred and we should copy the data back
-		/// to the stream on flush().
-		bool doFlush;
-
 		/// Parent stream, where the actual data is read from and written to.
 		iostream_sptr parent;
-		filtering_ostream_sptr outFilter;
 
+		/// Output filter to pass in-memory data through on flush().
+		filtered_ostream_sptr outFilter;
+
+		/// In-memory copy of data (after it has passed through inFilter)
 		boost::shared_ptr<std::stringstream> cache;
 
 	public:
@@ -73,8 +107,8 @@ class filteredstream_device {
 		 *
 		 * @param iLength Size of filteredstream in bytes
 		 */
-		filteredstream_device(iostream_sptr parent, filtering_istream_sptr inFilter,
-			filtering_ostream_sptr outFilter)
+		filteredstream_device(iostream_sptr parent, filtered_istream_sptr inFilter,
+			filtered_ostream_sptr outFilter)
 			throw (std::exception);
 
 		filteredstream_device(const filteredstream_device&)
@@ -96,10 +130,36 @@ class filteredstream_device {
 		/// the output filter.
 		bool flush();
 
+		/// Adjust (truncate) the stream size.
+		/**
+		 * @param newSize
+		 *   New length of the in-memory cache.
+		 */
+		void setSize(io::stream_offset newSize)
+			throw (std::ios::failure);
+
 };
 
 /// C++ iostream class for applying filters to a stream without seeking.
-typedef io::stream<filteredstream_device> filteredstream;
+/**
+ * This is the actual Boost iostream class.
+ *
+ * All these functions (including c'tors) call their equivalents in the
+ * filteredstream_device class.  See the comments in the class above.
+ */
+class filteredstream: public io::stream<filteredstream_device>
+{
+	public:
+		filteredstream(iostream_sptr parent,
+			filtered_istream_sptr inFilter, filtered_ostream_sptr outFilter)
+			throw ();
+
+		filteredstream(const filteredstream_device& orig)
+			throw ();
+
+		/// See filteredstream_device::setSize()
+		void setSize(io::stream_offset newSize);
+};
 
 /// Shared pointer to filteredstream
 typedef boost::shared_ptr<filteredstream> filteredstream_sptr;

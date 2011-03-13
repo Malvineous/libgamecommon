@@ -3,7 +3,7 @@
  * @brief  Boost iostream filter for compressing and decompressing data using
  *         a few variants of the LZW algorithm.
  *
- * Copyright (C) 2010 Adam Nielsen <malvineous@shikadi.net>
+ * Copyright (C) 2010-2011 Adam Nielsen <malvineous@shikadi.net>
  *
  * LZW algorithm based on GPL code by Juha Nieminen
  *   http://warp.povusers.org/EfficientLZW/
@@ -113,7 +113,8 @@ lzw_decompress_filter::lzw_decompress_filter(int initialBits, int maxBits,
 	eofCode(eofCode),
 	resetCode(resetCode),
 	dictionary(maxBits, firstCode),
-	data(((flags & LZW_BIG_ENDIAN) != LZW_BIG_ENDIAN) ? bitstream::littleEndian : bitstream::bigEndian)
+	data(((flags & LZW_BIG_ENDIAN) != LZW_BIG_ENDIAN) ? bitstream::littleEndian : bitstream::bigEndian),
+	code(0)
 {
 	if (this->flags & LZW_NO_BITSIZE_RESET) {
 		// If LZW_NO_BITSIZE_RESET is *not* set these things will be done in

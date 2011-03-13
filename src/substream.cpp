@@ -3,7 +3,7 @@
  * @brief  Class declaration for a C++ iostream exposing a limited section
  *         of another C++ iostream.
  *
- * Copyright (C) 2010 Adam Nielsen <malvineous@shikadi.net>
+ * Copyright (C) 2010-2011 Adam Nielsen <malvineous@shikadi.net>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -141,6 +141,12 @@ io::stream_offset substream_device::seek(io::stream_offset off, std::ios_base::s
 	}
 	this->iCurPos = iBase;
 	return this->iCurPos;
+}
+
+bool substream_device::flush()
+{
+	this->psParent->flush();
+	return true;
 }
 
 // Move the "window" of data (looking into the parent stream) forward or

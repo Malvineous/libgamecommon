@@ -2,7 +2,7 @@
  * @file   iostream_helpers.hpp
  * @brief  Functions to get variables in and out of a stream.
  *
- * Copyright (C) 2010 Adam Nielsen <malvineous@shikadi.net>
+ * Copyright (C) 2010-2011 Adam Nielsen <malvineous@shikadi.net>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -77,13 +77,19 @@ struct null_padded_const: public null_padded_write {
  * It can also be used when reading from a stream, e.g.
  *
  * @code
- * file >> nullPadded(str, 10);
+ * file >> nullPadded(str, 10, true);
  * @endcode
  *
  * In this case 10 bytes will always be read, but they will only be stored in
  * str until the first null is encountered.  If there are no null bytes then
  * the final string will be the full 10 chars (std::string will provide the
  * null termination in this case.)
+ *
+ * Set the last parameter to false to avoid having the string chopped at the
+ * first null.  In this example if there is a null at position 5, setting the
+ * last parameter to true will read 10 bytes but return a string of length 4,
+ * and setting the last parameter to false will also read 10 bytes but return
+ * a string of 10 bytes too, with an embedded null.
  */
 struct null_padded: public null_padded_read, public null_padded_write {
 	null_padded(std::string& r, std::streamsize len, bool chop);

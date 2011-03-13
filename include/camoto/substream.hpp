@@ -3,7 +3,7 @@
  * @brief  Class declaration for a C++ iostream exposing a limited
  *         section of another C++ iostream.
  *
- * Copyright (C) 2010 Adam Nielsen <malvineous@shikadi.net>
+ * Copyright (C) 2010-2011 Adam Nielsen <malvineous@shikadi.net>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -62,7 +62,7 @@ class substream_device {
 
 	public:
 		typedef char char_type;
-		typedef io::seekable_device_tag category;
+		struct category: io::seekable_device_tag, io::flushable_tag { };
 
 		/// Create a substream out of the given stream
 		/**
@@ -87,6 +87,9 @@ class substream_device {
 
 		/// boost::iostream callback function
 		io::stream_offset seek(io::stream_offset off, std::ios_base::seekdir way);
+
+		/// boost::iostream callback function
+		bool flush();
 
 	protected:
 		/// Move the "window" of data (looking into the parent stream) forward or

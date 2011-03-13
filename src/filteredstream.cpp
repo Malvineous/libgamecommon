@@ -3,7 +3,7 @@
  * @brief  Class declaration for a C++ iostream applying filters in-memory to
  *         avoid seeking.
  *
- * Copyright (C) 2010 Adam Nielsen <malvineous@shikadi.net>
+ * Copyright (C) 2010-2011 Adam Nielsen <malvineous@shikadi.net>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,9 +26,8 @@
 namespace camoto {
 
 filteredstream_device::filteredstream_device(iostream_sptr parent,
-	filtering_istream_sptr inFilter, filtering_ostream_sptr outFilter)
+	filtered_istream_sptr inFilter, filtered_ostream_sptr outFilter)
 	throw (std::exception) :
-		doFlush(false),
 		parent(parent),
 		outFilter(outFilter),
 		cache(new std::stringstream)
@@ -43,13 +42,11 @@ filteredstream_device::filteredstream_device(iostream_sptr parent,
 	this->cache->seekp(0, std::ios::beg);
 	assert(this->cache->good());
 
-	this->parent->seekp(0, std::ios::beg);
 	this->outFilter->push(*this->parent);
 }
 
 filteredstream_device::filteredstream_device(const filteredstream_device& orig)
 	throw () :
-		doFlush(orig.doFlush),
 		parent(orig.parent),
 		outFilter(orig.outFilter),
 		cache(orig.cache)
@@ -69,7 +66,6 @@ std::streamsize filteredstream_device::read(char_type *s, std::streamsize n)
 
 std::streamsize filteredstream_device::write(const char_type *s, std::streamsize n)
 {
-	this->doFlush = true;
 	return this->cache->rdbuf()->sputn(s, n);
 }
 
@@ -83,25 +79,52 @@ io::stream_offset filteredstream_device::seek(io::stream_offset off,
 
 bool filteredstream_device::flush()
 {
-	if (this->doFlush) {
+	this->cache->seekg(0, std::ios::beg);
+	assert(this->cache->good());
+	this->parent->seekp(0, std::ios::beg);
 
-		this->cache->seekg(0, std::ios::beg);
-		assert(this->cache->good());
-		this->parent->seekp(0, std::ios::beg);
-
-		// Can't use boost::iostreams::copy here as it causes a segfault for some
-		// reason.  Copying the data ourselves works fine though...
-		//boost::iostreams::copy(*this->cache, *this->outFilter);
-		char buf[1024];
-		int len;
-		while ((len = this->cache->rdbuf()->sgetn(buf, 1024))) {
-			this->outFilter->rdbuf()->sputn(buf, len);
-		}
-		this->outFilter->flush();
-		this->parent->flush();
-		this->doFlush = false;
+	// Can't use boost::iostreams::copy here as it causes a segfault for some
+	// reason.  Copying the data ourselves works fine though...
+	//boost::iostreams::copy(*this->cache, *this->outFilter);
+	char buf[1024];
+	int len;
+	while ((len = this->cache->rdbuf()->sgetn(buf, 1024))) {
+		this->outFilter->rdbuf()->sputn(buf, len);
 	}
+
+	if (!this->outFilter->strict_sync()) {
+		throw std::ios::failure("could not flush the filter back to the stream");
+	}
+	this->parent->flush();
+
 	return true;
+}
+
+void filteredstream_device::setSize(io::stream_offset newSize)
+	throw (std::ios::failure)
+{
+	stringStreamTruncate(this->cache.get(), newSize);
+	return;
+}
+
+
+
+filteredstream::filteredstream(iostream_sptr parent,
+	filtered_istream_sptr inFilter, filtered_ostream_sptr outFilter)
+	throw () :
+		io::stream<filteredstream_device>(parent, inFilter, outFilter)
+{
+}
+
+filteredstream::filteredstream(const filteredstream_device& orig)
+	throw () :
+		io::stream<filteredstream_device>(orig)
+{
+}
+
+void filteredstream::setSize(io::stream_offset newSize)
+{
+	this->io::stream<filteredstream_device>::operator *().setSize(newSize);
 }
 
 } // namespace camoto
