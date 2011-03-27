@@ -61,6 +61,30 @@ inline boost::shared_ptr<std::ostringstream> _createStream(void)
 
 void stringStreamTruncate(std::stringstream *ss, int len);
 
+/// Flush a Boost iostream pointer.
+/**
+ * Because of a few bugs in the Boost iostream implementation, some workarounds
+ * are required to flush streams with filters present.  By using this function
+ * whenever a stream needs to be flushed, the workarounds can be handled here.
+ *
+ * @param s
+ *   Stream to flush.
+ */
+inline void flush(boost::shared_ptr<std::ostream>& s)
+{
+	s->seekp(0, std::ios::cur);
+	s->flush();
+	return;
+}
+
+/// @see flush(boost::shared_ptr<std::ostream>&)
+inline void flush(boost::shared_ptr<std::iostream>& s)
+{
+	s->seekp(0, std::ios::cur);
+	s->flush();
+	return;
+}
+
 } // namespace camoto
 
 #endif // _CAMOTO_UTIL_HPP_
