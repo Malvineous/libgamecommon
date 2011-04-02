@@ -45,4 +45,6 @@ then
 	AC_DEFINE([DEBUG], [1], [Define to include extra debugging output])
 fi
 
+AM_SILENT_RULES([yes])
+
 AC_OUTPUT(Makefile src/Makefile include/Makefile include/camoto/Makefile tests/Makefile $PACKAGE.pc)
