@@ -31,6 +31,11 @@
 
 #include "tests.hpp"
 
+// mingw32 fix
+#ifndef __STRING
+#define __STRING(x) #x
+#endif
+
 // These are the various numbers that are read/written at different bit
 // lengths from/to the base data.
 

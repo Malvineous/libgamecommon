@@ -103,7 +103,7 @@
 		(uint64_t)(((uint64_t)(x) & (uint64_t)0xff00000000000000ULL) >> 56) ))
 
 // Little endian
-#if defined(__WIN__) || defined(__CYGWIN32__)
+#if defined(__WIN32__) || defined(__CYGWIN32__)
 
 #define le16toh(x)  (x)
 #define le32toh(x)  (x)
