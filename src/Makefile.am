@@ -13,5 +13,5 @@ libgamecommon_la_SOURCES += util.cpp
 AM_CPPFLAGS = $(DEBUG_CPPFLAGS) $(BOOST_CPPFLAGS) -I $(top_srcdir)/include
 AM_CXXFLAGS = $(DEBUG_CXXFLAGS)
 
-libgamecommon_la_LDFLAGS = $(AM_LDFLAGS) -release @VERSION@ -version-info 0
+libgamecommon_la_LDFLAGS = $(AM_LDFLAGS) -version-info 0:0:0
 libgamecommon_la_LIBADD = $(BOOST_SYSTEM_LIBS)
