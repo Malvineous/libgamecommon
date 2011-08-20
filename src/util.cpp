@@ -18,6 +18,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifdef __WIN32
+#include <windows.h> // SetEndOfFile() et al
+#else
+#include <unistd.h>  // truncate()
+#endif
+
 #include <camoto/util.hpp>
 
 namespace camoto {
@@ -46,6 +52,21 @@ void stringStreamTruncate(std::stringstream *ss, int len)
 		assert(ss->tellp() == len);
 	}
 	return;
+}
+
+int truncateFromString(std::string filename, unsigned long len)
+	throw ()
+{
+#ifdef __WIN32
+	HANDLE f = CreateFile(filename.c_str(), GENERIC_WRITE, 0, NULL, OPEN_EXISTING,
+		FILE_ATTRIBUTE_NORMAL, NULL);
+	SetFilePointer(f, length, NULL, FILE_BEGIN);
+	BOOL b = SetEndOfFile(f);
+	CloseHandle(f);
+	return b ? -1 : 0;
+#else
+	return truncate(filename.c_str(), len);
+#endif
 }
 
 } // namespace camoto

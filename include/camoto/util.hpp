@@ -85,6 +85,25 @@ inline void flush(boost::shared_ptr<std::iostream>& s)
 	return;
 }
 
+/// Truncate the given file.
+/**
+ * This takes a string parameter so that when boost::bind is used, the filename
+ * will be copied into the std::string object.  Otherwise only a char pointer
+ * is bound, which is often no longer valid by the time the truncate function
+ * is called.  This way the copy of the std::string will ensure the filename
+ * is available at call time.
+ *
+ * @param filename
+ *   Name of file to truncate.
+ *
+ * @param len
+ *   New file size.
+ *
+ * @return 0 on success, -1 on failure.
+ */
+int truncateFromString(std::string filename, unsigned long len)
+	throw ();
+
 } // namespace camoto
 
 #endif // _CAMOTO_UTIL_HPP_
