@@ -53,6 +53,10 @@ struct SuppItem {
 		// Music
 		Instruments, ///< Instrument patches/settings
 
+		// Maps
+		Layer1,      ///< A map layer
+		Layer2,      ///< Another map layer
+
 	};
 
 	/// The stream containing the supplemental data.
