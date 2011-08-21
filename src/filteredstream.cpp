@@ -30,7 +30,8 @@ filteredstream_device::filteredstream_device(iostream_sptr parent,
 	throw (std::exception) :
 		parent(parent),
 		outFilter(outFilter),
-		cache(new std::stringstream)
+		cache(new std::stringstream),
+		needFlush(false)
 {
 	assert(this->parent);
 	assert(inFilter);
@@ -66,6 +67,7 @@ std::streamsize filteredstream_device::read(char_type *s, std::streamsize n)
 
 std::streamsize filteredstream_device::write(const char_type *s, std::streamsize n)
 {
+	this->needFlush = true;
 	return this->cache->rdbuf()->sputn(s, n);
 }
 
@@ -79,6 +81,8 @@ io::stream_offset filteredstream_device::seek(io::stream_offset off,
 
 bool filteredstream_device::flush()
 {
+	if (!this->needFlush) return true;
+
 	this->cache->seekg(0, std::ios::beg);
 	assert(this->cache->good());
 	this->parent->seekp(0, std::ios::beg);
@@ -97,6 +101,7 @@ bool filteredstream_device::flush()
 	}
 	this->parent->flush();
 
+	this->needFlush = false;
 	return true;
 }
 

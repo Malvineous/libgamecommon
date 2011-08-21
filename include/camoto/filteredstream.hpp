@@ -93,6 +93,9 @@ class filteredstream_device {
 		/// In-memory copy of data (after it has passed through inFilter)
 		boost::shared_ptr<std::stringstream> cache;
 
+		/// Should flush() do anything?  Set to true if stream is written to.
+		bool needFlush;
+
 	public:
 		typedef char char_type;
 		struct category: io::seekable_device_tag, io::flushable_tag { };
