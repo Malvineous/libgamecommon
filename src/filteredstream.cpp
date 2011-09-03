@@ -116,13 +116,13 @@ void filteredstream_device::setSize(io::stream_offset newSize)
 
 filteredstream::filteredstream(iostream_sptr parent,
 	filtered_istream_sptr inFilter, filtered_ostream_sptr outFilter)
-	throw () :
+	throw (std::exception) :
 		io::stream<filteredstream_device>(parent, inFilter, outFilter)
 {
 }
 
 filteredstream::filteredstream(const filteredstream_device& orig)
-	throw () :
+	throw (std::exception) :
 		io::stream<filteredstream_device>(orig)
 {
 }

@@ -31,6 +31,7 @@
 #include <boost/iostreams/filtering_stream.hpp>
 
 #include <camoto/types.hpp>
+#include <camoto/exceptions.hpp>
 
 namespace camoto {
 
@@ -155,10 +156,10 @@ class filteredstream: public io::stream<filteredstream_device>
 	public:
 		filteredstream(iostream_sptr parent,
 			filtered_istream_sptr inFilter, filtered_ostream_sptr outFilter)
-			throw ();
+			throw (std::exception);
 
 		filteredstream(const filteredstream_device& orig)
-			throw ();
+			throw (std::exception);
 
 		/// See filteredstream_device::setSize()
 		void setSize(io::stream_offset newSize);
