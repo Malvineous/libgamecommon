@@ -57,6 +57,13 @@ struct SuppItem {
 		Layer1,      ///< A map layer
 		Layer2,      ///< Another map layer
 
+		// Generic
+		Extra1,      ///< Additional file
+		Extra2,      ///< Additional file
+		Extra3,      ///< Additional file
+		Extra4,      ///< Additional file
+		Extra5,      ///< Additional file
+
 	};
 
 	/// The stream containing the supplemental data.
