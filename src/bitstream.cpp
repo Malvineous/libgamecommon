@@ -197,12 +197,17 @@ int bitstream::write(fn_putnextchar fnNextChar, int bits, int in)
 			if (fnNextChar == NULL) {
 				this->writeBufByte();
 			} else {
-				int r = fnNextChar(this->bufByte);
-				//this->offset++; // unused here (no seeking allowed)
-				if (r <= 0) {
-					// EOF or WOULD_BLOCK
-					if (bitswritten) return bitswritten;
-					return r;
+				if (
+					(this->origBufByte != INITIAL_VALUE) && // if not first read
+					(this->bufByte != this->origBufByte)    // and bufbyte has been modified
+				) {
+					int r = fnNextChar(this->bufByte);
+					//this->offset++; // unused here (no seeking allowed)
+					if (r <= 0) {
+						// EOF or WOULD_BLOCK
+						if (bitswritten) return bitswritten;
+						return r;
+					}
 				}
 			}
 			this->origBufByte = WASNT_BUFFERED;
@@ -347,8 +352,23 @@ bitstream::endian bitstream::getEndian()
 void bitstream::flushByte()
 	throw ()
 {
+	this->flushByte(NULL);
+	return;
+}
+
+void bitstream::flushByte(fn_putnextchar fnNextChar)
+	throw ()
+{
 	// Write out the buf byte (if it has been changed)
 	if (this->parent) this->writeBufByte();
+	else {
+		if (
+			(this->origBufByte != INITIAL_VALUE) && // if not first read
+			(this->bufByte != this->origBufByte)    // and bufbyte has been modified
+		) {
+			int r = fnNextChar(this->bufByte);
+		}
+	}
 	this->origBufByte = INITIAL_VALUE;
 	this->curBitPos = 8; // reset to the start of the byte boundary
 	return;

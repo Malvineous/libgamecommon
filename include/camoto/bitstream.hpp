@@ -237,6 +237,17 @@ class bitstream {
 		void flushByte()
 			throw ();
 
+		/// Flush the byte currently cached, ensuring it is written out.
+		/**
+		 * This will cause the next write operation to start at the following byte
+		 * boundary.
+		 *
+		 * @param fnNextChar
+		 *   The function to call to write the next byte.
+		 */
+		void flushByte(fn_putnextchar fnNextChar)
+			throw ();
+
 		/// Write bufByte out to the parent stream if it has changed.
 		/**
 		 * @note Uses this->parent, so it only works with the read() and write()

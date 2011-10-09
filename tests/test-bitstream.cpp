@@ -619,4 +619,74 @@ BOOST_AUTO_TEST_CASE(bitstream_rwseek_1bit)
 		"Read/write/seek in 1-bit stream failed");
 }
 
+int putNextChar(camoto::ostream_sptr src, uint8_t out)
+{
+	src->write((char *)&out, 1);
+	return 1;
+}
+
+BOOST_AUTO_TEST_CASE(bitstream_writeonly)
+{
+	BOOST_TEST_MESSAGE("Write only without stream, make sure correct bytes come out");
+
+	bit.reset(new camoto::bitstream(camoto::bitstream::bigEndian));
+
+	camoto::fn_putnextchar cbNext = boost::bind(putNextChar, boost::dynamic_pointer_cast<std::ostream>(psBase), _1);
+
+	bit->write(cbNext, 1, 0);
+	bit->write(cbNext, 1, 0);
+	bit->write(cbNext, 1, 0);
+	bit->write(cbNext, 1, 1);
+	bit->write(cbNext, 1, 1);
+	bit->write(cbNext, 1, 0);
+	bit->write(cbNext, 1, 0);
+	bit->write(cbNext, 1, 0);
+
+	bit->write(cbNext, 1, 1);
+	bit->write(cbNext, 1, 1);
+	bit->write(cbNext, 1, 1);
+	bit->write(cbNext, 1, 0);
+	bit->write(cbNext, 1, 0);
+	bit->write(cbNext, 1, 1);
+	bit->write(cbNext, 1, 1);
+	bit->write(cbNext, 1, 1);
+
+	bit->flushByte(cbNext);
+
+	BOOST_CHECK_MESSAGE(is_equal(std::string("\x18\xE7", 2),
+		this->psstrBase->str()),
+		"Write only without stream failed");
+}
+
+BOOST_AUTO_TEST_CASE(bitstream_write_partial)
+{
+	BOOST_TEST_MESSAGE("Write only without stream, partial");
+
+	bit.reset(new camoto::bitstream(camoto::bitstream::bigEndian));
+
+	camoto::fn_putnextchar cbNext = boost::bind(putNextChar, boost::dynamic_pointer_cast<std::ostream>(psBase), _1);
+
+	bit->write(cbNext, 1, 0);
+	bit->write(cbNext, 1, 0);
+	bit->write(cbNext, 1, 0);
+	bit->write(cbNext, 1, 1);
+	bit->write(cbNext, 1, 1);
+	bit->write(cbNext, 1, 0);
+	bit->write(cbNext, 1, 0);
+	bit->write(cbNext, 1, 0);
+
+	bit->write(cbNext, 1, 1);
+	bit->write(cbNext, 1, 1);
+	bit->write(cbNext, 1, 1);
+	bit->write(cbNext, 1, 0);
+	bit->write(cbNext, 1, 0);
+	bit->write(cbNext, 1, 1);
+
+	bit->flushByte(cbNext);
+
+	BOOST_CHECK_MESSAGE(is_equal(std::string("\x18\xE4", 2),
+		this->psstrBase->str()),
+		"Write partial without stream failed");
+}
+
 BOOST_AUTO_TEST_SUITE_END()
