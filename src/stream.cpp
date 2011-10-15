@@ -116,7 +116,7 @@ void output::truncate_here()
 	return;
 }
 
-void copy(output_sptr& dest, input_sptr& src)
+void copy(output_sptr dest, input_sptr src)
 	throw (read_error, write_error, incomplete_write)
 {
 	uint8_t buffer[4096];

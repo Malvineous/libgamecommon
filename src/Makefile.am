@@ -11,6 +11,7 @@ libgamecommon_la_SOURCES += metadata.cpp
 libgamecommon_la_SOURCES += stream.cpp
 libgamecommon_la_SOURCES += stream_file.cpp
 libgamecommon_la_SOURCES += stream_string.cpp
+libgamecommon_la_SOURCES += stream_sub.cpp
 libgamecommon_la_SOURCES += util.cpp
 
 AM_CPPFLAGS = $(DEBUG_CPPFLAGS) $(BOOST_CPPFLAGS) -I $(top_srcdir)/include

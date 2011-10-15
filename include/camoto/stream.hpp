@@ -25,9 +25,59 @@
 #include <string>
 #include <stdint.h>
 #include <boost/shared_ptr.hpp>
+#include <boost/function.hpp>
 
 namespace camoto {
 namespace stream {
+
+/// Signed integer data type.  Internal use only.
+typedef long long signed_int_type;
+
+/// Unsigned integer data type.  Internal use only.
+typedef unsigned long long unsigned_int_type;
+
+/// Stream offset
+typedef unsigned_int_type pos;
+
+/// Length of data
+typedef unsigned_int_type len;
+
+/// Positive or negative amount from some other point
+typedef signed_int_type delta;
+
+/// Truncate function callback (to truncate a stream::output)
+/**
+ * This function is called with a single integer parameter when a stream
+ * needs to be shrunk or enlarged to the given size.
+ *
+ * Since no other data can be passed with this function call, usually
+ * boost::bind is used to create a "wrapping" around some other function with
+ * more parameters.
+ *
+ * The function signature is:
+ * @code
+ * bool fnTruncate(stream::pos new_length);
+ * @endcode
+ *
+ * This example uses boost::bind to package up a call to the Linux
+ * truncate() function (which requires both a filename and size) such that
+ * the filename is supplied in advance and not required when the \e fn_truncate
+ * call is made.
+ *
+ * @code
+ * fn_truncate fnTruncate = boost::bind<void>(truncate, "graphics.dat", _1);
+ * // later...
+ * fnTruncate(123);  // calls truncate("graphics.dat", 123)
+ * @endcode
+ *
+ * Normally this callback function only needs to be used when specialised
+ * streams are in use.  For example when creating a writable substream around
+ * another stream, you will need to supply a callback to handle the substream
+ * having enough data written into it that it needs to be enlarged.  In this
+ * case presumably you will move the data in the parent stream to make room
+ * for the now larger substream.
+ */
+typedef boost::function<bool(stream::pos)> fn_truncate;
 
 /// Base exception for stream functions.
 class error: public std::exception
@@ -90,21 +140,6 @@ class seek_error: public error
 		seek_error(const std::string& msg)
 			throw ();
 };
-
-/// Signed integer data type.  Internal use only.
-typedef long long signed_int_type;
-
-/// Unsigned integer data type.  Internal use only.
-typedef unsigned long long unsigned_int_type;
-
-/// Stream offset
-typedef unsigned_int_type pos;
-
-/// Length of data
-typedef unsigned_int_type len;
-
-/// Positive or negative amount from some other point
-typedef signed_int_type delta;
 
 /// Not all the expected data could be written to the stream.
 class incomplete_write: public write_error
@@ -380,6 +415,9 @@ typedef boost::shared_ptr<output> output_sptr;
 class inout: virtual public input, virtual public output {
 };
 
+/// Shared pointer to an inout stream.
+typedef boost::shared_ptr<inout> inout_sptr;
+
 /// Copy one stream into another.
 /**
  * @param dest
@@ -397,7 +435,7 @@ class inout: virtual public input, virtual public output {
  * @throw incomplete_write
  *  Not all data could fit into dest.
  */
-void copy(output_sptr& dest, input_sptr& src)
+void copy(output_sptr dest, input_sptr src)
 	throw (read_error, write_error, incomplete_write);
 
 
