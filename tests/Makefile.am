@@ -4,6 +4,7 @@ tests_SOURCES = tests.cpp
 tests_SOURCES += test-byteorder.cpp
 tests_SOURCES += test-iostream_helpers.cpp
 tests_SOURCES += test-stream_file.cpp
+tests_SOURCES += test-stream_string.cpp
 tests_SOURCES += test-streamMove.cpp
 tests_SOURCES += test-substream.cpp
 tests_SOURCES += test-segmented_stream.cpp

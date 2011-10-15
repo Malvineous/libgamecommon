@@ -13,4 +13,5 @@ nobase_library_include_HEADERS += exceptions.hpp
 nobase_library_include_HEADERS += metadata.hpp
 nobase_library_include_HEADERS += stream.hpp
 nobase_library_include_HEADERS += stream_file.hpp
+nobase_library_include_HEADERS += stream_string.hpp
 nobase_library_include_HEADERS += suppitem.hpp

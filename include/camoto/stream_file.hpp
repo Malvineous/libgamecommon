@@ -52,6 +52,9 @@ class file_core {
 			throw ();
 
 		/// Common seek function for reading and writing.
+		/**
+		 * @copydetails input::seekg()
+		 */
 		void seek(stream::delta off, seek_from from)
 			throw (seek_error);
 
