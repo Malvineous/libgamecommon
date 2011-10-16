@@ -2,7 +2,7 @@
  * @file   test-iostream_helpers.cpp
  * @brief  Test code for the iostream helper functions.
  *
- * Copyright (C) 2010 Adam Nielsen <malvineous@shikadi.net>
+ * Copyright (C) 2010-2011 Adam Nielsen <malvineous@shikadi.net>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,13 +18,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-#include <sstream>
 #include <boost/test/unit_test.hpp>
-
-#define BYTEORDER_USE_IOSTREAMS
-#define BYTEORDER_PROVIDE_TYPED_FUNCTIONS
-
+#include <camoto/stream_string.hpp>
 #include <camoto/iostream_helpers.hpp>
 
 using namespace camoto;
@@ -33,23 +28,25 @@ BOOST_AUTO_TEST_SUITE(iostream_helpers)
 
 BOOST_AUTO_TEST_CASE(null_padded_write)
 {
+	BOOST_TEST_MESSAGE("Write null-padded string");
 	{
-		std::stringstream data;
+		stream::string_sptr data(new stream::string());
 		data << nullPadded("AB", 4);
-		BOOST_REQUIRE_EQUAL(data.str().length(), 4);
-		BOOST_CHECK_EQUAL((uint8_t)data.str().at(0), 0x41);
-		BOOST_CHECK_EQUAL((uint8_t)data.str().at(1), 0x42);
-		BOOST_CHECK_EQUAL((uint8_t)data.str().at(2), 0x00);
-		BOOST_CHECK_EQUAL((uint8_t)data.str().at(3), 0x00);
+		BOOST_REQUIRE_EQUAL(data->str().length(), 4);
+		BOOST_CHECK_EQUAL((uint8_t)data->str().at(0), 0x41);
+		BOOST_CHECK_EQUAL((uint8_t)data->str().at(1), 0x42);
+		BOOST_CHECK_EQUAL((uint8_t)data->str().at(2), 0x00);
+		BOOST_CHECK_EQUAL((uint8_t)data->str().at(3), 0x00);
 	}
 }
 
 BOOST_AUTO_TEST_CASE(null_padded_read)
 {
+	BOOST_TEST_MESSAGE("Read null-padded string");
 	{
-		std::stringstream data;
-		data << "ABC\0EFGHIJKL";
-		data.seekg(0);
+		stream::string_sptr data(new stream::string());
+		data << std::string("ABC\0EFGHIJKL", 12);
+		data->seekg(0, stream::start);
 		std::string v;
 		data >> nullPadded(v, 8);
 		BOOST_CHECK(v.compare("ABC") == 0);
@@ -58,10 +55,11 @@ BOOST_AUTO_TEST_CASE(null_padded_read)
 
 BOOST_AUTO_TEST_CASE(fixed_length_read)
 {
+	BOOST_TEST_MESSAGE("Fixed-length read with embedded nulls");
 	{
-		std::stringstream data;
+		stream::string_sptr data(new stream::string());
 		data << std::string("ABC\0EFGHIJKL", 12);
-		data.seekg(0);
+		data->seekg(0, stream::start);
 		std::string v;
 		data >> fixedLength(v, 8);
 		BOOST_REQUIRE_EQUAL(v.length(), 8);

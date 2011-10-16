@@ -173,13 +173,18 @@ template <> inline uint64_t host_to  <uint64_t, big_endian>(uint64_t value) { re
 
 #ifdef BYTEORDER_USE_IOSTREAMS
 
+#ifndef BYTEORDER_ISTREAM
 #include <iostream>
+#define BYTEORDER_ISTREAM std::istream&
+#define BYTEORDER_OSTREAM std::ostream&
+#define BYTEORDER_ACCESSOR .  // as opposed to ->
+#endif
 
 struct number_format_read {
-	virtual void read(std::istream& s) const = 0;
+	virtual void read(BYTEORDER_ISTREAM s) const = 0;
 };
 struct number_format_write {
-	virtual void write(std::ostream& s) const = 0;
+	virtual void write(BYTEORDER_OSTREAM s) const = 0;
 };
 
 template <typename T, typename E, typename I>
@@ -189,18 +194,18 @@ struct number_format: public number_format_read, public number_format_write {
 	{
 	}
 
-	void read(std::istream& s) const
+	void read(BYTEORDER_ISTREAM s) const
 	{
 		T x = 0;
-		s.read((char *)&x, sizeof(T));
+		s BYTEORDER_ACCESSOR read((char *)&x, sizeof(T));
 		this->r = host_from<T, E>(x);
 		return;
 	}
 
-	void write(std::ostream& s) const
+	void write(BYTEORDER_OSTREAM s) const
 	{
 		T x = host_to<T, E>(this->r);
-		s.write((char *)&x, sizeof(T));
+		s BYTEORDER_ACCESSOR write((char *)&x, sizeof(T));
 		return;
 	}
 
@@ -215,10 +220,10 @@ struct number_format_const: public number_format_write {
 	{
 	}
 
-	void write(std::ostream& s) const
+	void write(BYTEORDER_OSTREAM s) const
 	{
 		T x = host_to<T, E>(this->r);
-		s.write((char *)&x, sizeof(T));
+		s BYTEORDER_ACCESSOR write((char *)&x, sizeof(T));
 		return;
 	}
 
@@ -228,12 +233,12 @@ struct number_format_const: public number_format_write {
 
 // If you get an error related to the next line (e.g. no match for operator >>)
 // it's because you're trying to read a value into a const variable.
-inline std::istream& operator >> (std::istream& s, const number_format_read& n) {
+inline BYTEORDER_ISTREAM operator >> (BYTEORDER_ISTREAM s, const number_format_read& n) {
 	n.read(s);
 	return s;
 }
 
-inline std::ostream& operator << (std::ostream& s, const number_format_write& n) {
+inline BYTEORDER_OSTREAM operator << (BYTEORDER_OSTREAM s, const number_format_write& n) {
 	n.write(s);
 	return s;
 }

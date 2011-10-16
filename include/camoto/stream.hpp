@@ -473,6 +473,18 @@ void move(inout_sptr data, stream::pos from, stream::pos to,
 	stream::len len)
 	throw (read_error, write_error, incomplete_write);
 
+/// iostream-style output function for char strings
+inline stream::output_sptr operator << (stream::output_sptr s, const char *d) {
+	s->write((const uint8_t *)d, strlen(d));
+	return s;
+}
+
+/// iostream-style output function for strings
+inline stream::output_sptr operator << (stream::output_sptr s, const std::string& d) {
+	s->write(d);
+	return s;
+}
+
 } // namespace stream
 } // namespace camoto
 

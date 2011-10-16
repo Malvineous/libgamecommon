@@ -24,44 +24,42 @@
 #include <iostream>
 #include <exception>
 #include <string.h>
-#include <boost/iostreams/stream.hpp>
 #include <camoto/types.hpp>
+#include <camoto/stream.hpp>
 
 #define BYTEORDER_USE_IOSTREAMS
+#define BYTEORDER_ISTREAM camoto::stream::input_sptr
+#define BYTEORDER_OSTREAM camoto::stream::output_sptr
+#define BYTEORDER_ACCESSOR ->
+#define BYTEORDER_PROVIDE_TYPED_FUNCTIONS
 #include <camoto/byteorder.hpp>
 
 namespace camoto {
 
-namespace io = boost::iostreams;
-
-/// Copy possibly overlapping data from one position in a stream to another.
-void streamMove(std::iostream& ps, io::stream_offset offFrom,
-	io::stream_offset offTo, io::stream_offset szLength);
-
 /// @sa null_padded
 struct null_padded_read {
-	null_padded_read(std::string& r, std::streamsize len, bool chop);
-	void read(std::istream& s) const;
+	null_padded_read(std::string& r, stream::len len, bool chop);
+	void read(stream::input_sptr s) const;
 
 	private:
 		std::string& r;
-		std::streamsize len;
+		stream::len len;
 		bool chop;
 };
 
 /// @sa null_padded
 struct null_padded_write {
-	null_padded_write(const std::string& r, std::streamsize len);
-	void write(std::ostream& s) const;
+	null_padded_write(const std::string& r, stream::len len);
+	void write(stream::output_sptr s) const;
 
 	private:
 		const std::string& r;
-		std::streamsize len;
+		stream::len len;
 };
 
 /// @sa null_padded
 struct null_padded_const: public null_padded_write {
-	null_padded_const(const std::string& r, std::streamsize len);
+	null_padded_const(const std::string& r, stream::len len);
 };
 
 /**
@@ -92,17 +90,17 @@ struct null_padded_const: public null_padded_write {
  * a string of 10 bytes too, with an embedded null.
  */
 struct null_padded: public null_padded_read, public null_padded_write {
-	null_padded(std::string& r, std::streamsize len, bool chop);
+	null_padded(std::string& r, stream::len len, bool chop);
 };
 
 // If you get an error related to the next line (e.g. no match for operator >>)
 // it's because you're trying to read a value into a const variable.
-inline std::istream& operator >> (std::istream& s, const null_padded_read& n) {
+inline stream::input_sptr operator >> (stream::input_sptr s, const null_padded_read& n) {
 	n.read(s);
 	return s;
 }
 
-inline std::ostream& operator << (std::ostream& s, const null_padded_write& n) {
+inline stream::output_sptr operator << (stream::output_sptr s, const null_padded_write& n) {
 	n.write(s);
 	return s;
 }
@@ -120,26 +118,12 @@ inline null_padded fixedLength(std::string& r, int len)
 	return null_padded(r, len, false);
 }
 
-// Convenience operators to allow iostream_sptr variables to be used with
-// stream operators the same way normal std::iostream variables are.
-template <class T, typename I>
-inline boost::shared_ptr<T>& operator << (boost::shared_ptr<T>& s, const I& n) {
-	(*(s.get())) << n;
-	return s;
-}
-
-template <class T, typename I>
-inline boost::shared_ptr<T>& operator >> (boost::shared_ptr<T>& s, const I& n) {
-	(*(s.get())) >> n;
-	return s;
-}
-
 // uint8_t / byte iostream operators
 
 struct number_format_u8: public number_format_read, public number_format_write {
 	number_format_u8(uint8_t& r);
-	void read(std::istream& s) const;
-	void write(std::ostream& s) const;
+	void read(stream::input_sptr s) const;
+	void write(stream::output_sptr s) const;
 
 	private:
 		uint8_t& r;
@@ -147,7 +131,7 @@ struct number_format_u8: public number_format_read, public number_format_write {
 
 struct number_format_const_u8: public number_format_write {
 	number_format_const_u8(const uint8_t& r);
-	void write(std::ostream& s) const;
+	void write(stream::output_sptr s) const;
 
 	private:
 		const uint8_t& r;
