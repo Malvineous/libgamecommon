@@ -2,7 +2,7 @@
  * @file   util.hpp
  * @brief  Utility functions used across the libraries.
  *
- * Copyright (C) 2010 Adam Nielsen <malvineous@shikadi.net>
+ * Copyright (C) 2010-2011 Adam Nielsen <malvineous@shikadi.net>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,51 +58,6 @@ inline boost::shared_ptr<std::ostringstream> _createStream(void)
 // as a number, so we need to add some null-output value instead - ios::dec
 // does the job nicely, and allows 'a' to start off with something that isn't a
 // number (e.g. a char.)
-
-void stringStreamTruncate(std::stringstream *ss, int len);
-
-/// Flush a Boost iostream pointer.
-/**
- * Because of a few bugs in the Boost iostream implementation, some workarounds
- * are required to flush streams with filters present.  By using this function
- * whenever a stream needs to be flushed, the workarounds can be handled here.
- *
- * @param s
- *   Stream to flush.
- */
-inline void flush(boost::shared_ptr<std::ostream>& s)
-{
-	s->seekp(0, std::ios::cur);
-	s->flush();
-	return;
-}
-
-/// @see flush(boost::shared_ptr<std::ostream>&)
-inline void flush(boost::shared_ptr<std::iostream>& s)
-{
-	s->seekp(0, std::ios::cur);
-	s->flush();
-	return;
-}
-
-/// Truncate the given file.
-/**
- * This takes a string parameter so that when boost::bind is used, the filename
- * will be copied into the std::string object.  Otherwise only a char pointer
- * is bound, which is often no longer valid by the time the truncate function
- * is called.  This way the copy of the std::string will ensure the filename
- * is available at call time.
- *
- * @param filename
- *   Name of file to truncate.
- *
- * @param len
- *   New file size.
- *
- * @return 0 on success, -1 on failure.
- */
-int truncateFromString(std::string filename, unsigned long len)
-	throw ();
 
 } // namespace camoto
 
