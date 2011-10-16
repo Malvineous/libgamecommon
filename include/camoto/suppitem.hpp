@@ -21,10 +21,8 @@
 #ifndef _CAMOTO_SUPPITEM_HPP_
 #define _CAMOTO_SUPPITEM_HPP_
 
-#include <vector>
 #include <map>
-
-#include <camoto/types.hpp>
+#include <camoto/stream.hpp>
 
 /// Main namespace
 namespace camoto {
@@ -66,19 +64,13 @@ struct SuppItem {
 
 	};
 
-	/// The stream containing the supplemental data.
-	iostream_sptr stream;
-
-	/// The truncate callback (required)
-	FN_TRUNCATE fnTruncate;
-
 };
 
 /// A list of required supplemental files and their filenames.
 typedef std::map<SuppItem::Type, std::string> SuppFilenames;
 
 /// A list of the supplemental file types mapped to open file streams.
-typedef std::map<SuppItem::Type, SuppItem> SuppData;
+typedef std::map<SuppItem::Type, stream::inout_sptr> SuppData;
 
 } // namespace camoto
 

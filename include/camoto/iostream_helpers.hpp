@@ -24,7 +24,6 @@
 #include <iostream>
 #include <exception>
 #include <string.h>
-#include <camoto/types.hpp>
 #include <camoto/stream.hpp>
 
 #define BYTEORDER_USE_IOSTREAMS

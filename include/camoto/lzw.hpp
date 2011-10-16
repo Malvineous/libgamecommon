@@ -31,7 +31,6 @@
 #include <boost/bind.hpp>
 
 #include <camoto/bitstream.hpp>
-#include <camoto/types.hpp>
 #include <camoto/exceptions.hpp>
 
 namespace camoto {

@@ -59,6 +59,75 @@ inline boost::shared_ptr<std::ostringstream> _createStream(void)
 // does the job nicely, and allows 'a' to start off with something that isn't a
 // number (e.g. a char.)
 
+/**
+
+\mainpage libgamecommon
+
+libgamecommon provides a number of utility functions for working with binary
+files.
+
+\section structure Classes
+
+<ul>
+  <li>
+    stream_seg - transparently add and remove chunks of data in the
+    middle of a stream
+  </li><li>
+    stream_sub - make a C++ iostream appear as a subsection of a larger stream
+  </li>
+</ul>
+
+\section example Examples
+
+\subsection endian Reading endian-specific data
+
+@code
+using namespace camoto;
+
+stream::file_sptr myfile(new stream::file());
+myfile->open("test.dat");
+
+uint16_t value;
+
+// Read a 16-bit (two byte) little-endian integer
+myfile >> u16le(value);
+
+// Same again but value in file is in big-endian instead
+myfile >> u16be(value);
+
+// Reading multiple values
+uint32_t value;
+uint8_t byte;
+myfile >> u32le(value) >> u8(byte);
+@endcode
+
+\subsection substream Creating a substream
+
+@code
+using namespace camoto;
+
+stream::file_sptr myfile(new stream::file());
+myfile->open("test.dat");
+
+// Create a stream starting 10 bytes into test.dat and 15 bytes long.
+stream::sub_sptr sub(new stream::sub());
+sub->open(myfile, 10, 15, NULL);
+
+sub->seekp(0, stream::start);
+sub->write(...); // data is written at offset 10 in test.dat
+@endcode
+
+\subsection substream Creating a segmented_stream
+
+See the segmented_stream test code.
+
+\section info More information
+
+Additional information including a mailing list is available from the Camoto
+homepage <http://www.shikadi.net/camoto>.
+
+**/
+
 } // namespace camoto
 
 #endif // _CAMOTO_UTIL_HPP_

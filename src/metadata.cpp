@@ -2,7 +2,7 @@
  * @file   metadata.cpp
  * @brief  Interface for reading and writing metadata about a file.
  *
- * Copyright (C) 2010 Adam Nielsen <malvineous@shikadi.net>
+ * Copyright (C) 2010-2011 Adam Nielsen <malvineous@shikadi.net>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,22 +29,22 @@ Metadata::MetadataTypes Metadata::getMetadataList() const
 }
 
 std::string Metadata::getMetadata(MetadataType item) const
-	throw (std::ios::failure)
+	throw (stream::error)
 {
 	// This should never be called because getMetadataList() returned an empty
 	// list.
 	assert(false);
-	throw std::ios::failure("unsupported metadata item");
+	throw stream::error("unsupported metadata item");
 }
 
 // Change the value of a metadata element.
 void Metadata::setMetadata(MetadataType item, const std::string& value)
-	throw (std::ios::failure)
+	throw (stream::error)
 {
 	// This should never be called because getMetadataList() returned an empty
 	// list.
 	assert(false);
-	throw std::ios::failure("unsupported metadata item");
+	throw stream::error("unsupported metadata item");
 }
 
 } // namespace camoto

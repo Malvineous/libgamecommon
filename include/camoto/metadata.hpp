@@ -2,7 +2,7 @@
  * @file   metadata.hpp
  * @brief  Interface for reading and writing metadata about a file.
  *
- * Copyright (C) 2010 Adam Nielsen <malvineous@shikadi.net>
+ * Copyright (C) 2010-2011 Adam Nielsen <malvineous@shikadi.net>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 #include <string>
 #include <vector>
-#include <camoto/types.hpp>
+#include <camoto/stream.hpp>
 
 namespace camoto {
 
@@ -83,7 +83,7 @@ class Metadata {
 		 * @return A string containing the metadata (may be empty.)
 		 */
 		virtual std::string getMetadata(MetadataType item) const
-			throw (std::ios::failure);
+			throw (stream::error);
 
 		/// Change the value of a metadata element.
 		/**
@@ -100,7 +100,7 @@ class Metadata {
 		 *         a blank.
 		 */
 		virtual void setMetadata(MetadataType item, const std::string& value)
-			throw (std::ios::failure);
+			throw (stream::error);
 
 };
 
