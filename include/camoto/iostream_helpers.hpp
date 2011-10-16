@@ -30,6 +30,7 @@
 #define BYTEORDER_ISTREAM camoto::stream::input_sptr
 #define BYTEORDER_OSTREAM camoto::stream::output_sptr
 #define BYTEORDER_ACCESSOR ->
+#define BYTEORDER_BUFFER_TYPE uint8_t *
 #define BYTEORDER_PROVIDE_TYPED_FUNCTIONS
 #include <camoto/byteorder.hpp>
 

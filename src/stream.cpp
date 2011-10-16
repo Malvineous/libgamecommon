@@ -88,6 +88,13 @@ void input::read(uint8_t *buffer, stream::len len)
 	return;
 }
 
+void input::read(char *buffer, stream::len len)
+	throw (incomplete_read, read_error)
+{
+	this->read((uint8_t *)buffer, len);
+	return;
+}
+
 std::string input::read(stream::len len)
 	throw (incomplete_read, read_error)
 {
@@ -104,6 +111,13 @@ void output::write(const uint8_t *buffer, stream::len len)
 	if (w < len) {
 		throw incomplete_write(w);
 	}
+	return;
+}
+
+void output::write(const char *buffer, stream::len len)
+	throw (incomplete_write, write_error)
+{
+	this->write((const uint8_t *)buffer, len);
 	return;
 }
 

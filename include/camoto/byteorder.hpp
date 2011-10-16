@@ -177,6 +177,7 @@ template <> inline uint64_t host_to  <uint64_t, big_endian>(uint64_t value) { re
 #include <iostream>
 #define BYTEORDER_ISTREAM std::istream&
 #define BYTEORDER_OSTREAM std::ostream&
+#define BYTEORDER_BUFFER_TYPE char *
 #define BYTEORDER_ACCESSOR .  // as opposed to ->
 #endif
 
@@ -197,7 +198,7 @@ struct number_format: public number_format_read, public number_format_write {
 	void read(BYTEORDER_ISTREAM s) const
 	{
 		T x = 0;
-		s BYTEORDER_ACCESSOR read((char *)&x, sizeof(T));
+		s BYTEORDER_ACCESSOR read((BYTEORDER_BUFFER_TYPE)&x, sizeof(T));
 		this->r = host_from<T, E>(x);
 		return;
 	}
@@ -205,7 +206,7 @@ struct number_format: public number_format_read, public number_format_write {
 	void write(BYTEORDER_OSTREAM s) const
 	{
 		T x = host_to<T, E>(this->r);
-		s BYTEORDER_ACCESSOR write((char *)&x, sizeof(T));
+		s BYTEORDER_ACCESSOR write((BYTEORDER_BUFFER_TYPE)&x, sizeof(T));
 		return;
 	}
 
@@ -223,7 +224,7 @@ struct number_format_const: public number_format_write {
 	void write(BYTEORDER_OSTREAM s) const
 	{
 		T x = host_to<T, E>(this->r);
-		s BYTEORDER_ACCESSOR write((char *)&x, sizeof(T));
+		s BYTEORDER_ACCESSOR write((BYTEORDER_BUFFER_TYPE)&x, sizeof(T));
 		return;
 	}
 

@@ -231,7 +231,12 @@ class input {
 		 * @throw read_error
 		 *   The data could not be read due to some other reason.
 		 */
-		virtual void read(uint8_t *buffer, stream::len len)
+		void read(uint8_t *buffer, stream::len len)
+			throw (incomplete_read, read_error);
+
+		/// Convenience function.
+		/// @copydoc read(uint8_t *, stream::len)
+		void read(char *buffer, stream::len len)
 			throw (incomplete_read, read_error);
 
 		/// Read the given number of bytes into a string.
@@ -348,6 +353,11 @@ class output {
 		 *   The write failed due to something other than EOF/insufficient space.
 		 */
 		void write(const uint8_t *buffer, stream::len len)
+			throw (incomplete_write, write_error);
+
+		/// Convenience function.
+		/// @copydoc write(const uint8_t, stream::len)
+		void write(const char *buffer, stream::len len)
 			throw (incomplete_write, write_error);
 
 		/// Write a string to the stream.
