@@ -29,9 +29,7 @@
 
 namespace camoto {
 
-namespace io = boost::iostreams;
-
-bitstream::bitstream(iostream_sptr parent, bitstream::endian endianType)
+bitstream::bitstream(stream::inout_sptr parent, bitstream::endian endianType)
 	throw () :
 		parent(parent),
 		endianType(endianType),
@@ -59,14 +57,14 @@ bitstream::~bitstream()
 }
 
 int bitstream::read(int bits, int *out)
-	throw (std::ios::failure)
+	throw (stream::error)
 {
 	assert(this->parent);
 	return this->read(NULL, bits, out);
 }
 
 int bitstream::read(fn_getnextchar fnNextChar, int bits, int *out)
-	throw (std::ios::failure)
+	throw (stream::error)
 {
 	*out = 0;
 	int bitsread = 0;
@@ -79,12 +77,11 @@ int bitstream::read(fn_getnextchar fnNextChar, int bits, int *out)
 		// writing we would never have needed it.)  But now we do need it, so we
 		// have to read it in and merge it in with whatever has been written so
 		// far, so that we don't lose any data previously written.
-		int r;
+		stream::pos r;
 		uint8_t b;
 		if (fnNextChar == NULL) {
-			this->parent->seekg(this->offset, std::ios::beg);
-			this->parent->read((char *)&b, 1);
-			r = this->parent->gcount();
+			this->parent->seekg(this->offset, stream::start);
+			r = this->parent->try_read(&b, 1);
 		} else {
 			r = fnNextChar(&b);
 		}
@@ -117,11 +114,10 @@ int bitstream::read(fn_getnextchar fnNextChar, int bits, int *out)
 		if (this->curBitPos == 8) {
 			if (this->parent) this->writeBufByte();
 
-			int r;
+			stream::pos r;
 			if (fnNextChar == NULL) {
-				this->parent->seekg(this->offset, std::ios::beg);
-				this->parent->read((char *)&this->bufByte, 1);
-				r = this->parent->gcount();
+				this->parent->seekg(this->offset, stream::start);
+				r = this->parent->try_read(&this->bufByte, 1);
 			} else {
 				r = fnNextChar(&this->bufByte);
 			}
@@ -177,14 +173,14 @@ int bitstream::read(fn_getnextchar fnNextChar, int bits, int *out)
 }
 
 int bitstream::write(int bits, int in)
-	throw (std::ios::failure)
+	throw (stream::error)
 {
 	assert(this->parent);
 	return this->write(NULL, bits, in);
 }
 
 int bitstream::write(fn_putnextchar fnNextChar, int bits, int in)
-	throw (std::ios::failure)
+	throw (stream::error)
 {
 	// Make sure the number being written can actually fit in this many bits.
 	assert(in < (1 << bits));
@@ -262,22 +258,19 @@ int bitstream::write(fn_putnextchar fnNextChar, int bits, int in)
 	return bitswritten;
 }
 
-io::stream_offset bitstream::seek(io::stream_offset off, std::ios_base::seekdir way)
-	throw (std::ios::failure)
+stream::pos bitstream::seek(stream::delta off, stream::seek_from way)
+	throw (stream::error)
 {
 	assert(this->parent);
 	this->flush();
 
 	int bitOffset = off % 8;
 	switch (way) {
-		case std::ios::beg:
-			this->offset = off / 8;
-			break;
-		case std::ios::end:
-			this->parent->seekg(off / 8, std::ios::end);
+		case stream::end:
+			this->parent->seekg(off / 8, stream::end);
 			this->offset = this->parent->tellg();
 			break;
-		case std::ios::cur:
+		case stream::cur:
 			// Undo the effect of reading the latest cache byte
 			if (this->origBufByte >= 0) this->offset--;
 
@@ -290,6 +283,9 @@ io::stream_offset bitstream::seek(io::stream_offset off, std::ios_base::seekdir 
 				this->offset++;
 				bitOffset -= 8;
 			}
+			break;
+		default: // stream::start
+			this->offset = off / 8;
 			break;
 	}
 	if (bitOffset < 0) {
@@ -310,7 +306,7 @@ io::stream_offset bitstream::seek(io::stream_offset off, std::ios_base::seekdir 
 }
 
 void bitstream::flush()
-	throw (std::ios::failure)
+	throw (stream::error)
 {
 	assert(this->parent);
 
@@ -325,14 +321,6 @@ void bitstream::flush()
 	// Write out the buf byte (if it has been changed)
 	this->writeBufByte();
 	this->parent->flush();
-	return;
-}
-
-void bitstream::clear()
-	throw (std::ios::failure)
-{
-	assert(this->parent);
-	this->parent->clear();
 	return;
 }
 
@@ -375,7 +363,7 @@ void bitstream::flushByte(fn_putnextchar fnNextChar)
 }
 
 void bitstream::writeBufByte()
-	throw (std::ios::failure)
+	throw (stream::error)
 {
 	assert(this->parent);
 	if (
@@ -399,8 +387,8 @@ void bitstream::writeBufByte()
 		// between read and write operations on the same stream.)
 
 		// Write the updated byte to the parent stream
-		this->parent->seekp(this->offset, std::ios::beg);
-		this->parent->write((char *)&this->bufByte, 1);
+		this->parent->seekp(this->offset, stream::start);
+		this->parent->write(&this->bufByte, 1);
 		this->offset++;
 		this->origBufByte = this->bufByte; // bufByte now matches on-disk version
 	} // else no modification, or the prev byte hadn't been cached

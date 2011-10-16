@@ -21,13 +21,14 @@
 #include <boost/test/unit_test.hpp>
 
 #include <boost/algorithm/string.hpp> // for case-insensitive string compare
-#include <boost/iostreams/copy.hpp>
+#include <boost/bind.hpp>
 #include <iostream>
 #include <iomanip>
 #include <vector>
 
 #include <camoto/debug.hpp>
 #include <camoto/bitstream.hpp>
+#include <camoto/stream_string.hpp>
 
 #include "tests.hpp"
 
@@ -35,6 +36,8 @@
 #ifndef __STRING
 #define __STRING(x) #x
 #endif
+
+using namespace camoto;
 
 // These are the various numbers that are read/written at different bit
 // lengths from/to the base data.
@@ -87,26 +90,22 @@ int values_17le[] = {0x03412, 0x13c2b, 0x26};
 int values_17be[] = {0x02468, 0x159e2, 0x0d000};
 #define PAD17 "\x00\x00"  /// Extra bytes we don't want to pass to the read code, but the write code will output
 
-namespace io = boost::iostreams;
-
 typedef std::vector<int> intvector;
 
 struct bitstream_read_sample: public default_sample {
 
-	boost::shared_ptr<std::stringstream> psstrBase;
-	void *_do; // unused var, but allows a statement to run in constructor init
-	camoto::iostream_sptr psBase;
-	camoto::bitstream_sptr bit;
+	stream::string_sptr base;
+	bitstream_sptr bit;
 	intvector result;
 
-	bitstream_read_sample() :
-		psstrBase(new std::stringstream),
-		_do((*this->psstrBase) << DATA_BYTES),
-		psBase(this->psstrBase),
-		bit(new camoto::bitstream(psBase, camoto::bitstream::littleEndian))
+	bitstream_read_sample()
+		: base(new stream::string())
 	{
+		this->base << DATA_BYTES;
+		this->bit.reset(new bitstream(this->base, bitstream::littleEndian));
+
 		// Make sure the data went in correctly to begin the test
-		BOOST_REQUIRE(this->psstrBase->str().compare(DATA_BYTES) == 0);
+		BOOST_REQUIRE(this->base->str().compare(DATA_BYTES) == 0);
 	}
 
 	void printNice(boost::test_tools::predicate_result& res,
@@ -173,20 +172,14 @@ struct bitstream_read_sample: public default_sample {
 
 struct bitstream_write_sample: public default_sample {
 
-	boost::shared_ptr<std::stringstream> psstrBase;
-	void *_do; // unused var, but allows a statement to run in constructor init
-	camoto::iostream_sptr psBase;
-	camoto::bitstream_sptr bit;
+	stream::string_sptr base;
+	bitstream_sptr bit;
 	intvector result;
 
-	bitstream_write_sample() :
-		psstrBase(new std::stringstream),
-		//_do((*this->psstrBase) << "\x12\x34\x56\x78\x9a"),
-		psBase(this->psstrBase),
-		bit(new camoto::bitstream(psBase, camoto::bitstream::littleEndian))
+	bitstream_write_sample()
+		: base(new stream::string())
 	{
-		// Make sure the data went in correctly to begin the test
-		//BOOST_REQUIRE(this->psstrBase->str().compare("\x12\x34\x56\x78\x9a") == 0);
+		this->bit.reset(new bitstream(this->base, bitstream::littleEndian));
 	}
 
 };
@@ -229,7 +222,7 @@ BOOST_AUTO_TEST_CASE(bitstream_read_ ## n ## bit_be) \
 { \
 	BOOST_TEST_MESSAGE("Read " __STRING(n) "-bit BE values"); \
 \
-	bit.reset(new camoto::bitstream(psBase, camoto::bitstream::bigEndian)); \
+	bit.reset(new bitstream(this->base, bitstream::bigEndian)); \
 \
 	READ_BITS(n); \
 \
@@ -273,7 +266,7 @@ BOOST_AUTO_TEST_CASE(bitstream_write_ ## n ## bit_le) \
 	bit->flush(); \
 \
 	BOOST_CHECK_MESSAGE(is_equal(std::string(DATA_BYTES PAD ## n, sizeof(DATA_BYTES PAD ## n)-1), \
-		this->psstrBase->str()), \
+		this->base->str()), \
 		"Writing " __STRING(n) "-bit LE values failed"); \
 }
 
@@ -282,13 +275,13 @@ BOOST_AUTO_TEST_CASE(bitstream_write_ ## n ## bit_be) \
 { \
 	BOOST_TEST_MESSAGE("Write " __STRING(n) "-bit BE values"); \
 \
-	bit.reset(new camoto::bitstream(psBase, camoto::bitstream::bigEndian)); \
+	bit.reset(new bitstream(this->base, bitstream::bigEndian)); \
 \
 	WRITE_BITS(n, values_ ## n ## be); \
 	bit->flush(); \
 \
 	BOOST_CHECK_MESSAGE(is_equal(std::string(DATA_BYTES PAD ## n, sizeof(DATA_BYTES PAD ## n)-1), \
-		this->psstrBase->str()), \
+		this->base->str()), \
 		"Writing " __STRING(n) "-bit BE values failed"); \
 }
 
@@ -309,9 +302,9 @@ BOOST_AUTO_TEST_CASE(bitstream_write_partial_byte)
 
 	// Write some dummy data to make sure the underlying stream is large enough,
 	// and we're not trying to seek past EOF.
-	*this->psstrBase << "\xff";
+	this->base << "\xff";
 
-	bit->changeEndian(camoto::bitstream::bigEndian);
+	bit->changeEndian(bitstream::bigEndian);
 
 	// Change the first four bits, but leave the remaining four alone.  The
 	// remaining four will then need to be read, merged and written upon flush.
@@ -320,7 +313,7 @@ BOOST_AUTO_TEST_CASE(bitstream_write_partial_byte)
 	bit->flush();
 
 	BOOST_CHECK_MESSAGE(is_equal(std::string("\x0f", 1),
-		this->psstrBase->str()),
+		this->base->str()),
 		"End write within a byte failed");
 }
 
@@ -330,9 +323,9 @@ BOOST_AUTO_TEST_CASE(bitstream_write_flush_partial_byte)
 
 	// Write some dummy data to make sure the underlying stream is large enough,
 	// and we're not trying to seek past EOF.
-	*this->psstrBase << "\x02";
+	this->base << "\x02";
 
-	bit->changeEndian(camoto::bitstream::bigEndian);
+	bit->changeEndian(bitstream::bigEndian);
 
 	// Flush in the middle of the operation and make sure it doesn't affect
 	// the stream position.
@@ -340,14 +333,14 @@ BOOST_AUTO_TEST_CASE(bitstream_write_flush_partial_byte)
 	bit->flush();
 
 	BOOST_CHECK_MESSAGE(is_equal(std::string("\xd2", 1),
-		this->psstrBase->str()),
+		this->base->str()),
 		"Flush within a byte failed (flush didn't work)");
 
 	bit->write(4, 0xd);
 	bit->flush();
 
 	BOOST_CHECK_MESSAGE(is_equal(std::string("\xdd", 1),
-		this->psstrBase->str()),
+		this->base->str()),
 		"Flush within a byte failed (flush affected stream pointer)");
 }
 
@@ -364,7 +357,7 @@ BOOST_AUTO_TEST_CASE(bitstream_seek_ ## b ## d ## o) \
 	int dummy; \
 	bit->read(8+3, &dummy); \
 \
-	this->bit->seek(o, std::ios::d); \
+	this->bit->seek(o, stream::d); \
 	READ_BITS(b); \
 \
 	BOOST_CHECK_MESSAGE(is_equal(make_vector(values_ ## b ## d ## o)), \
@@ -379,18 +372,18 @@ BOOST_AUTO_TEST_CASE(bitstream_seek_ ## b ## d ## neg ## o) \
 	int dummy; \
 	bit->read(8+3, &dummy); \
 \
-	this->bit->seek(-o, std::ios::d); \
+	this->bit->seek(-o, stream::d); \
 	READ_BITS(b); \
 \
 	BOOST_CHECK_MESSAGE(is_equal(make_vector(values_ ## b ## d ## neg ## o)), \
 		"Seek to -" __STRING(o) "@" __STRING(d) " - " __STRING(b) "-bit failed"); \
 }
 
-int values_8beg16[] = {0x56, 0x78, 0x9a};
-TEST_SEEK(8, beg, 16);
+int values_8start16[] = {0x56, 0x78, 0x9a};
+TEST_SEEK(8, start, 16);
 
-int values_8beg32[] = {0x9a};
-TEST_SEEK(8, beg, 32);
+int values_8start32[] = {0x9a};
+TEST_SEEK(8, start, 32);
 
 // Start at the offset of 3 in the test, seek +5, end up at byte offset 1
 int values_8cur5[] = {0x56, 0x78, 0x9a};
@@ -421,9 +414,9 @@ BOOST_AUTO_TEST_CASE(bitstream_rw_1bit)
 
 	// Write some dummy data to make sure the underlying stream is large enough,
 	// and we're not trying to seek past EOF.
-	*this->psstrBase << "\x90";
+	this->base << "\x90";
 
-	bit->changeEndian(camoto::bitstream::bigEndian);
+	bit->changeEndian(bitstream::bigEndian);
 
 	int val = 0;
 
@@ -440,7 +433,7 @@ BOOST_AUTO_TEST_CASE(bitstream_rw_1bit)
 	bit->flush();
 
 	BOOST_CHECK_MESSAGE(is_equal(std::string("\x9f", 1),
-		this->psstrBase->str()),
+		this->base->str()),
 		"Read/write within a byte in 1-bit stream failed");
 }
 
@@ -457,32 +450,32 @@ BOOST_AUTO_TEST_CASE(bitstream_rwseek_8bit)
 	bit->write(8, 0x98);
 
 	int val = 0;
-	int p = this->bit->seek(8, std::ios::beg);
+	int p = this->bit->seek(8, stream::start);
 	BOOST_REQUIRE_EQUAL(p, 8);
 	bit->read(8, &val);
 	BOOST_REQUIRE_EQUAL(val, 0xfe);
 
-	p = this->bit->seek(0, std::ios::beg);
+	p = this->bit->seek(0, stream::start);
 	BOOST_REQUIRE_EQUAL(p, 0);
 	bit->write(8, 0x12);
 
-	p = this->bit->seek(32, std::ios::beg);
+	p = this->bit->seek(32, stream::start);
 	BOOST_REQUIRE_EQUAL(p, 32);
 	bit->write(8, 0x9a);
 
-	p = this->bit->seek(16, std::ios::beg);
+	p = this->bit->seek(16, stream::start);
 	BOOST_REQUIRE_EQUAL(p, 16);
 	bit->write(8, 0x56);
 
-	p = this->bit->seek(8, std::ios::beg);
+	p = this->bit->seek(8, stream::start);
 	BOOST_REQUIRE_EQUAL(p, 8);
 	bit->write(8, 0x34);
 
-	p = this->bit->seek(24, std::ios::beg);
+	p = this->bit->seek(24, stream::start);
 	BOOST_REQUIRE_EQUAL(p, 24);
 	bit->write(8, 0x78);
 
-	p = this->bit->seek(8, std::ios::beg);
+	p = this->bit->seek(8, stream::start);
 	BOOST_REQUIRE_EQUAL(p, 8);
 	bit->read(8, &val);
 	BOOST_REQUIRE_EQUAL(val, 0x34);
@@ -490,7 +483,7 @@ BOOST_AUTO_TEST_CASE(bitstream_rwseek_8bit)
 	bit->flush();
 
 	BOOST_CHECK_MESSAGE(is_equal(std::string(DATA_BYTES, sizeof(DATA_BYTES)-1),
-		this->psstrBase->str()),
+		this->base->str()),
 		"Read/write/seek in 8-bit stream failed");
 }
 
@@ -507,32 +500,32 @@ BOOST_AUTO_TEST_CASE(bitstream_rwseek_9bit)
 	bit->write(4, 0x3);
 
 	int val = 0;
-	int p = this->bit->seek(9, std::ios::beg);
+	int p = this->bit->seek(9, stream::start);
 	BOOST_REQUIRE_EQUAL(p, 9);
 	bit->read(9, &val);
 	BOOST_REQUIRE_EQUAL(val, 0x1fe);
 
-	p = this->bit->seek(0, std::ios::beg);
+	p = this->bit->seek(0, stream::start);
 	BOOST_REQUIRE_EQUAL(p, 0);
 	bit->write(9, 0x012);
 
-	p = this->bit->seek(36, std::ios::beg);
+	p = this->bit->seek(36, stream::start);
 	BOOST_REQUIRE_EQUAL(p, 36);
 	bit->write(4, 0x9);
 
-	p = this->bit->seek(18, std::ios::beg);
+	p = this->bit->seek(18, stream::start);
 	BOOST_REQUIRE_EQUAL(p, 18);
 	bit->write(9, 0x015);
 
-	p = this->bit->seek(9, std::ios::beg);
+	p = this->bit->seek(9, stream::start);
 	BOOST_REQUIRE_EQUAL(p, 9);
 	bit->write(9, 0x11a);
 
-	p = this->bit->seek(27, std::ios::beg);
+	p = this->bit->seek(27, stream::start);
 	BOOST_REQUIRE_EQUAL(p, 27);
 	bit->write(9, 0x14f);
 
-	p = this->bit->seek(9, std::ios::beg);
+	p = this->bit->seek(9, stream::start);
 	BOOST_REQUIRE_EQUAL(p, 9);
 	bit->read(9, &val);
 	BOOST_REQUIRE_EQUAL(val, 0x11a);
@@ -540,7 +533,7 @@ BOOST_AUTO_TEST_CASE(bitstream_rwseek_9bit)
 	bit->flush();
 
 	BOOST_CHECK_MESSAGE(is_equal(std::string(DATA_BYTES, sizeof(DATA_BYTES)-1),
-		this->psstrBase->str()),
+		this->base->str()),
 		"Read/write/seek in 9-bit stream failed");
 }
 
@@ -554,7 +547,7 @@ BOOST_AUTO_TEST_CASE(bitstream_rwseek_1bit)
 	bit->write(8, 0xff);
 
 	int val = 0;
-	int p = this->bit->seek(0, std::ios::beg);
+	int p = this->bit->seek(0, stream::start);
 	BOOST_REQUIRE_EQUAL(p, 0);
 	bit->write(1, 0);
 
@@ -615,23 +608,23 @@ BOOST_AUTO_TEST_CASE(bitstream_rwseek_1bit)
 	bit->flush();
 
 	BOOST_CHECK_MESSAGE(is_equal(std::string(DATA_BYTES, sizeof(DATA_BYTES)-1),
-		this->psstrBase->str()),
+		this->base->str()),
 		"Read/write/seek in 1-bit stream failed");
 }
 
-int putNextChar(camoto::ostream_sptr src, uint8_t out)
+int putNextChar(stream::output_sptr src, uint8_t out)
+	throw (stream::write_error)
 {
-	src->write((char *)&out, 1);
-	return 1;
+	return src->try_write(&out, 1);
 }
 
 BOOST_AUTO_TEST_CASE(bitstream_writeonly)
 {
 	BOOST_TEST_MESSAGE("Write only without stream, make sure correct bytes come out");
 
-	bit.reset(new camoto::bitstream(camoto::bitstream::bigEndian));
+	bit.reset(new bitstream(bitstream::bigEndian));
 
-	camoto::fn_putnextchar cbNext = boost::bind(putNextChar, boost::dynamic_pointer_cast<std::ostream>(psBase), _1);
+	fn_putnextchar cbNext = boost::bind(putNextChar, this->base, _1);
 
 	bit->write(cbNext, 1, 0);
 	bit->write(cbNext, 1, 0);
@@ -654,7 +647,7 @@ BOOST_AUTO_TEST_CASE(bitstream_writeonly)
 	bit->flushByte(cbNext);
 
 	BOOST_CHECK_MESSAGE(is_equal(std::string("\x18\xE7", 2),
-		this->psstrBase->str()),
+		this->base->str()),
 		"Write only without stream failed");
 }
 
@@ -662,9 +655,9 @@ BOOST_AUTO_TEST_CASE(bitstream_write_partial)
 {
 	BOOST_TEST_MESSAGE("Write only without stream, partial");
 
-	bit.reset(new camoto::bitstream(camoto::bitstream::bigEndian));
+	bit.reset(new bitstream(bitstream::bigEndian));
 
-	camoto::fn_putnextchar cbNext = boost::bind(putNextChar, boost::dynamic_pointer_cast<std::ostream>(psBase), _1);
+	fn_putnextchar cbNext = boost::bind(putNextChar, this->base, _1);
 
 	bit->write(cbNext, 1, 0);
 	bit->write(cbNext, 1, 0);
@@ -685,7 +678,7 @@ BOOST_AUTO_TEST_CASE(bitstream_write_partial)
 	bit->flushByte(cbNext);
 
 	BOOST_CHECK_MESSAGE(is_equal(std::string("\x18\xE4", 2),
-		this->psstrBase->str()),
+		this->base->str()),
 		"Write partial without stream failed");
 }
 

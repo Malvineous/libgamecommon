@@ -22,15 +22,10 @@
 #ifndef _CAMOTO_BITSTREAM_HPP_
 #define _CAMOTO_BITSTREAM_HPP_
 
-#include <iosfwd>                           // streamsize, seekdir
-#include <boost/iostreams/positioning.hpp>  // stream_offset
 #include <boost/function.hpp>
-
-#include <camoto/types.hpp>
+#include <camoto/stream.hpp>
 
 namespace camoto {
-
-namespace io = boost::iostreams;
 
 typedef boost::function<int (uint8_t *)> fn_getnextchar;
 typedef boost::function<int (uint8_t)> fn_putnextchar;
@@ -40,7 +35,7 @@ typedef boost::function<int (uint8_t)> fn_putnextchar;
 class bitstream {
 	private:
 		/// Parent stream, where the actual data is read from and written to.
-		iostream_sptr parent;
+		stream::inout_sptr parent;
 
 		/// Current offset into parent stream.
 		/**
@@ -49,7 +44,7 @@ class bitstream {
 		 * switching between reading and writing, and we don't have the current
 		 * offset.
 		 */
-		io::stream_offset offset;
+		stream::pos offset;
 
 		/// Current seek position within bufByte (0-7), or 8 if bufByte has been
 		/// entirely used and must be updated on the next read/write.
@@ -88,7 +83,7 @@ class bitstream {
 		 *   0x102 as a nine-bit number, in little endian it would be written out
 		 *   as 02 80, in big endian it would be written as 81 00.
 		 */
-		bitstream(iostream_sptr parent, endian endianType)
+		bitstream(stream::inout_sptr parent, endian endianType)
 			throw ();
 
 		/// Stream-less constructor for using variant of read() with stream as
@@ -116,7 +111,7 @@ class bitstream {
 		 *   parameter if the read completed fully.
 		 */
 		int read(int bits, int *out)
-			throw (std::ios::failure);
+			throw (stream::error);
 
 		/// Read some bits from a particular stream.
 		/**
@@ -142,7 +137,7 @@ class bitstream {
 		 * @return The number of *bits* read, or < 0 on error (e.g. EOF/-1)
 		 */
 		int read(fn_getnextchar fnNextChar, int bits, int *out)
-			throw (std::ios::failure);
+			throw (stream::error);
 
 		/// Write some bits out to the stream.
 		/**
@@ -157,7 +152,7 @@ class bitstream {
 		 *   parameter if the write completed fully.
 		 */
 		int write(int bits, int in)
-			throw (std::ios::failure);
+			throw (stream::error);
 
 		/// Write some bits to a particular stream.
 		/**
@@ -184,7 +179,7 @@ class bitstream {
 		 * @return The number of *bits* written, or < 0 on error (e.g. EOF/-1)
 		 */
 		int write(fn_putnextchar fnNextChar, int bits, int in)
-			throw (std::ios::failure);
+			throw (stream::error);
 
 		/// Seek to a given bit position within the stream.
 		/**
@@ -192,15 +187,16 @@ class bitstream {
 		 *   take an fnNextChar parameter.
 		 *
 		 * @param off
-		 *   Bit offset (e.g. 0 == first byte, 8 == second byte)
+		 *   Bit offset (e.g. 0 == first byte, 8 == second byte), can be negative
+		 *   if \e way is not stream::start.
 		 *
 		 * @param way
-		 *   Seek direction - std::ios::beg/cur/end
+		 *   Seek direction - stream::start/cur/end
 		 *
 		 * @return Current offset (in bits from start of file)
 		 */
-		io::stream_offset seek(io::stream_offset off, std::ios_base::seekdir way)
-			throw (std::ios::failure);
+		stream::pos seek(stream::delta off, stream::seek_from way)
+			throw (stream::error);
 
 		/// Write out any partially written byte to the underlying stream.
 		/**
@@ -208,11 +204,7 @@ class bitstream {
 		 *   functions which do NOT take an fnNextChar parameter.
 		 */
 		void flush()
-			throw (std::ios::failure);
-
-		/// Reset any errors preventing access (e.g. EOF)
-		void clear()
-			throw (std::ios::failure);
+			throw (stream::error);
 
 		/// Alter the endian type without affecting the current seek position.
 		/**
@@ -254,7 +246,7 @@ class bitstream {
 		 *   functions which do NOT take an fnNextChar parameter.
 		 */
 		void writeBufByte()
-			throw (std::ios::failure);
+			throw (stream::error);
 
 };
 
