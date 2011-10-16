@@ -25,9 +25,28 @@
 namespace camoto {
 namespace stream {
 
+input_sptr open_stdin()
+	throw ()
+{
+	input_file_sptr f(new input_file());
+	f->handle = stdin;
+	f->close = false;
+	return f;
+}
+
+output_sptr open_stdout()
+	throw ()
+{
+	output_file_sptr f(new output_file());
+	f->handle = stdout;
+	f->close = false;
+	return f;
+}
+
 file_core::file_core()
 	throw () :
-		handle(NULL)
+		handle(NULL),
+		close(false)
 {
 }
 
@@ -60,6 +79,15 @@ stream::pos file_core::tell() const
 input_file::input_file()
 	throw ()
 {
+}
+
+input_file::~input_file()
+	throw ()
+{
+	if (this->close) {
+		fclose(this->handle);
+		this->close = false;
+	}
 }
 
 stream::len input_file::try_read(uint8_t *buffer, stream::len len)
@@ -98,6 +126,7 @@ void input_file::open(const char *filename)
 {
 	this->handle = fopen(filename, "rb");
 	if (this->handle == NULL) throw open_error(strerror(errno));
+	this->close = true;
 	// no need to seek, fopen("rb") positions file pointer at start
 	return;
 }
@@ -106,6 +135,15 @@ void input_file::open(const char *filename)
 output_file::output_file()
 	throw ()
 {
+}
+
+output_file::~output_file()
+	throw ()
+{
+	if (this->close) {
+		fclose(this->handle);
+		this->close = false;
+	}
 }
 
 stream::len output_file::try_write(const uint8_t *buffer, stream::len len)
@@ -166,6 +204,7 @@ void output_file::open(const char *filename)
 	// for read+write.
 	this->handle = fopen(filename, "r+b");
 	if (this->handle == NULL) throw open_error(strerror(errno));
+	this->close = true;
 	this->seek(0, start);
 	return;
 }
@@ -181,6 +220,7 @@ void output_file::create(const char *filename)
 	// for read+write.
 	this->handle = fopen(filename, "w+b");
 	if (this->handle == NULL) throw open_error(strerror(errno));
+	this->close = true;
 	this->seek(0, start);
 	return;
 }

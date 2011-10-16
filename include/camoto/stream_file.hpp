@@ -27,6 +27,14 @@
 namespace camoto {
 namespace stream {
 
+/// Get an input stream reading from standard input.
+input_sptr open_stdin()
+	throw ();
+
+/// Get an output stream writing to standard output.
+output_sptr open_stdout()
+	throw ();
+
 /// Exception thrown when a file could not be opened or created.
 class open_error: public error
 {
@@ -47,6 +55,7 @@ class file_core {
 
 	protected:
 		FILE *handle;  ///< stdio file handle
+		bool close;    ///< Do we need to close \e handle ?
 
 		file_core()
 			throw ();
@@ -76,6 +85,9 @@ class input_file: virtual public input,
 		input_file()
 			throw ();
 
+		virtual ~input_file()
+			throw ();
+
 		virtual stream::len try_read(uint8_t *buffer, stream::len len)
 			throw ();
 
@@ -99,6 +111,9 @@ class input_file: virtual public input,
 		void open(const char *filename)
 			throw (open_error);
 
+		friend input_sptr open_stdin()
+			throw ();
+
 };
 
 /// Shared pointer to a readable file.
@@ -114,6 +129,9 @@ class output_file: virtual public output,
 		 * @note Must call open() or create() before any other functions.
 		 */
 		output_file()
+			throw ();
+
+		virtual ~output_file()
 			throw ();
 
 		virtual stream::len try_write(const uint8_t *buffer, stream::len len)
@@ -152,6 +170,9 @@ class output_file: virtual public output,
 		 */
 		void create(const char *filename)
 			throw (open_error);
+
+		friend output_sptr open_stdout()
+			throw ();
 };
 
 /// Shared pointer to a writable file.
