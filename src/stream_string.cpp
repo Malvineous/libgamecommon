@@ -21,6 +21,7 @@
 #include <errno.h>
 #include <string.h>
 #include <camoto/stream_string.hpp>
+#include <camoto/util.hpp>
 
 namespace camoto {
 namespace stream {
@@ -42,26 +43,28 @@ string_core::~string_core()
 void string_core::seek(stream::delta off, seek_from from)
 	throw (seek_error)
 {
-	stream::pos newOffset;
+	stream::pos baseOffset;
 	std::string::size_type stringSize = this->data->length();
 	switch (from) {
 		case cur:
-			newOffset = this->offset + off;
+			baseOffset = this->offset;
 			break;
 		case end:
-			newOffset = stringSize + off;
+			baseOffset = stringSize;
 			break;
 		default:
-			newOffset = off;
+			baseOffset = 0;
 			break;
 	}
-	if (newOffset > stringSize) {
-		throw seek_error("Cannot seek beyond end of string");
-	}
-	if (newOffset < 0) {
+	if ((off < 0) && (baseOffset < off * -1)) {
 		throw seek_error("Cannot seek back past start of string");
 	}
-	this->offset = newOffset;
+	baseOffset += off;
+	if (baseOffset > stringSize) {
+		throw seek_error(createString("Cannot seek beyond end of string (offset "
+			<< baseOffset << " > length " << stringSize << ")"));
+	}
+	this->offset = baseOffset;
 	return;
 }
 

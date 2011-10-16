@@ -21,6 +21,7 @@
 #include <errno.h>
 #include <string.h>
 #include <camoto/stream_sub.hpp>
+#include <camoto/util.hpp>
 
 namespace camoto {
 namespace stream {
@@ -28,25 +29,27 @@ namespace stream {
 void sub_core::seek(stream::delta off, seek_from from)
 	throw (seek_error)
 {
-	stream::pos newOffset;
+	stream::pos baseOffset;
 	switch (from) {
 		case cur:
-			newOffset = this->offset + off;
+			baseOffset = this->offset;
 			break;
 		case end:
-			newOffset = this->offset + this->stream_len + off;
+			baseOffset = this->stream_len;
 			break;
 		default:
-			newOffset = off;
+			baseOffset = 0;
 			break;
 	}
-	if (newOffset > this->stream_len) {
-		throw seek_error("Cannot seek beyond end of substream");
-	}
-	if (newOffset < 0) {
+	if ((off < 0) && (baseOffset < off * -1)) {
 		throw seek_error("Cannot seek back past start of substream");
 	}
-	this->offset = newOffset;
+	baseOffset += off;
+	if (baseOffset > this->stream_len) {
+		throw seek_error(createString("Cannot seek beyond end of substream (offset "
+			<< baseOffset << " > length " << this->stream_len << ")"));
+	}
+	this->offset = baseOffset;
 	return;
 }
 
