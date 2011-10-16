@@ -40,6 +40,12 @@ const char *error::what()
 	return this->msg.c_str();
 }
 
+std::string error::get_message()
+	throw ()
+{
+	return this->msg;
+}
+
 read_error::read_error(const std::string& msg)
 	throw () :
 		error(msg)
@@ -119,7 +125,7 @@ void output::truncate_here()
 void copy(output_sptr dest, input_sptr src)
 	throw (read_error, write_error, incomplete_write)
 {
-	uint8_t buffer[4096];
+	uint8_t buffer[BUFFER_SIZE];
 	stream::len total_written = 0;
 	stream::len r;
 	do {
@@ -132,6 +138,123 @@ void copy(output_sptr dest, input_sptr src)
 			throw incomplete_write(total_written);
 		}
 	} while (r == sizeof(buffer));
+	return;
+}
+
+void move(inout_sptr data, stream::pos from, stream::pos to,
+	stream::len len)
+	throw (read_error, write_error, incomplete_write)
+{
+	if (from == to) return; // job done, that was easy
+
+	uint8_t buffer[BUFFER_SIZE];
+	stream::len r, w, total_written = 0;
+	stream::len szNext;
+
+	stream::pos fromEnd = from + len;
+	stream::pos toEnd = to + len;
+
+	stream::pos size = data->size();
+
+	// Make sure the caller isn't trying to read or write past the end of the
+	// stream (as it needs to be resized first if this is to happen.)
+	assert(fromEnd <= size);
+	assert(toEnd <= size);
+
+	if (
+		(from > to) || // The destination starts before the source
+		(fromEnd <= to) || // The source ends before the dest starts (no overlap)
+		(toEnd <= from) // The dest ends before the source starts (no overlap)
+	) {
+		// Moving data back towards the start of the stream, start at the beginning
+		// and work towards the last block.
+		do {
+			// Figure out how much to read next (a full block or the last partial one)
+			if (BUFFER_SIZE <= len) {
+				szNext = BUFFER_SIZE;
+			} else {
+				szNext = len;
+			}
+
+			// Despite having separate read and write pointers, moving one affects
+			// the other so we have to keep seeking all the time.
+			try {
+				data->seekg(from, stream::start);
+				r = data->try_read(buffer, szNext);
+			} catch (seek_error& e) {
+				throw read_error(e.get_message());
+			}
+
+			try {
+				data->seekp(to, stream::start);
+				w = data->try_write(buffer, r);
+			} catch (seek_error& e) {
+				throw read_error(e.get_message());
+			}
+
+			from += r; to += w;
+			len -= r;
+
+			total_written += w;
+			if (r != w) {
+				throw incomplete_write(total_written);
+			}
+		} while ((r) && (szNext == BUFFER_SIZE));
+	} else {
+		// Moving data forwards towards the end of the stream, start at the end
+		// and work back towards the first block.
+
+		szNext = BUFFER_SIZE;
+/*
+		// Check to see if we'll be moving data out past the end of the stream
+		if (size < toEnd) {
+			// We have to move data past the end of the stream, but since we can't
+			// seek past the end we need to enlarge the stream first.  An easy way
+			// of doing this is to use the code above (in the other 'if' condition,
+			// moving in the opposite direction) to move just the extra data from
+			// start-to-end which will push out the stream to the correct size.
+			stream::pos offExcess = toEnd - size;
+			move(data, size - offExcess, size, offExcess);
+
+			// Now we've moved the last offExcess bytes, so shrink the move operation
+			// by that amount and continue as before.
+			len -= offExcess;
+		}
+*/
+		do {
+			if (
+				(fromEnd < BUFFER_SIZE)
+				|| (fromEnd - BUFFER_SIZE < from)
+			) {
+				szNext = fromEnd - from;
+				fromEnd = from;
+				toEnd = to;
+			} else {
+				fromEnd -= BUFFER_SIZE;
+				toEnd -= BUFFER_SIZE;
+			}
+
+			try {
+				data->seekg(fromEnd, stream::start);
+				r = data->try_read(buffer, szNext);
+			} catch (seek_error& e) {
+				throw read_error(e.get_message());
+			}
+
+			try {
+				data->seekp(toEnd, stream::start);
+				w = data->try_write(buffer, r);
+			} catch (seek_error& e) {
+				throw write_error(e.get_message());
+			}
+
+			total_written += w;
+			if (r != w) {
+				throw incomplete_write(total_written);
+			}
+
+		} while (fromEnd > from);
+	}
 	return;
 }
 

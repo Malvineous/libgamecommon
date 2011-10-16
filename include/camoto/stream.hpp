@@ -30,6 +30,9 @@
 namespace camoto {
 namespace stream {
 
+/// Buffer size to use in copy() and move().
+#define BUFFER_SIZE 4096
+
 /// Signed integer data type.  Internal use only.
 typedef long long signed_int_type;
 
@@ -96,6 +99,10 @@ class error: public std::exception
 
 		/// Standard error retrieval function.
 		virtual const char *what()
+			throw ();
+
+		/// Get the error message as a string instead.
+		std::string get_message()
 			throw ();
 
 	protected:
@@ -438,6 +445,33 @@ typedef boost::shared_ptr<inout> inout_sptr;
 void copy(output_sptr dest, input_sptr src)
 	throw (read_error, write_error, incomplete_write);
 
+/// Copy possibly overlapping data from one position in a stream to another.
+/**
+ * @param data
+ *   Target stream to move data around in.
+ *
+ * @param from
+ *   Offset from the start of the stream where the data will be read from.
+ *
+ * @param to
+ *   Offset from the start of the stream where the data will be written to.
+ *
+ * @throw read_error
+ *   Data could not be read from src.
+ *
+ * @throw write_error
+ *   Data could not be written to dest.
+ *
+ * @throw incomplete_write
+ *  Not all data could fit into dest.
+ *
+ * @post \e len bytes of data that existed starting at position \e from before
+ *   this function call are now at location \e to.  They may no longer exist at
+ *   location \e from, if the regions overlapped.
+ */
+void move(inout_sptr data, stream::pos from, stream::pos to,
+	stream::len len)
+	throw (read_error, write_error, incomplete_write);
 
 } // namespace stream
 } // namespace camoto
