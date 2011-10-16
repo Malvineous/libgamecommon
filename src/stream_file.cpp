@@ -146,7 +146,7 @@ void output_file::truncate(stream::pos size)
 	return;
 }
 
-void output_file::flush() const
+void output_file::flush()
 	throw (write_error)
 {
 	if (fflush(this->handle) < 0) {

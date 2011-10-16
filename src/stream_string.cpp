@@ -170,7 +170,7 @@ void output_string::truncate(stream::pos size)
 	return;
 }
 
-void output_string::flush() const
+void output_string::flush()
 	throw ()
 {
 	return;

@@ -128,7 +128,7 @@ class output_file: virtual public output,
 		virtual void truncate(stream::pos size)
 			throw (seek_error);
 
-		virtual void flush() const
+		virtual void flush()
 			throw (write_error);
 
 		/// Open an existing file.

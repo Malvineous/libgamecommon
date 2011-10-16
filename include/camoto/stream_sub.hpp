@@ -125,7 +125,7 @@ class output_sub: virtual public output,
 		virtual void truncate(stream::pos size)
 			throw (seek_error);
 
-		virtual void flush() const
+		virtual void flush()
 			throw ();
 
 		/// Map onto a subsection of another stream.

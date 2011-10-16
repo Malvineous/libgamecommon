@@ -193,7 +193,7 @@ void output_sub::truncate(stream::pos size)
 	return;
 }
 
-void output_sub::flush() const
+void output_sub::flush()
 	throw ()
 {
 	this->out_parent->flush();

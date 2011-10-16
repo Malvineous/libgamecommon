@@ -411,7 +411,7 @@ class output {
 		 *   The data could not be flushed.  The stream is in an indeterminate
 		 *   state.
 		 */
-		virtual void flush() const
+		virtual void flush()
 			throw (write_error) = 0;
 };
 
