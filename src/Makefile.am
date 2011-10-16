@@ -1,8 +1,6 @@
 lib_LTLIBRARIES = libgamecommon.la
 
 libgamecommon_la_SOURCES = iostream_helpers.cpp
-libgamecommon_la_SOURCES += segmented_stream.cpp
-libgamecommon_la_SOURCES += substream.cpp
 libgamecommon_la_SOURCES += bitstream.cpp
 libgamecommon_la_SOURCES += lzw.cpp
 libgamecommon_la_SOURCES += filteredstream.cpp
