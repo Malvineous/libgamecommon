@@ -63,6 +63,14 @@ class sub_core {
 		 */
 		void resize(stream::len len)
 			throw ();
+
+		/// Get the current offset into the parent stream.
+		/**
+		 * @return Current offset, relative to start of parent stream, where first
+		 *   byte in the substream sits.
+		 */
+		stream::pos get_offset()
+			throw ();
 };
 
 /// Read-only stream to access a section within another stream.
@@ -100,6 +108,7 @@ class input_sub: virtual public input,
 
 		using sub_core::relocate;
 		using sub_core::resize;
+		using sub_core::get_offset;
 
 	protected:
 		input_sptr in_parent; ///< Parent stream for reading
@@ -154,6 +163,7 @@ class output_sub: virtual public output,
 
 		using sub_core::relocate;
 		using sub_core::resize;
+		using sub_core::get_offset;
 
 	protected:
 		/// Callback to alert parent stream we want to change size.
@@ -183,6 +193,7 @@ class sub: virtual public inout,
 
 		using sub_core::relocate;
 		using sub_core::resize;
+		using sub_core::get_offset;
 };
 
 /// Shared pointer to a readable and writable substream.

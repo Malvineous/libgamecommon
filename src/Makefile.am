@@ -10,6 +10,7 @@ libgamecommon_la_SOURCES += exceptions.cpp
 libgamecommon_la_SOURCES += metadata.cpp
 libgamecommon_la_SOURCES += stream.cpp
 libgamecommon_la_SOURCES += stream_file.cpp
+libgamecommon_la_SOURCES += stream_seg.cpp
 libgamecommon_la_SOURCES += stream_string.cpp
 libgamecommon_la_SOURCES += stream_sub.cpp
 libgamecommon_la_SOURCES += util.cpp

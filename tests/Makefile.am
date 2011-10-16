@@ -5,6 +5,7 @@ tests_SOURCES += test-byteorder.cpp
 tests_SOURCES += test-iostream_helpers.cpp
 tests_SOURCES += test-stream.cpp
 tests_SOURCES += test-stream_file.cpp
+tests_SOURCES += test-stream_seg.cpp
 tests_SOURCES += test-stream_string.cpp
 tests_SOURCES += test-stream_sub.cpp
 tests_SOURCES += test-streamMove.cpp

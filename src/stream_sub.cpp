@@ -77,6 +77,12 @@ void sub_core::resize(stream::len len)
 	return;
 }
 
+stream::pos sub_core::get_offset()
+	throw ()
+{
+	return this->start;
+}
+
 
 stream::len input_sub::try_read(uint8_t *buffer, stream::len len)
 	throw ()
