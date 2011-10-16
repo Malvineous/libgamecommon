@@ -98,11 +98,11 @@ class error: public std::exception
 			throw ();
 
 		/// Standard error retrieval function.
-		virtual const char *what()
+		virtual const char *what() const
 			throw ();
 
 		/// Get the error message as a string instead.
-		std::string get_message()
+		std::string get_message() const
 			throw ();
 
 	protected:

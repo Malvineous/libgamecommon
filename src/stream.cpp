@@ -34,13 +34,13 @@ error::~error()
 {
 }
 
-const char *error::what()
+const char *error::what() const
 	throw ()
 {
 	return this->msg.c_str();
 }
 
-std::string error::get_message()
+std::string error::get_message() const
 	throw ()
 {
 	return this->msg;
