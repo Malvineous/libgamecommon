@@ -123,7 +123,7 @@ class output_sub: virtual public output,
 {
 	public:
 		virtual stream::len try_write(const uint8_t *buffer, stream::len len)
-			throw ();
+			throw (write_error);
 
 		virtual void seekp(stream::delta off, seek_from from)
 			throw (seek_error);
@@ -132,7 +132,7 @@ class output_sub: virtual public output,
 			throw (seek_error);
 
 		virtual void truncate(stream::pos size)
-			throw (seek_error);
+			throw (write_error);
 
 		virtual void flush()
 			throw ();

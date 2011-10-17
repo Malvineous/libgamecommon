@@ -129,10 +129,15 @@ void output::write(const std::string& buffer)
 }
 
 void output::truncate_here()
-	throw (seek_error)
+	throw (write_error)
 {
-	stream::pos here = this->tellp();
-	this->truncate(here);
+	try {
+		stream::pos here = this->tellp();
+		this->truncate(here);
+	} catch (const seek_error& e) {
+		throw write_error("Unable to obtain current seek position for truncate: "
+			+ e.get_message());
+	}
 	return;
 }
 

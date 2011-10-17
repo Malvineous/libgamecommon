@@ -145,7 +145,7 @@ void input_sub::open(input_sptr parent, stream::pos start, stream::len len)
 
 
 stream::len output_sub::try_write(const uint8_t *buffer, stream::len len)
-	throw ()
+	throw (write_error)
 {
 	// Make sure we didn't somehow end up past the end of the stream
 	assert(this->offset <= this->stream_len);
@@ -154,13 +154,19 @@ stream::len output_sub::try_write(const uint8_t *buffer, stream::len len)
 		// Stream is too small to accommodate entire write, attempt to enlarge
 		this->flush();
 		// Don't call truncate() because we don't want the pointer moved
-		if (!this->fn_resize(this->offset + len)) {
+		try {
+			this->fn_resize(this->offset + len);
+		} catch (const write_error&) {
 			// Truncate failed, reduce write to available space
 			len = this->stream_len - this->offset;
 		}
 	}
 
-	this->out_parent->seekp(this->start + this->offset, stream::start);
+	try {
+		this->out_parent->seekp(this->start + this->offset, stream::start);
+	} catch (const seek_error&) {
+		return 0;
+	}
 	stream::pos w = this->out_parent->try_write(buffer, len);
 	this->offset += w;
 
@@ -190,15 +196,17 @@ stream::pos output_sub::tellp() const
 }
 
 void output_sub::truncate(stream::pos size)
-	throw (seek_error)
+	throw (write_error)
 {
 	assert(this->fn_resize);
 
 	this->flush();
-	if (!this->fn_resize(size)) {
-		throw seek_error("Resize callback could not resize the stream");
+	this->fn_resize(size);
+	try {
+		this->seekp(size, stream::start);
+	} catch (const seek_error& e) {
+		throw write_error("Unable to seek to EOF after truncate: " + e.get_message());
 	}
-	this->seekp(size, stream::start);
 	return;
 }
 

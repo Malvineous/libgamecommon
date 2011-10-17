@@ -59,7 +59,8 @@ typedef signed_int_type delta;
  *
  * The function signature is:
  * @code
- * bool fnTruncate(stream::pos new_length);
+ * void fnTruncate(stream::pos new_length)
+ *   throw (stream::write_error);
  * @endcode
  *
  * This example uses boost::bind to package up a call to the Linux
@@ -79,8 +80,11 @@ typedef signed_int_type delta;
  * having enough data written into it that it needs to be enlarged.  In this
  * case presumably you will move the data in the parent stream to make room
  * for the now larger substream.
+ *
+ * The callback should throw stream::write_error if the operation did not
+ * succeed.
  */
-typedef boost::function<bool(stream::pos)> fn_truncate;
+typedef boost::function<void(stream::pos)> fn_truncate;
 
 /// Base exception for stream functions.
 class error: public std::exception
@@ -403,17 +407,24 @@ class output {
 		 *
 		 * @note There is an implicit call to flush() before the truncate happens.
 		 *
-		 * @post The seek position is moved to offset 'size'.
+		 * @throw write_error
+		 *   The truncate could not be performed.
+		 *
+		 * @post The seek position is moved to the end of the stream (at offset
+		 *   \e size)
 		 */
 		virtual void truncate(stream::pos size)
-			throw (seek_error) = 0;
+			throw (write_error) = 0;
 
 		/// Set the stream size to end at the current position.
 		/**
 		 * @note There is an implicit call to flush() before the truncate happens.
+		 *
+		 * @throw write_error
+		 *   The truncate could not be performed.
 		 */
 		virtual void truncate_here()
-			throw (seek_error);
+			throw (write_error);
 
 		/// Commit all changes to the underlying storage medium.
 		/**

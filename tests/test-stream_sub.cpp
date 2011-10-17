@@ -127,9 +127,9 @@ BOOST_AUTO_TEST_CASE(write_then_move)
 		"Move substream's offset after write failed");
 }
 
-bool noResize(stream::len len)
+void noResize(stream::len len)
 {
-	return false; // resize refused
+	throw stream::write_error("Resize refused for testing purposes");
 }
 
 BOOST_AUTO_TEST_CASE(write_past_eof_fixed)
@@ -150,14 +150,14 @@ BOOST_AUTO_TEST_CASE(write_past_eof_fixed)
 		"Write past fixed-size substream's EOF");
 }
 
-bool doResize(stream::output_sub_sptr s, stream::len len)
+void doResize(stream::output_sub_sptr s, stream::len len)
 {
 	// Since we're writing to a string stream we don't have to bother resizing the
 	// underlying stream - just notify the substream the resize has been done.  As
 	// long as we're not seeking into the new space in the test, the string stream
 	// will enlarge automatically.
 	s->resize(len);
-	return true; // resize permitted
+	return;
 }
 
 BOOST_AUTO_TEST_CASE(write_past_eof_expand)

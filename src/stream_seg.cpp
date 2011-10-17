@@ -258,12 +258,16 @@ stream::pos seg::tellp() const
 }
 
 void seg::truncate(stream::pos size)
-	throw (seek_error)
+	throw (write_error)
 {
-	stream::len total = this->size();
-	this->seekp(size, stream::start);
-	this->remove(total - size);
-	this->flush();
+	try {
+		stream::len total = this->size();
+		this->seekp(size, stream::start);
+		this->remove(total - size);
+		this->flush();
+	} catch (const seek_error& e) {
+		throw write_error("Unable to seek during truncate: " + e.get_message());
+	}
 	return;
 }
 

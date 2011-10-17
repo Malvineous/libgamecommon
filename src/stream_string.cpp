@@ -165,11 +165,15 @@ stream::pos output_string::tellp() const
 }
 
 void output_string::truncate(stream::pos size)
-	throw (seek_error)
+	throw (write_error)
 {
 	this->flush();
-	this->data->resize(size);
-	this->seekp(size, start);
+	try {
+		this->data->resize(size);
+		this->seek(size, stream::start);
+	} catch (const seek_error& e) {
+		throw write_error("Unable to seek to EOF after truncate: " + e.get_message());
+	}
 	return;
 }
 

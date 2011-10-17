@@ -144,7 +144,7 @@ class output_file: virtual public output,
 			throw (seek_error);
 
 		virtual void truncate(stream::pos size)
-			throw (seek_error);
+			throw (write_error);
 
 		virtual void flush()
 			throw (write_error);

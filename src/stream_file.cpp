@@ -166,21 +166,25 @@ stream::pos output_file::tellp() const
 }
 
 void output_file::truncate(stream::pos size)
-	throw (seek_error)
+	throw (write_error)
 {
 	this->flush();
 	int fd = fileno(this->handle);
 #ifdef __WIN32
 	if (chsize(fd, size) < 0) {
-		throw seek_error(strerror(errno));
+		throw write_error(strerror(errno));
 	}
 #else
 	if (ftruncate(fd, size) < 0) {
-		throw seek_error(strerror(errno));
+		throw write_error(strerror(errno));
 	}
 #endif
 	// Have to seek last as the file might not have been large enough earlier
-	this->seekp(size, start);
+	try {
+		this->seekp(size, stream::start);
+	} catch (const seek_error& e) {
+		throw write_error("Unable to seek to EOF after truncate: " + e.get_message());
+	}
 	return;
 }
 
