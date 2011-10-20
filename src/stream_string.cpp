@@ -178,7 +178,7 @@ void output_string::truncate(stream::pos size)
 }
 
 void output_string::flush()
-	throw ()
+	throw (write_error)
 {
 	return;
 }

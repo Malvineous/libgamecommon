@@ -10,7 +10,6 @@ tests_SOURCES += test-stream_string.cpp
 tests_SOURCES += test-stream_sub.cpp
 tests_SOURCES += test-bitstream.cpp
 tests_SOURCES += test-lzw.cpp
-tests_SOURCES += test-filteredstream.cpp
 
 EXTRA_tests_SOURCES = tests.hpp
 

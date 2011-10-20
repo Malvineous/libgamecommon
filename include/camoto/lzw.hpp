@@ -3,7 +3,7 @@
  * @brief  Boost iostream filter for compressing and decompressing data using
  *         a few variants of the LZW algorithm.
  *
- * Copyright (C) 2010 Adam Nielsen <malvineous@shikadi.net>
+ * Copyright (C) 2010-2011 Adam Nielsen <malvineous@shikadi.net>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,18 +24,11 @@
 
 #include <vector>
 #include <deque>
-#include <iosfwd>                           // streamsize
-#include <boost/iostreams/concepts.hpp>     // multichar_input_filter
-#include <boost/iostreams/char_traits.hpp>  // EOF, WOULD_BLOCK
-#include <boost/iostreams/operations.hpp>   // get
-#include <boost/bind.hpp>
 
 #include <camoto/bitstream.hpp>
-#include <camoto/exceptions.hpp>
+#include <camoto/filter.hpp>
 
 namespace camoto {
-
-namespace io = boost::iostreams;
 
 #define LZW_LITTLE_ENDIAN     0x00 ///< Read bytes in little-endian order
 #define LZW_BIG_ENDIAN        0x01 ///< Read bytes in big-endian order
@@ -69,7 +62,7 @@ class Dictionary
 	std::vector<byte> decodedString;
 
 	void fillDecodedString(unsigned code)
-		throw (ECorruptedData);
+		throw (filter_error);
 
 public:
 	Dictionary(unsigned maxBits, unsigned codeStart);
@@ -82,15 +75,7 @@ public:
 	void reset();
 };
 
-template <typename Source>
-int nextSourceChar(Source& src, uint8_t *out) {
-	int c = boost::iostreams::get(src);
-	if (c < 0) return c;
-	*out = c;
-	return 1;
-}
-
-class lzw_decompress_filter: public io::multichar_input_filter {
+class filter_lzw_decompress: public filter {
 
 	protected:
 		const unsigned int maxBits;  ///< Maximum codeword size (dictionary size limit)
@@ -136,37 +121,19 @@ class lzw_decompress_filter: public io::multichar_input_filter {
 		 *   codewords with no reserved values, or e.g. 258 for 9-bit codewords
 		 *   with two reserved values.
 		 */
-		lzw_decompress_filter(int initialBits, int maxBits, int firstCode,
+		filter_lzw_decompress(int initialBits, int maxBits, int firstCode,
 			int eofCode, int resetCode, int flags);
 
+		virtual void transform(uint8_t *out, stream::len *lenOut, const uint8_t *in,
+			stream::len *lenIn)
+			throw (filter_error);
+
 		void resetDictionary();
+
 		/// Recalculate the reserved/trigger codewords.
 		void recalcCodes();
 
 		void fillBuffer(fn_getnextchar cbNext);
-
-		template<typename Source>
-		std::streamsize read(Source& src, char* s, std::streamsize n)
-		{
-			int r = 0;
-			while (n > 0) {
-				if (!this->buffer.empty()) {
-					*s++ = this->buffer.front();
-					this->buffer.pop_front();
-					n--;
-					r++;
-				} else {
-					fn_getnextchar cbNext = boost::bind(nextSourceChar<Source>, boost::ref(src), _1);
-					this->fillBuffer(cbNext);
-					if (this->buffer.empty()) {
-						if (r == 0) r = -1; // EOF
-						break;
-					}
-				}
-			}
-			return r;
-		}
-
 };
 
 } // namespace camoto

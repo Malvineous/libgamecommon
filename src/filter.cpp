@@ -1,11 +1,8 @@
 /**
- * @file   exceptions.cpp
- * @brief  Exception types used across the library.
+ * @file   filter.cpp
+ * @brief  Base filter implementation.
  *
- * Copyright (C) 2010 Adam Nielsen <malvineous@shikadi.net>
- *
- * LZW algorithm based on GPL code by Juha Nieminen
- *   http://warp.povusers.org/EfficientLZW/
+ * Copyright (C) 2010-2011 Adam Nielsen <malvineous@shikadi.net>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,25 +18,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <camoto/exceptions.hpp>
+#include <camoto/filter.hpp>
 
 namespace camoto {
 
-ECorruptedData::ECorruptedData(const std::string& msg)
+filter_error::filter_error(const std::string& msg)
 	throw () :
-		msg(msg)
+		error(msg)
 {
-}
-
-ECorruptedData::~ECorruptedData()
-	throw ()
-{
-}
-
-const char *ECorruptedData::what() const
-	throw ()
-{
-	return this->msg.c_str();
 }
 
 } // namespace camoto

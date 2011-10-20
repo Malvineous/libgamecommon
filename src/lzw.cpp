@@ -22,6 +22,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <boost/bind.hpp>
 #include <camoto/lzw.hpp>
 
 namespace camoto {
@@ -34,26 +35,26 @@ CodeString::CodeString(byte newByte, unsigned pI):
 }
 
 void Dictionary::fillDecodedString(unsigned code)
-	throw (ECorruptedData)
+	throw (filter_error)
 {
 	decodedString.clear();
 	int safety = 0;
 	int tableSize = table.size();
 	while (code != ~0U) {
-		if (code >= tableSize) throw ECorruptedData("LZW data is corrupted - "
+		if (code >= tableSize) throw filter_error("LZW data is corrupted - "
 			"codeword was larger than the number of entries in the dictionary!");
 		const CodeString& cs = table[code];
 		decodedString.push_back(cs.k);
 
 		// Make sure this codeword's prefix is not itself, otherwise we'll get
 		// stuck in an infinite loop!
-		if (cs.prefixIndex == code) throw ECorruptedData("LZW data is corrupted - "
+		if (cs.prefixIndex == code) throw filter_error("LZW data is corrupted - "
 			"codeword's prefix is itself, cannot continue as this would cause an "
 			"infinite loop!");
 		code = cs.prefixIndex;
 
 		if (++safety > tableSize * 2) {
-			throw ECorruptedData("LZW data is corrupted - searched through the "
+			throw filter_error("LZW data is corrupted - searched through the "
 				"dictionary twice but the code never mapped to a byte value!");
 		}
 	}
@@ -105,7 +106,7 @@ void Dictionary::reset()
 }
 
 
-lzw_decompress_filter::lzw_decompress_filter(int initialBits, int maxBits,
+filter_lzw_decompress::filter_lzw_decompress(int initialBits, int maxBits,
 	int firstCode, int eofCode, int resetCode, int flags) :
 	maxBits(maxBits),
 	flags(flags),
@@ -125,7 +126,42 @@ lzw_decompress_filter::lzw_decompress_filter(int initialBits, int maxBits,
 	this->resetDictionary();
 }
 
-void lzw_decompress_filter::resetDictionary()
+int nextChar(const uint8_t **in, stream::len *lenIn, stream::len *r, uint8_t *out)
+{
+	if (*lenIn) {
+		*out = **in; // "read" byte
+		(*in)++;     // increment read buffer
+		(*r)++;      // increment read count
+		return 1;    // return number of bytes read
+	}
+	return 0; // EOF
+}
+
+void filter_lzw_decompress::transform(uint8_t *out, stream::len *lenOut,
+	const uint8_t *in, stream::len *lenIn)
+	throw (filter_error)
+{
+	stream::len r = 0, w = 0;
+	while ((w < *lenOut) && ((r < *lenIn) || (!this->buffer.empty()))) {
+		if (!this->buffer.empty()) {
+			*out++ = this->buffer.front();
+			this->buffer.pop_front();
+			w++;
+		} else {
+			fn_getnextchar cbNext = boost::bind(nextChar, &in, lenIn, &r, _1);
+			this->fillBuffer(cbNext);
+			if (this->buffer.empty()) {
+				//if (r == 0) r = -1; // EOF
+				break;
+			}
+		}
+	}
+	*lenIn = r;
+	*lenOut = w;
+	return;
+}
+
+void filter_lzw_decompress::resetDictionary()
 {
 	this->dictionary.reset();
 	if (!(this->flags & LZW_NO_BITSIZE_RESET)) {
@@ -137,7 +173,7 @@ void lzw_decompress_filter::resetDictionary()
 	return;
 }
 
-void lzw_decompress_filter::recalcCodes()
+void filter_lzw_decompress::recalcCodes()
 {
 	// Work out the maximum codeword value that will be possible at the current
 	// bit length.
@@ -166,7 +202,7 @@ void lzw_decompress_filter::recalcCodes()
 	return;
 }
 
-void lzw_decompress_filter::fillBuffer(fn_getnextchar cbNext)
+void filter_lzw_decompress::fillBuffer(fn_getnextchar cbNext)
 {
 	if ((this->flags & LZW_EOF_PARAM_VALID) && (this->code == this->curEOFCode)) return;
 

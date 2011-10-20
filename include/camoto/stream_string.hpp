@@ -122,7 +122,7 @@ class output_string: virtual public output,
 			throw (write_error);
 
 		virtual void flush()
-			throw ();
+			throw (write_error);
 
 		/// Wrap around an existing string.
 		/**
