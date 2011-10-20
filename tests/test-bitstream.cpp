@@ -2,7 +2,7 @@
  * @file   test-bitstream.cpp
  * @brief  Test code for bitstream class.
  *
- * Copyright (C) 2010 Adam Nielsen <malvineous@shikadi.net>
+ * Copyright (C) 2010-2011 Adam Nielsen <malvineous@shikadi.net>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -342,6 +342,132 @@ BOOST_AUTO_TEST_CASE(bitstream_write_flush_partial_byte)
 	BOOST_CHECK_MESSAGE(is_equal(std::string("\xdd", 1),
 		this->base->str()),
 		"Flush within a byte failed (flush affected stream pointer)");
+}
+
+BOOST_AUTO_TEST_CASE(bitstream_write_flushbyte)
+{
+	BOOST_TEST_MESSAGE("Flush within a byte multiple times");
+
+	// Write some dummy data to make sure the underlying stream is large enough,
+	// and we're not trying to seek past EOF.
+	this->base->write("\xff\xff\x00\x00", 4);
+
+	bit->changeEndian(bitstream::bigEndian);
+
+	// Flush in the middle of the operation and make sure it doesn't affect
+	// the stream position.
+	bit->write(4, 0xd);
+	bit->flushByte();
+	bit->write(5, 0x1);
+	bit->flushByte();
+	bit->write(1, 0x1);
+	bit->flushByte();
+	bit->write(2, 0x3);
+	bit->flush();
+	BOOST_CHECK_MESSAGE(is_equal(std::string("\xd0\x08\x80\xc0", 4),
+		this->base->str()),
+		"Flush within a byte failed (flush didn't work)");
+}
+
+BOOST_AUTO_TEST_CASE(bitstream_write_flushbyte_over)
+{
+	BOOST_TEST_MESSAGE("Flush within a byte after writing more than one byte");
+
+	// Write some dummy data to make sure the underlying stream is large enough,
+	// and we're not trying to seek past EOF.
+	this->base->write("\xff\xff\x00\x00", 4);
+
+	bit->changeEndian(bitstream::bigEndian);
+
+	// Flush in the middle of the operation and make sure it doesn't affect
+	// the stream position.
+	bit->write(4, 0xd);
+	bit->flushByte();
+	bit->write(10, 0x3ff);
+	bit->flushByte();
+	bit->write(4, 0xd);
+	bit->flush();
+	BOOST_CHECK_MESSAGE(is_equal(std::string("\xd0\xff\xc0\xd0", 4),
+		this->base->str()),
+		"Flush within a byte failed (flush didn't work)");
+}
+
+BOOST_AUTO_TEST_CASE(bitstream_write_peek_bigendian)
+{
+	BOOST_TEST_MESSAGE("Peek at buffered byte (big endian)");
+
+	// Write some dummy data to make sure the underlying stream is large enough,
+	// and we're not trying to seek past EOF.
+	this->base->write("\xff\xff\x00\x00\x00", 5);
+
+	bit->changeEndian(bitstream::bigEndian);
+
+	uint8_t next, mask;
+
+	// Flush in the middle of the operation and make sure it doesn't affect
+	// the stream position.
+	bit->write(4, 0xd);
+
+	bit->peekByte(&next, &mask);
+	BOOST_REQUIRE_EQUAL(next, 0xd0);
+	BOOST_REQUIRE_EQUAL(mask, 0xf0);
+
+	bit->flushByte();
+	bit->write(10, 0x3ff);
+
+	bit->peekByte(&next, &mask);
+	BOOST_REQUIRE_EQUAL(next, 0xc0);
+	BOOST_REQUIRE_EQUAL(mask, 0xc0);
+
+	bit->write(6, 0x3f);
+
+	bit->peekByte(&next, &mask);
+	BOOST_REQUIRE_EQUAL(next, 0x00);
+	BOOST_REQUIRE_EQUAL(mask, 0x00);
+
+	bit->write(1, 0x01);
+	bit->flushByte();
+	BOOST_REQUIRE_EQUAL(next, 0x00);
+	BOOST_REQUIRE_EQUAL(mask, 0x00);
+}
+
+BOOST_AUTO_TEST_CASE(bitstream_write_peek_littleendian)
+{
+	BOOST_TEST_MESSAGE("Peek at buffered byte (little endian)");
+
+	// Write some dummy data to make sure the underlying stream is large enough,
+	// and we're not trying to seek past EOF.
+	this->base->write("\xff\xff\x00\x00\x00", 5);
+
+	bit->changeEndian(bitstream::littleEndian);
+
+	uint8_t next, mask;
+
+	// Flush in the middle of the operation and make sure it doesn't affect
+	// the stream position.
+	bit->write(4, 0xd);
+
+	bit->peekByte(&next, &mask);
+	BOOST_REQUIRE_EQUAL(next, 0x0d);
+	BOOST_REQUIRE_EQUAL(mask, 0x0f);
+
+	bit->flushByte();
+	bit->write(10, 0x3ff);
+
+	bit->peekByte(&next, &mask);
+	BOOST_REQUIRE_EQUAL(next, 0x03);
+	BOOST_REQUIRE_EQUAL(mask, 0x03);
+
+	bit->write(6, 0x3f);
+
+	bit->peekByte(&next, &mask);
+	BOOST_REQUIRE_EQUAL(next, 0x00);
+	BOOST_REQUIRE_EQUAL(mask, 0x00);
+
+	bit->write(1, 0x01);
+	bit->flushByte();
+	BOOST_REQUIRE_EQUAL(next, 0x00);
+	BOOST_REQUIRE_EQUAL(mask, 0x00);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

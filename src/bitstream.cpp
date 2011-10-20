@@ -3,7 +3,7 @@
  * @brief  iostream wrapper reading and writing a number of bits rather than
  *         bytes.
  *
- * Copyright (C) 2010 Adam Nielsen <malvineous@shikadi.net>
+ * Copyright (C) 2010-2011 Adam Nielsen <malvineous@shikadi.net>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -85,8 +85,8 @@ int bitstream::read(fn_getnextchar fnNextChar, int bits, int *out)
 		} else {
 			r = fnNextChar(&b);
 		}
-		if (r <= 0) {
-			// EOF or WOULD_BLOCK
+		if (r == 0) {
+			// EOF
 			if (bitsread == 0) return r;
 			if (this->endianType == bitstream::bigEndian) {
 				// Big endian needs to be padded with zero data first
@@ -121,8 +121,8 @@ int bitstream::read(fn_getnextchar fnNextChar, int bits, int *out)
 			} else {
 				r = fnNextChar(&this->bufByte);
 			}
-			if (r <= 0) {
-				// EOF or WOULD_BLOCK
+			if (r == 0) {
+				// EOF
 				if (bitsread == 0) return r;
 				if (this->endianType == bitstream::bigEndian) {
 					// Big endian needs to be padded with zero data first
@@ -208,6 +208,10 @@ int bitstream::write(fn_putnextchar fnNextChar, int bits, int in)
 			}
 			this->origBufByte = WASNT_BUFFERED;
 			this->curBitPos = 0;
+
+			// Make sure a subsequent flushByte() call pads out the byte with zeroes
+			// instead of the same bits as the current byte.
+			this->bufByte = 0;
 		}
 
 		// Write at most whatever space is left in the buffer, which will
@@ -359,6 +363,10 @@ void bitstream::flushByte(fn_putnextchar fnNextChar)
 	}
 	this->origBufByte = INITIAL_VALUE;
 	this->curBitPos = 8; // reset to the start of the byte boundary
+
+	// Make sure a subsequent flushByte() call pads out the byte with zeroes
+	// instead of the same bits as the current byte.
+	this->bufByte = 0;
 	return;
 }
 
@@ -392,6 +400,18 @@ void bitstream::writeBufByte()
 		this->offset++;
 		this->origBufByte = this->bufByte; // bufByte now matches on-disk version
 	} // else no modification, or the prev byte hadn't been cached
+	return;
+}
+
+void bitstream::peekByte(uint8_t *buf, uint8_t *mask)
+	throw ()
+{
+	*buf = (this->curBitPos == 8) ? 0x00 : this->bufByte;
+	if (this->endianType == bitstream::littleEndian) {
+		*mask = ~(0xFF << (this->curBitPos % 8));
+	} else {
+		*mask = ~(0xFF >> (this->curBitPos % 8));
+	}
 	return;
 }
 

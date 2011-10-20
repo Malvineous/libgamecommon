@@ -3,7 +3,7 @@
  * @brief  iostream wrapper reading and writing a number of bits rather than
  *         bytes.
  *
- * Copyright (C) 2010 Adam Nielsen <malvineous@shikadi.net>
+ * Copyright (C) 2010-2011 Adam Nielsen <malvineous@shikadi.net>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,8 +69,8 @@ class bitstream {
 
 		/// Byte order in the bitstream
 		enum endian {
-			littleEndian,
-			bigEndian,
+			littleEndian,    ///< Little-endian (Intel)
+			bigEndian,       ///< Big-endian (Motorola)
 		} endianType;
 
 		/// Create a bitstream out of the given stream
@@ -248,6 +248,17 @@ class bitstream {
 		void writeBufByte()
 			throw (stream::error);
 
+		/// Peek at the next byte that will be written out.
+		/**
+		 * @param buf
+		 *   Where to store the byte.
+		 *
+		 * @param mask
+		 *   Mask of valid bits, e.g. 0xF0 indicates only the four most-significant
+		 *   bits in \e buf are valid.
+		 */
+		void peekByte(uint8_t *buf, uint8_t *mask)
+			throw ();
 };
 
 typedef boost::shared_ptr<bitstream> bitstream_sptr;
