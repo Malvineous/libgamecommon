@@ -30,6 +30,14 @@
 
 using namespace camoto;
 
+/// Truncate function to adjust a stream::string so it can hold an enlarging stream::sub
+void ss_resize(stream::output_sptr base, stream::output_sub_sptr sub, stream::len len)
+	throw (stream::write_error)
+{
+	base->truncate(sub->get_offset() + len);
+	sub->resize(len);
+}
+
 struct stream_sub_sample: public default_sample {
 
 	stream::string_sptr base;
@@ -75,7 +83,7 @@ BOOST_AUTO_TEST_CASE(read_write)
 {
 	BOOST_TEST_MESSAGE("Create substream and read what was written");
 
-	this->sub->open(this->base, 2, 10, NULL);
+	this->sub->open(this->base, 2, 10, boost::bind(ss_resize, this->base, this->sub, _1));
 	this->sub->seekp(4, stream::cur); // initial offset must always be 0
 	this->sub->write("123");
 	this->sub->seekg(2, stream::start);
@@ -90,7 +98,7 @@ BOOST_AUTO_TEST_CASE(change_offset)
 {
 	BOOST_TEST_MESSAGE("Move substream's offset");
 
-	this->sub->open(this->base, 2, 4, NULL);
+	this->sub->open(this->base, 2, 4, boost::bind(ss_resize, this->base, this->sub, _1));
 
 	this->sub->relocate(8);
 	this->sub->resize(16); // can't read past end of stream!
@@ -102,8 +110,7 @@ BOOST_AUTO_TEST_CASE(change_offset)
 BOOST_AUTO_TEST_CASE(write_then_move)
 {
 	BOOST_TEST_MESSAGE("Move substream's offset after writing");
-
-	this->sub->open(this->base, 0, 16, NULL);
+	this->sub->open(this->base, 0, 16, boost::bind(ss_resize, this->base, this->sub, _1));
 
 	this->sub->seekp(10, stream::start);
 	this->sub->write("12345");

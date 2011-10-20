@@ -147,6 +147,8 @@ void input_sub::open(input_sptr parent, stream::pos start, stream::len len)
 stream::len output_sub::try_write(const uint8_t *buffer, stream::len len)
 	throw (write_error)
 {
+	assert(this->fn_resize);
+
 	// Make sure we didn't somehow end up past the end of the stream
 	assert(this->offset <= this->stream_len);
 
