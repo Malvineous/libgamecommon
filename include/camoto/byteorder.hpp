@@ -1,7 +1,8 @@
-/*
- * byteorder.h - Standard C and C++ implementations of byte order functions.
+/**
+ * @file  byteorder.hpp
+ * @brief Standard C and C++ implementations of byte order functions.
  *
- * Copyright (C) 2010 Adam Nielsen <malvineous@shikadi.net>
+ * Copyright (C) 2010-2011 Adam Nielsen <malvineous@shikadi.net>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
