@@ -147,8 +147,6 @@ void input_sub::open(input_sptr parent, stream::pos start, stream::len len)
 stream::len output_sub::try_write(const uint8_t *buffer, stream::len len)
 	throw (write_error)
 {
-	assert(this->fn_resize);
-
 	// Make sure we didn't somehow end up past the end of the stream
 	assert(this->offset <= this->stream_len);
 
@@ -157,7 +155,11 @@ stream::len output_sub::try_write(const uint8_t *buffer, stream::len len)
 		this->flush();
 		// Don't call truncate() because we don't want the pointer moved
 		try {
-			this->fn_resize(this->offset + len);
+			if (this->fn_resize) this->fn_resize(this->offset + len);
+			else {
+				std::cerr << "[stream::sub::try_write] No truncate function, cannot "
+					"enlarge substream.  Doing a partial write." << std::endl;
+			}
 		} catch (const write_error&) {
 			// Truncate failed, reduce write to available space
 			len = this->stream_len - this->offset;
@@ -200,7 +202,11 @@ stream::pos output_sub::tellp() const
 void output_sub::truncate(stream::pos size)
 	throw (write_error)
 {
-	assert(this->fn_resize);
+	if (this->stream_len == size) return; // nothing to do
+	if (!this->fn_resize) {
+		throw write_error("Cannot truncate substream, no callback function was "
+			"provided to notify the substream owner.");
+	}
 
 	this->flush();
 	this->fn_resize(size);
