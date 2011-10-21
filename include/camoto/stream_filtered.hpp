@@ -44,7 +44,7 @@ class input_filtered: virtual public input_string
 		 *   Filter to process data.
 		 */
 		void open(input_sptr parent, filter_sptr read_filter)
-			throw ();
+			throw (filter_error);
 };
 
 /// Shared pointer to a readable filtered stream.
@@ -112,7 +112,7 @@ class filtered: virtual public inout,
 		 *   Filter to process data.
 		 */
 		void open(inout_sptr parent, filter_sptr read_filter, filter_sptr write_filter)
-			throw ();
+			throw (filter_error);
 };
 
 /// Shared pointer to a readable and writable filtered stream.

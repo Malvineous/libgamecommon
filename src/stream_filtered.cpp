@@ -24,7 +24,7 @@ namespace camoto {
 namespace stream {
 
 void input_filtered::open(input_sptr parent, filter_sptr read_filter)
-	throw ()
+	throw (filter_error)
 {
 	assert(parent);
 	assert(read_filter);
@@ -70,7 +70,11 @@ void output_filtered::flush()
 	do {
 		lenIn = lenRemaining;
 		lenOut = BUFFER_SIZE;
-		this->write_filter->transform(bufOut, &lenOut, bufIn, &lenIn);
+		try {
+			this->write_filter->transform(bufOut, &lenOut, bufIn, &lenIn);
+		} catch (const filter_error& e) {
+			throw write_error("Filter error: " + e.get_message());
+		}
 
 		// Sanity checks: Make sure the filter didn't write more data that it was
 		// allowed to.
@@ -105,7 +109,7 @@ filtered::filtered()
 }
 
 void filtered::open(inout_sptr parent, filter_sptr read_filter, filter_sptr write_filter)
-	throw ()
+	throw (filter_error)
 {
 	this->input_filtered::open(parent, read_filter);
 	this->output_filtered::open(parent, write_filter);
