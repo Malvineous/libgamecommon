@@ -111,6 +111,10 @@ class input_file: virtual public input,
 		void open(const char *filename)
 			throw (open_error);
 
+		/// @copydoc open(const char *)
+		void open(const std::string& filename)
+			throw (open_error);
+
 		friend input_sptr open_stdin()
 			throw ();
 
@@ -160,6 +164,10 @@ class output_file: virtual public output,
 		void open(const char *filename)
 			throw (open_error);
 
+		/// @copydoc open(const char *)
+		void open(const std::string& filename)
+			throw (open_error);
+
 		/// Create a new file, or overwrite (blank out) an existing one.
 		/**
 		 * @param filename
@@ -169,6 +177,10 @@ class output_file: virtual public output,
 		 *   The file could not be created (e.g. no permission).
 		 */
 		void create(const char *filename)
+			throw (open_error);
+
+		/// @copydoc create(const char *)
+		void create(const std::string& filename)
 			throw (open_error);
 
 		friend output_sptr open_stdout()

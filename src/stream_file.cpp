@@ -131,6 +131,13 @@ void input_file::open(const char *filename)
 	return;
 }
 
+void input_file::open(const std::string& filename)
+	throw (open_error)
+{
+	this->open(filename.c_str());
+	return;
+}
+
 
 output_file::output_file()
 	throw ()
@@ -213,6 +220,13 @@ void output_file::open(const char *filename)
 	return;
 }
 
+void output_file::open(const std::string& filename)
+	throw (open_error)
+{
+	this->open(filename.c_str());
+	return;
+}
+
 void output_file::create(const char *filename)
 	throw (open_error)
 {
@@ -226,6 +240,13 @@ void output_file::create(const char *filename)
 	if (this->handle == NULL) throw open_error(strerror(errno));
 	this->close = true;
 	this->seek(0, start);
+	return;
+}
+
+void output_file::create(const std::string& filename)
+	throw (open_error)
+{
+	this->create(filename.c_str());
 	return;
 }
 
