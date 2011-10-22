@@ -44,7 +44,7 @@ class input_filtered: virtual public input_string
 		 *   Filter to process data.
 		 */
 		void open(input_sptr parent, filter_sptr read_filter)
-			throw (filter_error);
+			throw (filter_error, read_error);
 };
 
 /// Shared pointer to a readable filtered stream.
@@ -68,13 +68,21 @@ class output_filtered: virtual public output_string
 		 *
 		 * @param write_filter
 		 *   Filter to process data.
+		 *
+		 * @param resize
+		 *   Notification function called when the stream is resized.  This function
+		 *   doesn't have to do anything (and can be NULL) but it is used in cases
+		 *   where a game archive stores both a file's compressed and decompressed
+		 *   size.  Here the callback will be notified of the decompressed size
+		 *   during the flush() call.
 		 */
-		void open(output_sptr parent, filter_sptr write_filter)
+		void open(output_sptr parent, filter_sptr write_filter, fn_truncate resize)
 			throw ();
 
 	protected:
 		filter_sptr write_filter; ///< Filter to pass data through
 		output_sptr out_parent;   ///< Parent stream for writing
+		fn_truncate fn_resize;    ///< Size-change notification function
 };
 
 /// Shared pointer to a writable filtered stream.
@@ -110,9 +118,17 @@ class filtered: virtual public inout,
 		 *
 		 * @param write_filter
 		 *   Filter to process data.
+		 *
+		 * @param resize
+		 *   Notification function called when the stream is resized.  This function
+		 *   doesn't have to do anything (and can be NULL) but it is used in cases
+		 *   where a game archive stores both a file's compressed and decompressed
+		 *   size.  Here the callback will be notified of the decompressed size
+		 *   during the flush() call.
 		 */
-		void open(inout_sptr parent, filter_sptr read_filter, filter_sptr write_filter)
-			throw (filter_error);
+		void open(inout_sptr parent, filter_sptr read_filter,
+			filter_sptr write_filter, fn_truncate resize)
+			throw (filter_error, read_error);
 };
 
 /// Shared pointer to a readable and writable filtered stream.

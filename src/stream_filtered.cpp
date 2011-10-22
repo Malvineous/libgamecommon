@@ -24,7 +24,7 @@ namespace camoto {
 namespace stream {
 
 void input_filtered::open(input_sptr parent, filter_sptr read_filter)
-	throw (filter_error)
+	throw (filter_error, read_error)
 {
 	assert(parent);
 	assert(read_filter);
@@ -62,11 +62,15 @@ void output_filtered::flush()
 {
 	this->out_parent->seekp(0, stream::start);
 
-	// Filter the in-memory buffer and write it out to the parent stream
 	const uint8_t *bufIn = (const uint8_t *)this->data->c_str();
 	uint8_t bufOut[BUFFER_SIZE];
 	stream::len lenRemaining = this->data->length();
 	stream::len lenIn, lenOut;
+
+	// Notify the owner what the unfiltered size is
+	if (this->fn_resize) this->fn_resize(lenRemaining);
+
+	// Filter the in-memory buffer and write it out to the parent stream
 	do {
 		lenIn = lenRemaining;
 		lenOut = BUFFER_SIZE;
@@ -91,7 +95,8 @@ void output_filtered::flush()
 	return;
 }
 
-void output_filtered::open(output_sptr parent, filter_sptr write_filter)
+void output_filtered::open(output_sptr parent, filter_sptr write_filter,
+	fn_truncate resize)
 	throw ()
 {
 	assert(parent);
@@ -99,6 +104,7 @@ void output_filtered::open(output_sptr parent, filter_sptr write_filter)
 
 	this->out_parent = parent;
 	this->write_filter = write_filter;
+	this->fn_resize = resize;
 	return;
 }
 
@@ -108,11 +114,12 @@ filtered::filtered()
 {
 }
 
-void filtered::open(inout_sptr parent, filter_sptr read_filter, filter_sptr write_filter)
-	throw (filter_error)
+void filtered::open(inout_sptr parent, filter_sptr read_filter,
+	filter_sptr write_filter, fn_truncate resize)
+	throw (filter_error, read_error)
 {
 	this->input_filtered::open(parent, read_filter);
-	this->output_filtered::open(parent, write_filter);
+	this->output_filtered::open(parent, write_filter, resize);
 	return;
 }
 
