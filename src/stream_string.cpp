@@ -141,6 +141,9 @@ stream::len output_string::try_write(const uint8_t *buffer, stream::len len)
 	stream::pos size = this->data->length();
 	if (done > size) {
 		this->data->resize(done);
+	} else if (size == 0) {
+		// Empty write to an empty string
+		return 0;
 	}
 
 	// Make sure our final assumed memory at least matches the real one.

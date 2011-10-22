@@ -74,7 +74,6 @@ stream::len seg::try_read(uint8_t *buffer, stream::len len)
 		stream::pos lenSecond;
 		if (this->offset + lenRemaining > offSecondEnd) {
 			lenSecond = offSecondEnd - this->offset;
-			lenRemaining -= lenSecond;
 		} else {
 			lenSecond = lenRemaining;
 		}
@@ -84,6 +83,7 @@ stream::len seg::try_read(uint8_t *buffer, stream::len len)
 		this->offset += lenSecond;
 		buffer += lenSecond;
 		lenReadSecond = lenSecond;
+		lenRemaining -= lenSecond;
 	} else {
 		lenReadSecond = 0;
 		// lenRemaining remains unchanged as == len
