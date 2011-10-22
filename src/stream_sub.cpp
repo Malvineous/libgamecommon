@@ -100,6 +100,7 @@ stream::len input_sub::try_read(uint8_t *buffer, stream::len len)
 	this->in_parent->seekg(this->start + this->offset, stream::start);
 
 	stream::len r = this->in_parent->try_read(buffer, len);
+	assert(r <= len);
 	this->offset += r;
 
 	// Make sure we didn't somehow end up past the end of the stream

@@ -82,6 +82,7 @@ void input::read(uint8_t *buffer, stream::len len)
 	throw (incomplete_read, read_error)
 {
 	stream::len r = this->try_read(buffer, len);
+	assert(r <= len);
 	if (r < len) {
 		throw incomplete_read(r);
 	}
@@ -108,6 +109,7 @@ void output::write(const uint8_t *buffer, stream::len len)
 	throw (incomplete_write, write_error)
 {
 	stream::len w = this->try_write(buffer, len);
+	assert(w <= len);
 	if (w < len) {
 		throw incomplete_write(w);
 	}

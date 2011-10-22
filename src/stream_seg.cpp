@@ -334,6 +334,8 @@ void seg::flush()
 void seg::open(inout_sptr parent)
 	throw ()
 {
+	assert(parent);
+
 	this->parent = parent;
 	this->offset = 0;
 	this->off_parent = 0;

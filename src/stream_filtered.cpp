@@ -42,6 +42,7 @@ void input_filtered::open(input_sptr parent, filter_sptr read_filter)
 	do {
 		lenOut = BUFFER_SIZE;
 		lenRead = parent->try_read(bufIn + lenLeftover, BUFFER_SIZE - lenLeftover);
+		assert(lenRead <= BUFFER_SIZE - lenLeftover);
 		lenRead += lenLeftover;
 		lenIn = lenRead;
 		read_filter->transform(bufOut, &lenOut, bufIn, &lenIn);
