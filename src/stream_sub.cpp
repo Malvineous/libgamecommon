@@ -214,7 +214,8 @@ void output_sub::truncate(stream::pos size)
 	try {
 		this->seekp(size, stream::start);
 	} catch (const seek_error& e) {
-		throw write_error("Unable to seek to EOF after truncate: " + e.get_message());
+		throw write_error("Truncate callback silently failed!  Unable to seek to "
+			"EOF after truncate: " + e.get_message());
 	}
 	return;
 }
