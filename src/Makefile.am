@@ -12,7 +12,9 @@ libgamecommon_la_SOURCES += stream_seg.cpp
 libgamecommon_la_SOURCES += stream_string.cpp
 libgamecommon_la_SOURCES += stream_sub.cpp
 
-AM_CPPFLAGS = $(DEBUG_CPPFLAGS) $(BOOST_CPPFLAGS) -I $(top_srcdir)/include
+WARNINGS = -Wall -Wextra -Wno-unused-parameter
+
+AM_CPPFLAGS = $(DEBUG_CPPFLAGS) $(BOOST_CPPFLAGS) -I $(top_srcdir)/include $(WARNINGS)
 AM_CXXFLAGS = $(DEBUG_CXXFLAGS)
 
 libgamecommon_la_LDFLAGS = $(AM_LDFLAGS) -version-info 0:0:0

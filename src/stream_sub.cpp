@@ -41,7 +41,7 @@ void sub_core::seek(stream::delta off, seek_from from)
 			baseOffset = 0;
 			break;
 	}
-	if ((off < 0) && (baseOffset < off * -1)) {
+	if ((off < 0) && (baseOffset < (unsigned)(off * -1))) {
 		throw seek_error("Cannot seek back past start of substream");
 	}
 	baseOffset += off;
@@ -57,7 +57,7 @@ void sub_core::relocate(stream::delta off)
 	throw ()
 {
 	// Don't seek past the start of the parent stream
-	if (off < 0) assert(this->start > off * -1);
+	if (off < 0) assert(this->start > (unsigned)(off * -1));
 
 	// Don't seek beyond the end of the parent stream
 	//assert(this->start + off + this->stream_len < this->parent->size());

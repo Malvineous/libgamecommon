@@ -97,7 +97,7 @@ class filter_lzw_decompress: public filter {
 		int curResetCode;
 
 		/// The maximum codeword value at the current bit length
-		int maxCode;
+		unsigned int maxCode;
 
 		/// Length of initial codeword, and codeword length after a dictionary
 		/// reset (unless LZW_NO_BITSIZE_RESET is given, when the codeword length

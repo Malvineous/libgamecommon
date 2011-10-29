@@ -32,22 +32,22 @@ namespace camoto {
 bitstream::bitstream(stream::inout_sptr parent, bitstream::endian endianType)
 	throw () :
 		parent(parent),
-		endianType(endianType),
 		offset(0),
 		curBitPos(8), // 8 means update bufByte on next operation
 		bufByte(0),
-		origBufByte(INITIAL_VALUE)
+		origBufByte(INITIAL_VALUE),
+		endianType(endianType)
 {
 }
 
 bitstream::bitstream(bitstream::endian endianType)
 	throw () :
 		parent(),
-		endianType(endianType),
 		offset(0),
 		curBitPos(8), // 8 means update bufByte on next operation
 		bufByte(0),
-		origBufByte(INITIAL_VALUE)
+		origBufByte(INITIAL_VALUE),
+		endianType(endianType)
 {
 }
 
@@ -358,7 +358,7 @@ void bitstream::flushByte(fn_putnextchar fnNextChar)
 			(this->origBufByte != INITIAL_VALUE) && // if not first read
 			(this->bufByte != this->origBufByte)    // and bufbyte has been modified
 		) {
-			int r = fnNextChar(this->bufByte);
+			fnNextChar(this->bufByte);
 		}
 	}
 	this->origBufByte = INITIAL_VALUE;

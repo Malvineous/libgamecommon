@@ -22,6 +22,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <iostream>
 #include <boost/bind.hpp>
 #include <camoto/lzw.hpp>
 
@@ -38,8 +39,8 @@ void Dictionary::fillDecodedString(unsigned code)
 	throw (filter_error)
 {
 	decodedString.clear();
-	int safety = 0;
-	int tableSize = table.size();
+	unsigned int safety = 0;
+	unsigned int tableSize = table.size();
 	while (code != ~0U) {
 		if (code >= tableSize) throw filter_error("LZW data is corrupted - "
 			"codeword was larger than the number of entries in the dictionary!");
@@ -110,9 +111,9 @@ filter_lzw_decompress::filter_lzw_decompress(int initialBits, int maxBits,
 	int firstCode, int eofCode, int resetCode, int flags) :
 	maxBits(maxBits),
 	flags(flags),
-	initialBits(initialBits),
 	eofCode(eofCode),
 	resetCode(resetCode),
+	initialBits(initialBits),
 	dictionary(maxBits, firstCode),
 	data(((flags & LZW_BIG_ENDIAN) != LZW_BIG_ENDIAN) ? bitstream::littleEndian : bitstream::bigEndian),
 	code(0)
@@ -207,8 +208,7 @@ void filter_lzw_decompress::fillBuffer(fn_getnextchar cbNext)
 	if ((this->flags & LZW_EOF_PARAM_VALID) && (this->code == this->curEOFCode)) return;
 
 getNextCodeword:
-	int bitsRead = this->data.read(cbNext, this->currentBits, &this->code);
-	if (bitsRead < 0) return;//bitsRead; // EOF or wouldblock
+	unsigned int bitsRead = this->data.read(cbNext, this->currentBits, &this->code);
 	if (bitsRead < this->currentBits) {
 		// TODO: save bits and append next time?  How to test this?
 		// EOF
@@ -232,7 +232,6 @@ getNextCodeword:
 	if ((this->flags & LZW_RESET_PARAM_VALID) && (this->code == this->curResetCode)) {
 		this->resetDictionary();
 		if (this->flags & LZW_FLUSH_ON_RESET) {
-			int dummy;
 			this->data.flushByte();
 			// We can't use seek here because cbNext might not be from the stream
 			//this->data.read(cbNext, num*8, &dummy);

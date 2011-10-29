@@ -56,7 +56,7 @@ void string_core::seek(stream::delta off, seek_from from)
 			baseOffset = 0;
 			break;
 	}
-	if ((off < 0) && (baseOffset < off * -1)) {
+	if ((off < 0) && (baseOffset < (unsigned)(off * -1))) {
 		throw seek_error("Cannot seek back past start of string");
 	}
 	baseOffset += off;

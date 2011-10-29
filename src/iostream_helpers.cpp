@@ -60,7 +60,7 @@ null_padded_write::null_padded_write(const std::string& r, stream::len len) :
 
 void null_padded_write::write(stream::output_sptr s) const
 {
-	int lenData = this->r.length();
+	unsigned int lenData = this->r.length();
 	assert(lenData <= this->len);
 
 	// Write the content
