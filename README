@@ -14,11 +14,31 @@ suite!
 
 The library currently contains the following elements:
 
-  * substream: C++ iostream for accessing a subsection of another stream.
+  * stream: Replacement for C++ iostream, all other stream elements implement
+    this interface.  Also includes stream_file and stream_string.
 
-  * segmented_stream: C++ iostream allowing data to be inserted and removed
-    at arbitrary positions within the stream, and the resulting on-disk data
-    shuffling only happening once, at flush().
+  * stream_sub: Access a subsection of another stream, transparently to the
+    user of the class instance.
+
+  * stream_seg: A stream allowing data to be inserted and removed at arbitrary
+    positions within the stream, and the resulting on-disk data shuffling only
+    happening once, at flush().
+
+  * stream_filtered: Transparently filter data read from and written to the
+    stream.  Filters can compress/decompress, encrypt/decrypt, etc.
+
+  * lzw: Generic implementation of the LZW compression algorithm, implemented
+    in the form of a filter (suitable for use with stream_filtered.)
+
+  * bitstream: Stream-like interface allowing reading and writing of individual
+    bits.  Used by the LZW algorithm which initially reads data in units of
+    9-bits.
+
+  * iostream_helpers: Helper classes to simplify reading and writing data in a
+    platform neutral manner.  "stream << u32le(123)" will write the number 123
+    as a 32-bit unsigned little-endian integer regardless of the endian-ness of
+    the host platform, and likewise "uint16_t i; stream >> u16be(i);" will read
+    a 16-bit big-endian integer from the stream.
 
 Each element contains a number of tests to confirm it is working as expected,
 and these are run in the usual manner: "make check"
