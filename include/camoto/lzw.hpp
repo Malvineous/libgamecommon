@@ -132,8 +132,6 @@ class filter_lzw_decompress: public filter {
 
 		/// Recalculate the reserved/trigger codewords.
 		void recalcCodes();
-
-		void fillBuffer(fn_getnextchar cbNext);
 };
 
 } // namespace camoto

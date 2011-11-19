@@ -129,7 +129,7 @@ filter_lzw_decompress::filter_lzw_decompress(int initialBits, int maxBits,
 
 int nextChar(const uint8_t **in, stream::len *lenIn, stream::len *r, uint8_t *out)
 {
-	if (*lenIn) {
+	if (*r < *lenIn) {
 		*out = **in; // "read" byte
 		(*in)++;     // increment read buffer
 		(*r)++;      // increment read count
@@ -143,14 +143,68 @@ void filter_lzw_decompress::transform(uint8_t *out, stream::len *lenOut,
 	throw (filter_error)
 {
 	stream::len r = 0, w = 0;
-	while ((w < *lenOut) && ((r < *lenIn) || (!this->buffer.empty()))) {
+	fn_getnextchar cbNext = boost::bind(nextChar, &in, lenIn, &r, _1);
+	while (
+		(w < *lenOut) && (
+			(
+				(r + 1 < *lenIn) || // Make sure there's at least one leftover byte
+				((r < *lenIn) && (*lenIn < 2)) // unless it's the last incoming byte
+			) || (!this->buffer.empty())
+		)
+	) {
 		if (!this->buffer.empty()) {
 			*out++ = this->buffer.front();
 			this->buffer.pop_front();
 			w++;
 		} else {
-			fn_getnextchar cbNext = boost::bind(nextChar, &in, lenIn, &r, _1);
-			this->fillBuffer(cbNext);
+			if ((this->flags & LZW_EOF_PARAM_VALID) && (this->code == this->curEOFCode)) break;
+
+			unsigned int bitsRead = this->data.read(cbNext, this->currentBits, &this->code);
+			if (bitsRead < this->currentBits) {
+				// TODO: save bits and append next time?  How to test this?
+				// EOF
+				break;
+			}
+			assert(bitsRead > 0);
+
+			if ((this->flags & LZW_EOF_PARAM_VALID) && (this->code == this->curEOFCode)) break;
+
+			if (this->isDictReset) {
+				// When the dictionary is empty, the next "codeword" is always the first
+				// byte for the first dictionary entry, which also means it's the first
+				// output byte too (once it's truncated to eight bits.)
+				this->buffer.push_back(this->code);
+				this->oldCode = this->code;
+				this->isDictReset = false;
+				continue;
+			}
+
+			// See if the code we just got is a special one that will reset the dictionary
+			if ((this->flags & LZW_RESET_PARAM_VALID) && (this->code == this->curResetCode)) {
+				this->resetDictionary();
+				if (this->flags & LZW_FLUSH_ON_RESET) {
+					this->data.flushByte();
+					// We can't use seek here because cbNext might not be from the stream
+					//this->data.read(cbNext, num*8, &dummy);
+				}
+				continue;
+			}
+
+			this->dictionary.decode(this->oldCode, this->code, this->buffer);
+
+
+			if (this->dictionary.size() > this->maxCode) {
+				if (this->currentBits == this->maxBits) {
+					if (this->flags & LZW_RESET_FULL_DICT) this->resetDictionary();
+				} else {
+					++this->currentBits;
+					this->recalcCodes();
+				}
+			}
+
+			this->oldCode = this->code;
+
+
 			if (this->buffer.empty()) {
 				//if (r == 0) r = -1; // EOF
 				break;
@@ -200,58 +254,6 @@ void filter_lzw_decompress::recalcCodes()
 			this->maxCode--;
 		} else this->curResetCode = this->resetCode;
 	}
-	return;
-}
-
-void filter_lzw_decompress::fillBuffer(fn_getnextchar cbNext)
-{
-	if ((this->flags & LZW_EOF_PARAM_VALID) && (this->code == this->curEOFCode)) return;
-
-getNextCodeword:
-	unsigned int bitsRead = this->data.read(cbNext, this->currentBits, &this->code);
-	if (bitsRead < this->currentBits) {
-		// TODO: save bits and append next time?  How to test this?
-		// EOF
-		return;
-	}
-	assert(bitsRead > 0);
-
-	if ((this->flags & LZW_EOF_PARAM_VALID) && (this->code == this->curEOFCode)) return;
-
-	if (this->isDictReset) {
-		// When the dictionary is empty, the next "codeword" is always the first
-		// byte for the first dictionary entry, which also means it's the first
-		// output byte too (once it's truncated to eight bits.)
-		this->buffer.push_back(this->code);
-		this->oldCode = this->code;
-		this->isDictReset = false;
-		goto getNextCodeword;
-	}
-
-	// See if the code we just got is a special one that will reset the dictionary
-	if ((this->flags & LZW_RESET_PARAM_VALID) && (this->code == this->curResetCode)) {
-		this->resetDictionary();
-		if (this->flags & LZW_FLUSH_ON_RESET) {
-			this->data.flushByte();
-			// We can't use seek here because cbNext might not be from the stream
-			//this->data.read(cbNext, num*8, &dummy);
-		}
-		goto getNextCodeword;
-	}
-
-	this->dictionary.decode(this->oldCode, this->code, this->buffer);
-
-
-	if (this->dictionary.size() > this->maxCode) {
-		if (this->currentBits == this->maxBits) {
-			if (this->flags & LZW_RESET_FULL_DICT) this->resetDictionary();
-		} else {
-			++this->currentBits;
-			this->recalcCodes();
-		}
-	}
-
-	this->oldCode = this->code;
 	return;
 }
 
