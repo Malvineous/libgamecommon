@@ -32,7 +32,11 @@ void input_filtered::open(input_sptr parent, filter_sptr read_filter)
 	// Seek to the start here, because we will have to do the same when the time
 	// comes to write the change, so seeking here will make it obvious if the
 	// offset is wrong.
-	parent->seekg(0, stream::start);
+	try {
+		parent->seekg(0, stream::start);
+	} catch (const seek_error&) {
+		// Just ignore it, the stream might not be seekable (e.g. stdin)
+	}
 
 	// Read and filter the entire input into an in-memory buffer
 	uint8_t bufIn[BUFFER_SIZE];
@@ -54,7 +58,7 @@ void input_filtered::open(input_sptr parent, filter_sptr read_filter)
 			memmove(bufIn, bufIn + lenIn, lenLeftover);
 		}
 		this->data->append((char *)bufOut, lenOut);
-	} while ((lenIn != 0) && (lenOut != 0));
+	} while ((lenIn != 0) || (lenOut != 0));
 	return;
 }
 
