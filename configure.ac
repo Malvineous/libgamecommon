@@ -4,7 +4,7 @@
 AC_PREREQ([2.63])
 AC_INIT([libgamecommon], [1.0], [camoto@lists.shikadi.net])
 AM_INIT_AUTOMAKE([libgamecommon], [1.0])
-AC_CONFIG_SRCDIR([src/substream.cpp])
+AC_CONFIG_SRCDIR([src/stream.cpp])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 AC_LANG(C++)

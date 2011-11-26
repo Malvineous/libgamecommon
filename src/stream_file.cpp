@@ -20,6 +20,7 @@
 
 #include <errno.h>
 #include <string.h>
+#include <unistd.h>
 #include <camoto/stream_file.hpp>
 
 namespace camoto {
@@ -177,15 +178,10 @@ void output_file::truncate(stream::pos size)
 {
 	this->flush();
 	int fd = fileno(this->handle);
-#ifdef __WIN32
-	if (chsize(fd, size) < 0) {
-		throw write_error(strerror(errno));
-	}
-#else
 	if (ftruncate(fd, size) < 0) {
 		throw write_error(strerror(errno));
 	}
-#endif
+
 	// Have to seek last as the file might not have been large enough earlier
 	try {
 		this->seekp(size, stream::start);
