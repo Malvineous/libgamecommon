@@ -21,11 +21,10 @@
 #ifndef _CAMOTO_STREAM_HPP_
 #define _CAMOTO_STREAM_HPP_
 
-#include <exception>
-#include <string>
 #include <stdint.h>
 #include <boost/shared_ptr.hpp>
 #include <boost/function.hpp>
+#include <camoto/error.hpp>
 
 namespace camoto {
 namespace stream {
@@ -87,7 +86,7 @@ typedef signed_int_type delta;
 typedef boost::function<void(stream::pos)> fn_truncate;
 
 /// Base exception for stream functions.
-class error: public std::exception
+class error: public camoto::error
 {
 	public:
 		/// Constructor.
@@ -97,20 +96,6 @@ class error: public std::exception
 		 */
 		error(const std::string& msg)
 			throw ();
-
-		~error()
-			throw ();
-
-		/// Standard error retrieval function.
-		virtual const char *what() const
-			throw ();
-
-		/// Get the error message as a string instead.
-		std::string get_message() const
-			throw ();
-
-	protected:
-		std::string msg;  ///< Detailed error message for UI
 };
 
 /// Could not read data from stream.

@@ -25,25 +25,8 @@ namespace stream {
 
 error::error(const std::string& msg)
 	throw () :
-		msg(msg)
+		camoto::error(msg)
 {
-}
-
-error::~error()
-	throw ()
-{
-}
-
-const char *error::what() const
-	throw ()
-{
-	return this->msg.c_str();
-}
-
-std::string error::get_message() const
-	throw ()
-{
-	return this->msg;
 }
 
 read_error::read_error(const std::string& msg)

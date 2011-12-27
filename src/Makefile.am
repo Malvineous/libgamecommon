@@ -2,6 +2,7 @@ lib_LTLIBRARIES = libgamecommon.la
 
 libgamecommon_la_SOURCES = iostream_helpers.cpp
 libgamecommon_la_SOURCES += bitstream.cpp
+libgamecommon_la_SOURCES += error.cpp
 libgamecommon_la_SOURCES += lzw.cpp
 libgamecommon_la_SOURCES += filter.cpp
 libgamecommon_la_SOURCES += metadata.cpp
