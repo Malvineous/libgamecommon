@@ -34,7 +34,7 @@ namespace camoto {
  * file format.
  *
  * The metadata functions all have no-op defaults, they only need to be
- * overridden for tileset formats that have metadata.
+ * overridden for file formats that have metadata.
  */
 class Metadata {
 
@@ -53,18 +53,18 @@ class Metadata {
 
 		/// Get a list of supported metadata elements that can be set.
 		/**
-		 * Some tileset formats have room for additional data, such as a palette
+		 * Some file formats have room for additional data, such as a palette
 		 * filename.  This function is used to obtain a list of the
-		 * metadata elements supported by the current tileset.  Not every tileset
+		 * metadata elements supported by the current format.  Not every format
 		 * supports all the metadata types, and any optional elements will be
 		 * included in this list (but getMetadata() may return an empty string for
 		 * those.)
 		 *
-		 * Note to tileset format implementors: There is a default implementation
-		 * of this function which returns an empty vector.  Thus this only needs
-		 * to be overridden if the tileset format does actually support metadata.
+		 * Note to implementors: There is a default implementation of this function
+		 * which returns an empty vector.  Thus this only needs to be overridden if
+		 * the file format does actually support metadata.
 		 *
-		 * @return std::vector of \ref E_METADATA items.
+		 * @return std::vector of \ref MetadataType items.
 		 */
 		virtual MetadataTypes getMetadataList() const
 			throw ();
@@ -74,9 +74,9 @@ class Metadata {
 		 * Returns the value of a metadata item reported to exist by
 		 * getMetadataList().
 		 *
-		 * Note to tileset format implementors: There is a default implementation
-		 * of this function which always throws an exception.  Thus this only needs
-		 * to be overridden if the tileset format does actually support metadata.
+		 * Note to implementors: There is a default implementation of this function
+		 * which always throws an exception.  Thus this only needs to be overridden
+		 * if metadata is actually supported.
 		 *
 		 * @param  item Item to retrieve.  Must have been included in the list
 		 *         returned by getMetadataList().
@@ -89,9 +89,9 @@ class Metadata {
 		/**
 		 * Only elements returned by getMetadataList() can be changed.
 		 *
-		 * Note to tileset format implementors: There is a default implementation
-		 * of this function which always throws an exception.  Thus this only needs
-		 * to be overridden if the tileset format does actually support metadata.
+		 * Note to implementors: There is a default implementation of this function
+		 * which always throws an exception.  Thus this only needs to be overridden
+		 * if metadata is actually supported.
 		 *
 		 * @param  item Item to set.  Must have been included in the list returned
 		 *         by getMetadataList().
