@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <camoto/stream.hpp>
+#include <camoto/error.hpp>
 
 namespace camoto {
 
