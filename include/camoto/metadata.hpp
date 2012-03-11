@@ -42,9 +42,12 @@ class Metadata {
 
 		/// Metadata item types.
 		enum MetadataType {
-			Description,     ///< File description
+			Description,     ///< File description, remarks, etc.
 			PaletteFilename, ///< Palette filename
 			Version,         ///< Version/revision number
+
+			Title,           ///< Song title
+			Author,          ///< Composer, etc.
 		};
 
 		/// Vector of metadata item types.
