@@ -23,6 +23,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #include <camoto/stream.hpp>
 
 namespace camoto {
@@ -53,6 +54,8 @@ class Metadata {
 		/// Vector of metadata item types.
 		typedef std::vector<MetadataType> MetadataTypes;
 
+		/// Map for associating strings with metadata item types.
+		typedef std::map<MetadataType, std::string> TypeMap;
 
 		/// Get a list of supported metadata elements that can be set.
 		/**
