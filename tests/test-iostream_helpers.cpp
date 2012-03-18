@@ -50,6 +50,9 @@ BOOST_AUTO_TEST_CASE(null_padded_read)
 		std::string v;
 		data >> nullPadded(v, 8);
 		BOOST_CHECK(v.compare("ABC") == 0);
+		// Make sure all eight characters were read, even though the ones after the
+		// null were discarded.
+		BOOST_REQUIRE_EQUAL(data->tellg(), 8);
 	}
 }
 
@@ -72,6 +75,35 @@ BOOST_AUTO_TEST_CASE(fixed_length_read)
 		BOOST_CHECK_EQUAL((uint8_t)v.c_str()[6], 0x47);
 		BOOST_CHECK_EQUAL((uint8_t)v.c_str()[7], 0x48);
 		BOOST_CHECK_EQUAL((uint8_t)v.c_str()[8], 0x00);
+	}
+}
+
+BOOST_AUTO_TEST_CASE(null_terminated_write)
+{
+	BOOST_TEST_MESSAGE("Write null-terminated string");
+	{
+		stream::string_sptr data(new stream::string());
+		data << nullTerminated("AB", 4);
+		BOOST_REQUIRE_EQUAL(data->str().length(), 3);
+		BOOST_CHECK_EQUAL((uint8_t)data->str().at(0), 0x41);
+		BOOST_CHECK_EQUAL((uint8_t)data->str().at(1), 0x42);
+		BOOST_CHECK_EQUAL((uint8_t)data->str().at(2), 0x00);
+	}
+}
+
+BOOST_AUTO_TEST_CASE(null_terminated_read)
+{
+	BOOST_TEST_MESSAGE("Read null-terminated string");
+	{
+		stream::string_sptr data(new stream::string());
+		data << std::string("ABC\0EFGHIJKL", 12);
+		data->seekg(0, stream::start);
+		std::string v;
+		data >> nullTerminated(v, 8);
+		BOOST_CHECK(v.compare("ABC") == 0);
+		// Make sure only the characters up to the null were read, even though there
+		// was room to read more.
+		BOOST_REQUIRE_EQUAL(data->tellg(), 4);
 	}
 }
 

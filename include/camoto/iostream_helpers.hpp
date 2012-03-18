@@ -118,6 +118,82 @@ inline null_padded fixedLength(std::string& r, int len)
 	return null_padded(r, len, false);
 }
 
+// null terminated strings
+
+/// @sa null_terminated
+struct null_terminated_read {
+	null_terminated_read(std::string& r, stream::len len);
+	void read(stream::input_sptr s) const;
+
+	private:
+		std::string& r;
+		stream::len maxlen;
+};
+
+/// @sa null_terminated
+struct null_terminated_write {
+	null_terminated_write(const std::string& r, stream::len len);
+	void write(stream::output_sptr s) const;
+
+	private:
+		const std::string& r;
+		stream::len maxlen;
+};
+
+/// @sa null_terminated
+struct null_terminated_const: public null_terminated_write {
+	null_terminated_const(const std::string& r, stream::len len);
+};
+
+/**
+ * nullTerminated will read a variable length null-terminated string from a
+ * stream, e.g.
+ *
+ * @code
+ * std::string str;
+ * file >> nullTerminated(str, 256);
+ * @endcode
+ *
+ * Here up to 256 characters will be read from the file.  If no terminating null
+ * is encountered, the string will be 256 characters in length.
+ *
+ * It can also be used when writing to a stream, e.g.
+ *
+ * @code
+ * std::string demo("hello");
+ * file << nullTerminated(demo, 256);  // write 6 bytes, "hello\0"
+ * @endcode
+ *
+ * In this case up to 256 bytes will be written, and there is guaranteed to be
+ * a terminating null character.  If the string is longer than this length, it
+ * is truncated (only 255 characters written) and a null will be placed as the
+ * 256th character written.
+ */
+struct null_terminated: public null_terminated_read, public null_terminated_write {
+	null_terminated(std::string& r, stream::len maxlen);
+};
+
+// If you get an error related to the next line (e.g. no match for operator >>)
+// it's because you're trying to read a value into a const variable.
+inline stream::input_sptr operator >> (stream::input_sptr s, const null_terminated_read& n) {
+	n.read(s);
+	return s;
+}
+
+inline stream::output_sptr operator << (stream::output_sptr s, const null_terminated_write& n) {
+	n.write(s);
+	return s;
+}
+
+inline null_terminated nullTerminated(std::string& r, int maxlen)
+{
+	return null_terminated(r, maxlen);
+}
+inline null_terminated_const nullTerminated(const std::string& r, int maxlen)
+{
+	return null_terminated_const(r, maxlen);
+}
+
 // uint8_t / byte iostream operators
 
 struct number_format_u8: public number_format_read, public number_format_write {

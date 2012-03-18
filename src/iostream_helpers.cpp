@@ -91,6 +91,55 @@ null_padded::null_padded(std::string& r, stream::len len, bool chop) :
 }
 
 
+null_terminated_read::null_terminated_read(std::string& r, stream::len maxlen) :
+	r(r),
+	maxlen(maxlen)
+{
+}
+
+void null_terminated_read::read(stream::input_sptr s) const
+{
+	uint8_t buf;
+	for (stream::len i = 0; i < this->maxlen; i++) {
+		s->read(&buf, 1);
+		if (buf == 0) break;
+		this->r += (char)buf;
+	}
+	return;
+}
+
+null_terminated_write::null_terminated_write(const std::string& r, stream::len maxlen)
+	: r(r),
+	  maxlen(maxlen)
+{
+}
+
+void null_terminated_write::write(stream::output_sptr s) const
+{
+	stream::len lenData = this->r.length();
+	if (lenData > this->maxlen - 1) lenData = this->maxlen - 1;
+
+	// Write the content
+	s->write((const uint8_t *)this->r.c_str(), lenData);
+
+	// Write the terminating null
+	s->write((const uint8_t *)"", 1);
+
+	return;
+}
+
+null_terminated_const::null_terminated_const(const std::string& r, stream::len maxlen)
+	: null_terminated_write(r, maxlen)
+{
+}
+
+null_terminated::null_terminated(std::string& r, stream::len maxlen)
+	: null_terminated_read(r, maxlen),
+	  null_terminated_write(r, maxlen)
+{
+}
+
+
 number_format_u8::number_format_u8(uint8_t& r) :
 	r(r)
 {
