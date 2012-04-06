@@ -62,10 +62,30 @@ void input_filtered::open(input_sptr parent, filter_sptr read_filter)
 	return;
 }
 
+void output_filtered::truncate(stream::pos size)
+	throw (write_error)
+{
+	// The input side (decompressed, if we're a compressor filter) wants to be
+	// truncated.  We'll have to ignore this, because at this point we don't know
+	// where the output side (compressed data) should end.  We may not have even
+	// run the filter yet!
+	//
+	// We perform the actual truncate of the parent stream in flush(), after we've
+	// performed the filtering operation.
+	return;
+}
+
 void output_filtered::flush()
 	throw (write_error)
 {
-	this->out_parent->seekp(0, stream::start);
+	if (this->done_filter) {
+		std::cout << "WARNING: Tried to flush a filtered stream twice, ignoring "
+			"second flush to avoid additional call to filter." << std::endl;
+		return;
+	}
+	this->done_filter = true;
+
+	this->output_string::flush();
 
 	const uint8_t *bufIn = (const uint8_t *)this->data->c_str();
 	uint8_t bufOut[BUFFER_SIZE];
@@ -76,6 +96,7 @@ void output_filtered::flush()
 	if (this->fn_resize) this->fn_resize(lenRemaining);
 
 	// Filter the in-memory buffer and write it out to the parent stream
+	this->out_parent->seekp(0, stream::start);
 	do {
 		lenIn = lenRemaining;
 		lenOut = BUFFER_SIZE;
@@ -96,7 +117,8 @@ void output_filtered::flush()
 		this->out_parent->write(bufOut, lenOut);
 	} while ((lenIn != 0) && (lenOut != 0));
 
-	this->output_string::flush();
+	this->out_parent->flush();
+	this->out_parent->truncate_here();
 	return;
 }
 
@@ -110,6 +132,7 @@ void output_filtered::open(output_sptr parent, filter_sptr write_filter,
 	this->out_parent = parent;
 	this->write_filter = write_filter;
 	this->fn_resize = resize;
+	this->done_filter = false;
 	return;
 }
 

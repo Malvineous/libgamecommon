@@ -2,7 +2,7 @@
  * @file   stream_filtered.hpp
  * @brief  Pass read/write operations through a filter to modify the data.
  *
- * Copyright (C) 2010-2011 Adam Nielsen <malvineous@shikadi.net>
+ * Copyright (C) 2010-2012 Adam Nielsen <malvineous@shikadi.net>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,6 +54,9 @@ typedef boost::shared_ptr<input_filtered> input_filtered_sptr;
 class output_filtered: virtual public output_string
 {
 	public:
+		virtual void truncate(stream::pos size)
+			throw (write_error);
+
 		virtual void flush()
 			throw (write_error);
 
@@ -74,7 +77,8 @@ class output_filtered: virtual public output_string
 		 *   doesn't have to do anything (and can be NULL) but it is used in cases
 		 *   where a game archive stores both a file's compressed and decompressed
 		 *   size.  Here the callback will be notified of the decompressed size
-		 *   during the flush() call.
+		 *   during the flush() call, while parent->truncate() will be called with
+		 *   the compressed size.
 		 */
 		void open(output_sptr parent, filter_sptr write_filter, fn_truncate resize)
 			throw ();
@@ -83,6 +87,7 @@ class output_filtered: virtual public output_string
 		filter_sptr write_filter; ///< Filter to pass data through
 		output_sptr out_parent;   ///< Parent stream for writing
 		fn_truncate fn_resize;    ///< Size-change notification function
+		bool done_filter;         ///< Set to true once filter has been run once
 };
 
 /// Shared pointer to a writable filtered stream.
