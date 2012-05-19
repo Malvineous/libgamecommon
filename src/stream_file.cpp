@@ -87,7 +87,7 @@ input_file::~input_file()
 {
 	if (this->close) {
 		fclose(this->handle);
-		this->close = false;
+		this->close = false; // prevent double-close in ~output_file()
 	}
 }
 
@@ -142,6 +142,7 @@ void input_file::open(const std::string& filename)
 
 output_file::output_file()
 	throw ()
+	: do_remove(false)
 {
 }
 
@@ -150,7 +151,12 @@ output_file::~output_file()
 {
 	if (this->close) {
 		fclose(this->handle);
-		this->close = false;
+		this->close = false; // prevent double-close in ~input_file()
+
+		// Can only delete the file if it's a real file
+		if (this->do_remove) {
+			unlink(this->filename.c_str());
+		}
 	}
 }
 
@@ -203,27 +209,52 @@ void output_file::flush()
 void output_file::open(const char *filename)
 	throw (open_error)
 {
-	// We have to open the file in read/write even though we aren't reading,
-	// because none of the other options allow us to seek around and overwrite
-	// arbitrary points in the file.
-	//
-	// We also use this function as file::open() which *must* open in
-	// for read+write.
-	this->handle = fopen(filename, "r+b");
-	if (this->handle == NULL) throw open_error(strerror(errno));
-	this->close = true;
-	this->seek(0, start);
+	this->filename = std::string(filename);
+	this->open();
 	return;
 }
 
 void output_file::open(const std::string& filename)
 	throw (open_error)
 {
-	this->open(filename.c_str());
+	this->filename = filename;
+	this->open();
+	return;
+}
+
+void output_file::open()
+	throw (open_error)
+{
+	// We have to open the file in read/write even though we aren't reading,
+	// because none of the other options allow us to seek around and overwrite
+	// arbitrary points in the file.
+	//
+	// We also use this function as file::open() which *must* open in
+	// for read+write.
+	this->handle = fopen(this->filename.c_str(), "r+b");
+	if (this->handle == NULL) throw open_error(strerror(errno));
+	this->close = true;
+	this->seek(0, start);
 	return;
 }
 
 void output_file::create(const char *filename)
+	throw (open_error)
+{
+	this->filename = std::string(filename);
+	this->create();
+	return;
+}
+
+void output_file::create(const std::string& filename)
+	throw (open_error)
+{
+	this->filename = filename;
+	this->create();
+	return;
+}
+
+void output_file::create()
 	throw (open_error)
 {
 	// We have to open the file in read/write even though we aren't reading,
@@ -232,17 +263,17 @@ void output_file::create(const char *filename)
 	//
 	// We also use this function as file::create() which *must* open in
 	// for read+write.
-	this->handle = fopen(filename, "w+b");
+	this->handle = fopen(this->filename.c_str(), "w+b");
 	if (this->handle == NULL) throw open_error(strerror(errno));
 	this->close = true;
 	this->seek(0, start);
 	return;
 }
 
-void output_file::create(const std::string& filename)
-	throw (open_error)
+void output_file::remove()
+	throw ()
 {
-	this->create(filename.c_str());
+	this->do_remove = true;
 	return;
 }
 

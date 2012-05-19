@@ -183,8 +183,22 @@ class output_file: virtual public output,
 		void create(const std::string& filename)
 			throw (open_error);
 
+		/// Delete the file upon close.
+		void remove()
+			throw ();
+
 		friend output_sptr open_stdout()
 			throw ();
+
+	protected:
+		bool do_remove;        ///< Delete file on close?
+		std::string filename;  ///< Copy of filename for deletion
+
+		void open()
+			throw (open_error);
+
+		void create()
+			throw (open_error);
 };
 
 /// Shared pointer to a writable file.
