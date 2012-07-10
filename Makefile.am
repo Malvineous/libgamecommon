@@ -1,5 +1,3 @@
-AUTOMAKE_OPTIONS = foreign dist-bzip2
-
 # "src" must go first so the library is available when the tests compile
 SUBDIRS = src include tests
 
