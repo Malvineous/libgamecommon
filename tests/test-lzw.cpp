@@ -24,6 +24,7 @@
 #include <camoto/bitstream.hpp>
 #include <camoto/stream_string.hpp>
 #include <camoto/stream_filtered.hpp>
+#include <camoto/util.hpp>
 
 #include "tests.hpp"
 
@@ -70,7 +71,8 @@ BOOST_AUTO_TEST_CASE(lzw_decomp_read)
 	bit_in->write(9, '.');
 	bit_in->write(9, 0x100);
 
-	filter_sptr filt(new filter_lzw_decompress(9, 9, 0x101, 0x100, 0, LZW_BIG_ENDIAN | LZW_EOF_PARAM_VALID));
+	filter_sptr filt(new filter_lzw_decompress(9, 9, 0x101, 0x100, 0,
+		LZW_BIG_ENDIAN | LZW_EOF_PARAM_VALID));
 	stream::input_filtered_sptr processed(new stream::input_filtered());
 	processed->open(this->in, filt);
 
@@ -92,7 +94,8 @@ BOOST_AUTO_TEST_CASE(lzw_decomp_bitlength_expand)
 	bit_in->write(10, 'B');
 	bit_in->write(10, 0x100);
 
-	filter_sptr filt(new filter_lzw_decompress(9, 10, 0x101, 0x100, 0, LZW_BIG_ENDIAN | LZW_EOF_PARAM_VALID));
+	filter_sptr filt(new filter_lzw_decompress(9, 10, 0x101, 0x100, 0,
+		LZW_BIG_ENDIAN | LZW_EOF_PARAM_VALID));
 	stream::input_filtered_sptr processed(new stream::input_filtered());
 	processed->open(this->in, filt);
 
@@ -100,6 +103,192 @@ BOOST_AUTO_TEST_CASE(lzw_decomp_bitlength_expand)
 
 	BOOST_CHECK_MESSAGE(is_equal(std::string(256, 'A') + "B"),
 		"Codeword bit length expansion when LZW decompressing failed");
+}
+
+BOOST_AUTO_TEST_CASE(lzw_decomp_reset)
+{
+	BOOST_TEST_MESSAGE("Dictionary reset shared with EOF codeword when LZW decompressing");
+
+	bitstream_sptr bit_in(new bitstream(this->in, bitstream::bigEndian));
+	for (int i = 0; i < 256; i++) {
+		bit_in->write(9, 'A');
+	}
+	// Codeword will have just expanded to 10 bits
+	bit_in->write(10, 'B');
+	bit_in->write(10, 0x100);
+	bit_in->write(9, 'C');
+	bit_in->write(9, 'C');
+	bit_in->write(9, 0x100);
+
+	filter_sptr filt(new filter_lzw_decompress(9, 10, 0x101, 0x100, 0x100,
+		LZW_BIG_ENDIAN | LZW_RESET_PARAM_VALID));
+	stream::input_filtered_sptr processed(new stream::input_filtered());
+	processed->open(this->in, filt);
+
+	stream::copy(this->out, processed);
+
+	BOOST_CHECK_MESSAGE(is_equal(std::string(256, 'A') + "BCC"),
+		"Dictionary reset shared with EOF codeword when LZW decompressing failed");
+}
+
+BOOST_AUTO_TEST_CASE(lzw_decomp_dict_overflow)
+{
+	BOOST_TEST_MESSAGE("Decompress some LZW data with a dictionary overflow");
+
+	bitstream_sptr bit_in(new bitstream(this->in, bitstream::bigEndian));
+	for (int i = 0; i < (1<<8); i++) bit_in->write(9, 'a');
+	for (int i = 0; i < (1<<9); i++) bit_in->write(10, 'b');
+	for (int i = 0; i < (1<<10); i++) bit_in->write(11, 'c');
+	for (int i = 0; i < (1<<11); i++) bit_in->write(12, 'd');
+	bit_in->write(12, 'e');
+	bit_in->write(12, 'e');
+	bit_in->write(12, 0x100);
+
+	filter_sptr filt(new filter_lzw_decompress(9, 12, 0x101, 0x100, 0,
+		LZW_BIG_ENDIAN | LZW_EOF_PARAM_VALID));
+	stream::input_filtered_sptr processed(new stream::input_filtered());
+	processed->open(this->in, filt);
+
+	stream::copy(this->out, processed);
+
+	BOOST_CHECK_MESSAGE(is_equal(createString(
+		std::string((1 << 8), 'a') <<
+		std::string((1 << 9), 'b') <<
+		std::string((1 << 10), 'c') <<
+		std::string((1 << 11), 'd') <<
+		"ee"
+		)),
+		"Decompressing LZW data with a dictionary overflow failed");
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_FIXTURE_TEST_SUITE(lzw_comp_suite, lzw_decomp_sample)
+
+BOOST_AUTO_TEST_CASE(lzw_comp_write)
+{
+	BOOST_TEST_MESSAGE("Compress some LZW data");
+
+	stream::string_sptr exp(new stream::string());
+	bitstream_sptr bit_exp(new bitstream(exp, bitstream::bigEndian));
+	bit_exp->write(9, 'H');
+	bit_exp->write(9, 'e');
+	bit_exp->write(9, 'l');
+	bit_exp->write(9, 'l');
+	bit_exp->write(9, 'o');
+	bit_exp->write(9, ' ');
+	bit_exp->write(9, 'h');
+	bit_exp->write(9, 'e');
+	bit_exp->write(9, 'l');
+	bit_exp->write(9, 'l');
+	bit_exp->write(9, 'o');
+	bit_exp->write(9, ' ');
+	bit_exp->write(9, 'h');
+	bit_exp->write(9, 'e');
+	bit_exp->write(9, 'l');
+	bit_exp->write(9, 'l');
+	bit_exp->write(9, 'o');
+	bit_exp->write(9, '.');
+	bit_exp->write(9, 0x100);
+
+	this->in->write("Hello hello hello.");
+
+	filter_sptr filt(new filter_lzw_compress(9, 9, 0x101, 0x100, 0, LZW_BIG_ENDIAN | LZW_EOF_PARAM_VALID));
+	stream::input_filtered_sptr processed(new stream::input_filtered());
+	processed->open(this->in, filt);
+
+	stream::copy(this->out, processed);
+
+	BOOST_CHECK_MESSAGE(is_equal(exp->str()),
+		"Compressing LZW data failed");
+}
+
+BOOST_AUTO_TEST_CASE(lzw_comp_write_dict_grow)
+{
+	BOOST_TEST_MESSAGE("Compress some LZW data with a growing dictionary");
+
+	stream::string_sptr exp(new stream::string());
+	bitstream_sptr bit_exp(new bitstream(exp, bitstream::bigEndian));
+	for (int i = 0; i < 256; i++) {
+		bit_exp->write(9, 'a');
+	}
+	bit_exp->write(10, 'b');
+	bit_exp->write(10, 0x100);
+
+	for (int i = 0; i < 256; i++) {
+		this->in->write("a");
+	}
+	this->in->write("b");
+
+	filter_sptr filt(new filter_lzw_compress(9, 12, 0x101, 0x100, 0, LZW_BIG_ENDIAN | LZW_EOF_PARAM_VALID));
+	stream::input_filtered_sptr processed(new stream::input_filtered());
+	processed->open(this->in, filt);
+
+	stream::copy(this->out, processed);
+
+	BOOST_CHECK_MESSAGE(is_equal(exp->str()),
+		"Compressing LZW data with growing dictionary failed");
+}
+
+BOOST_AUTO_TEST_CASE(lzw_comp_write_dict_overflow)
+{
+	BOOST_TEST_MESSAGE("Compress some LZW data with an overflowing dictionary");
+
+	stream::string_sptr exp(new stream::string());
+	bitstream_sptr bit_exp(new bitstream(exp, bitstream::bigEndian));
+	for (int i = 0; i < (1<<8); i++) bit_exp->write(9, 'a');
+	for (int i = 0; i < (1<<9); i++) bit_exp->write(10, 'b');
+	for (int i = 0; i < (1<<10); i++) bit_exp->write(11, 'c');
+	for (int i = 0; i < (1<<11); i++) bit_exp->write(12, 'd');
+	bit_exp->write(12, 'e');
+	bit_exp->write(12, 'e');
+	bit_exp->write(12, 0x100);
+
+	for (int i = 0; i < (1<<8); i++) this->in->write("a");
+	for (int i = 0; i < (1<<9); i++) this->in->write("b");
+	for (int i = 0; i < (1<<10); i++) this->in->write("c");
+	for (int i = 0; i < (1<<11); i++) this->in->write("d");
+	this->in->write("ee");
+
+	filter_sptr filt(new filter_lzw_compress(9, 12, 0x101, 0x100, 0, LZW_BIG_ENDIAN | LZW_EOF_PARAM_VALID));
+	stream::input_filtered_sptr processed(new stream::input_filtered());
+	processed->open(this->in, filt);
+
+	stream::copy(this->out, processed);
+
+	BOOST_CHECK_MESSAGE(is_equal(exp->str()),
+		"Compressing LZW data with an overflowing dictionary failed");
+}
+
+BOOST_AUTO_TEST_CASE(lzw_comp_write_dict_overflow_reset)
+{
+	BOOST_TEST_MESSAGE("Compress some LZW data with an autoreset dictionary");
+
+	stream::string_sptr exp(new stream::string());
+	bitstream_sptr bit_exp(new bitstream(exp, bitstream::bigEndian));
+	for (int i = 0; i < (1<<8); i++) bit_exp->write(9, 'a');
+	for (int i = 0; i < (1<<9); i++) bit_exp->write(10, 'b');
+	for (int i = 0; i < (1<<10); i++) bit_exp->write(11, 'c');
+	for (int i = 0; i < (1<<11); i++) bit_exp->write(12, 'd');
+	bit_exp->write(9, 'e');
+	bit_exp->write(9, 'e');
+	bit_exp->write(9, 0x100);
+
+	for (int i = 0; i < (1<<8); i++) this->in->write("a");
+	for (int i = 0; i < (1<<9); i++) this->in->write("b");
+	for (int i = 0; i < (1<<10); i++) this->in->write("c");
+	for (int i = 0; i < (1<<11); i++) this->in->write("d");
+	this->in->write("ee");
+
+	filter_sptr filt(new filter_lzw_compress(9, 12, 0x101, 0x100, 0,
+		LZW_BIG_ENDIAN | LZW_EOF_PARAM_VALID | LZW_RESET_FULL_DICT));
+	stream::input_filtered_sptr processed(new stream::input_filtered());
+	processed->open(this->in, filt);
+
+	stream::copy(this->out, processed);
+
+	BOOST_CHECK_MESSAGE(is_equal(exp->str()),
+		"Compressing LZW data with an autoreset dictionary failed");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

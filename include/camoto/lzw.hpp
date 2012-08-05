@@ -3,7 +3,7 @@
  * @brief  Boost iostream filter for compressing and decompressing data using
  *         a few variants of the LZW algorithm.
  *
- * Copyright (C) 2010-2011 Adam Nielsen <malvineous@shikadi.net>
+ * Copyright (C) 2010-2012 Adam Nielsen <malvineous@shikadi.net>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -75,8 +75,8 @@ public:
 	void reset();
 };
 
-class filter_lzw_decompress: public filter {
-
+class filter_lzw_decompress: public filter
+{
 	protected:
 		const unsigned int maxBits;  ///< Maximum codeword size (dictionary size limit)
 		const unsigned int flags;
@@ -115,13 +115,67 @@ class filter_lzw_decompress: public filter {
 		int oldCode;           ///< Previous codeword
 
 	public:
-
 		/**
 		 * @param firstCode The first valid codeword.  Will be 256 for 9-bit
 		 *   codewords with no reserved values, or e.g. 258 for 9-bit codewords
 		 *   with two reserved values.
 		 */
 		filter_lzw_decompress(int initialBits, int maxBits, int firstCode,
+			int eofCode, int resetCode, int flags);
+
+		virtual void transform(uint8_t *out, stream::len *lenOut, const uint8_t *in,
+			stream::len *lenIn)
+			throw (filter_error);
+
+		void resetDictionary();
+
+		/// Recalculate the reserved/trigger codewords.
+		void recalcCodes();
+};
+
+class filter_lzw_compress: public filter
+{
+	protected:
+		const unsigned int maxBits;  ///< Maximum codeword size (dictionary size limit)
+		const unsigned int flags;
+
+		/// The codeword for end-of-data.  Only used if LZW_EOF_PARAM_VALID used.
+		/// Values < 1 are from the maximum possible codeword (so -1 means the EOF
+		/// code is one less than the max codeword at the current bit depth.)
+		int eofCode;
+		/// Actual eofCode at the moment, for those codewords which change with
+		/// the bit length.
+		int curEOFCode;
+
+		/// Same as eofCode but the code to reset the dictionary.  As above, only
+		/// valid if LZW_RESET_PARAM_VALID included in c'tor flags.
+		int resetCode;
+		/// Actual eofCode at the moment, for those codewords which change with
+		/// the bit length.
+		int curResetCode;
+
+		/// The maximum codeword value at the current bit length
+		unsigned int maxCode;
+
+		unsigned int firstCode;
+
+		/// Length of initial codeword, and codeword length after a dictionary
+		/// reset (unless LZW_NO_BITSIZE_RESET is given, when the codeword length
+		/// is unchanged after a dictionary reset.)
+		int initialBits;
+
+		unsigned int dictSize;
+		unsigned int currentBits;     ///< Current codeword size in bits
+
+		bitstream data;
+
+	public:
+		/**
+		 * @param firstCode The first valid codeword.  Will be 256 for 9-bit
+		 *   codewords with no reserved values, or e.g. 258 for 9-bit codewords
+		 *   with two reserved values.
+		 */
+		filter_lzw_compress(int initialBits, int maxBits, int firstCode,
 			int eofCode, int resetCode, int flags);
 
 		virtual void transform(uint8_t *out, stream::len *lenOut, const uint8_t *in,

@@ -3,7 +3,7 @@
  * @brief  Boost iostream filter for compressing and decompressing data using
  *         a few variants of the LZW algorithm.
  *
- * Copyright (C) 2010-2011 Adam Nielsen <malvineous@shikadi.net>
+ * Copyright (C) 2010-2012 Adam Nielsen <malvineous@shikadi.net>
  *
  * LZW algorithm based on GPL code by Juha Nieminen
  *   http://warp.povusers.org/EfficientLZW/
@@ -25,6 +25,16 @@
 #include <iostream>
 #include <boost/bind.hpp>
 #include <camoto/lzw.hpp>
+
+/// How many bytes should be left in reserve
+/**
+ * This is required to avoid trying to read or write the next codeword, and
+ * running out of space in the middle of it, truncating the codeword.  Setting
+ * this to 2 means there will always be enough room for a 16-bit codeword.
+ * Since all the LZW code so far only goes up to 12-bit codewords this should
+ * cover everything.
+ */
+#define LZW_LEFTOVER_BYTES 2
 
 namespace camoto {
 
@@ -147,8 +157,8 @@ void filter_lzw_decompress::transform(uint8_t *out, stream::len *lenOut,
 	while (
 		(w < *lenOut) && (
 			(
-				(r + 1 < *lenIn) || // Make sure there's at least one leftover byte
-				((r < *lenIn) && (*lenIn < 2)) // unless it's the last incoming byte
+				(r + LZW_LEFTOVER_BYTES < *lenIn) || // Make sure there's at least some leftover bytes (for the longest codeword)
+				((r < *lenIn) && (*lenIn <= LZW_LEFTOVER_BYTES)) // unless it's the last incoming byte
 			) || (!this->buffer.empty())
 		)
 	) {
@@ -160,7 +170,15 @@ void filter_lzw_decompress::transform(uint8_t *out, stream::len *lenOut,
 			if ((this->flags & LZW_EOF_PARAM_VALID) && (this->code == this->curEOFCode)) break;
 
 			unsigned int bitsRead = this->data.read(cbNext, this->currentBits, &this->code);
+			if (this->currentBits > LZW_LEFTOVER_BYTES * 8) {
+				std::cerr << "WARNING: libgamecommon/lzw.cpp needs bit width increased "
+					"to avoid data corruption." << std::endl;
+			}
 			if (bitsRead < this->currentBits) {
+				std::cerr << "Couldn't read all bits this iteration (tried to read "
+					<< this->currentBits << " but only got " << bitsRead << ".  "
+					<< *lenIn - r << " bytes left to read, " << *lenOut - w
+					<< " bytes left to write into.)" << std::endl;
 				// TODO: save bits and append next time?  How to test this?
 				// EOF
 				break;
@@ -253,6 +271,144 @@ void filter_lzw_decompress::recalcCodes()
 			this->curResetCode = actualMaxCode + this->resetCode;
 			this->maxCode--;
 		} else this->curResetCode = this->resetCode;
+	}
+	return;
+}
+
+filter_lzw_compress::filter_lzw_compress(int initialBits, int maxBits,
+	int firstCode, int eofCode, int resetCode, int flags) :
+	maxBits(maxBits),
+	flags(flags),
+	eofCode(eofCode),
+	resetCode(resetCode),
+	firstCode(firstCode),
+	initialBits(initialBits),
+	dictSize(256),
+	currentBits(initialBits),
+	data(((flags & LZW_BIG_ENDIAN) != LZW_BIG_ENDIAN) ? bitstream::littleEndian : bitstream::bigEndian)
+{
+	assert(initialBits > 0);
+	if (this->flags & LZW_NO_BITSIZE_RESET) {
+		// If LZW_NO_BITSIZE_RESET is *not* set these things will be done in
+		// resetDictionary() instead.
+		this->currentBits = initialBits;
+		this->recalcCodes();
+	}
+	this->resetDictionary();
+}
+
+int putChar(uint8_t **out, const stream::len *lenOut, stream::len *w, uint8_t in)
+{
+	if (*w < *lenOut) {
+		**out = in; // "write" byte
+		(*out)++;     // increment write buffer
+		(*w)++;      // increment write count
+		return 1;    // return number of bytes written
+	}
+	return 0; // EOF
+}
+
+void filter_lzw_compress::transform(uint8_t *out, stream::len *lenOut,
+	const uint8_t *in, stream::len *lenIn)
+	throw (filter_error)
+{
+	stream::len r = 0, w = 0;
+	fn_putnextchar cbNext = boost::bind(putChar, &out, lenOut, &w, _1);
+	while (
+		(w + LZW_LEFTOVER_BYTES < *lenOut) && ( // leave some leftover bytes to guarantee the codeword will be written
+			(
+				(r + 1 < *lenIn) || // Make sure there's at least one leftover byte
+				((r < *lenIn) && (*lenIn < 2)) // unless it's the last incoming byte
+			)
+		)
+	) {
+		if (this->currentBits > LZW_LEFTOVER_BYTES * 8) {
+			std::cerr << "WARNING: libgamecommon/lzw.cpp needs bit width increased "
+				"to avoid data corruption." << std::endl;
+		}
+		unsigned int bitsWritten = this->data.write(cbNext, this->currentBits, *in);
+
+		in++;
+		r++;
+		if (bitsWritten < this->currentBits) {
+			std::cerr << "Couldn't write all bits this iteration (tried to write "
+				<< this->currentBits << " but only wrote " << bitsWritten << ".  "
+				<< *lenIn - r << " bytes left to read, " << *lenOut - w
+				<< " bytes left to write into.)" << std::endl;
+			// EOF
+			break;
+		}
+
+		if (this->dictSize > this->maxCode) {
+			if (this->currentBits == this->maxBits) {
+				if (this->flags & LZW_RESET_FULL_DICT) this->resetDictionary();
+			} else {
+				++this->currentBits;
+				this->recalcCodes();
+			}
+		} else {
+			this->dictSize++;
+		}
+		assert(bitsWritten > 0);
+	}
+	if ((w < *lenOut) && (*lenIn == 0)) {
+		// No more data to read, but more space to write
+		if ((this->flags & LZW_EOF_PARAM_VALID) && (this->curEOFCode > 0)) {
+			// Add the EOF parameter
+			this->data.write(cbNext, this->currentBits, this->curEOFCode);
+			// Don't write this again
+			this->curEOFCode = 0;
+		}
+	}
+	*lenIn = r;
+	*lenOut = w;
+	return;
+}
+
+void filter_lzw_compress::resetDictionary()
+{
+	this->dictSize = 256;
+	if (!(this->flags & LZW_NO_BITSIZE_RESET)) {
+		// Only reset the bit length with the dictionary if wanted
+		this->currentBits = this->initialBits;
+		this->recalcCodes();
+	}
+	return;
+}
+
+void filter_lzw_compress::recalcCodes()
+{
+	// Work out the maximum codeword value that will be possible at the current
+	// bit length.
+	int actualMaxCode = (1 << this->currentBits) - 1;
+	this->maxCode = actualMaxCode;
+
+	// Take any reserved codewords into account so we increase the bit depth
+	// at the correct time.
+	if (this->flags & LZW_EOF_PARAM_VALID) {
+		if (this->eofCode < 1) {
+			// If the eofCode is zero or negative, take it as an index back from
+			// the last codeword, with 0 being the largest possible codeword.
+			this->curEOFCode = actualMaxCode + this->eofCode;
+			this->maxCode--;
+		} else {
+			this->curEOFCode = this->eofCode;
+			this->dictSize++; // this assumes the code is at the start
+		}
+	}
+
+	if (this->flags & LZW_RESET_PARAM_VALID) {
+		if (this->resetCode < 1) {
+			// If the resetCode is zero or negative, take it as an index back from
+			// the last codeword, with 0 being the largest possible codeword.
+			this->curResetCode = actualMaxCode + this->resetCode;
+			this->maxCode--;
+		} else {
+			this->curResetCode = this->resetCode;
+			if (this->curEOFCode != this->curResetCode) {
+				this->dictSize++; // this assumes the code is at the start
+			}
+		}
 	}
 	return;
 }
