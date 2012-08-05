@@ -2,7 +2,7 @@
  * @file  tests.hpp
  * @breif Generic test code.
  *
- * Copyright (C) 2010-2011 Adam Nielsen <malvineous@shikadi.net>
+ * Copyright (C) 2010-2012 Adam Nielsen <malvineous@shikadi.net>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 #define _CAMOTO_TESTS_HPP_
 
 #include <boost/test/unit_test.hpp>
+#include <camoto/stream_string.hpp>
 
 // Allow a string constant to be passed around with embedded nulls
 #define makeString(x)  std::string((x), sizeof((x)) - 1)
@@ -36,6 +37,27 @@ struct default_sample {
 
 	boost::test_tools::predicate_result is_equal(const std::string& strExpected,
 		const std::string& strCheck);
+
+};
+
+struct string_sample: public default_sample {
+
+	camoto::stream::string_sptr in;
+	camoto::stream::string_sptr out;
+
+	string_sample() :
+		in(new camoto::stream::string()),
+		out(new camoto::stream::string())
+	{
+	}
+
+	using default_sample::is_equal;
+
+	boost::test_tools::predicate_result is_equal(const std::string& strExpected)
+	{
+		// See if the stringstream now matches what we expected
+		return this->default_sample::is_equal(strExpected, out->str());
+	}
 
 };
 

@@ -22,7 +22,6 @@
 
 #include <camoto/lzw.hpp>
 #include <camoto/bitstream.hpp>
-#include <camoto/stream_string.hpp>
 #include <camoto/stream_filtered.hpp>
 #include <camoto/util.hpp>
 
@@ -30,26 +29,7 @@
 
 using namespace camoto;
 
-struct lzw_decomp_sample: public default_sample {
-
-	stream::string_sptr in;
-	stream::string_sptr out;
-
-	lzw_decomp_sample() :
-		in(new stream::string()),
-		out(new stream::string())
-	{
-	}
-
-	boost::test_tools::predicate_result is_equal(const std::string& strExpected)
-	{
-		// See if the stringstream now matches what we expected
-		return this->default_sample::is_equal(strExpected, out->str());
-	}
-
-};
-
-BOOST_FIXTURE_TEST_SUITE(lzw_decomp_suite, lzw_decomp_sample)
+BOOST_FIXTURE_TEST_SUITE(lzw_decomp_suite, string_sample)
 
 BOOST_AUTO_TEST_CASE(lzw_decomp_read)
 {
@@ -163,7 +143,7 @@ BOOST_AUTO_TEST_CASE(lzw_decomp_dict_overflow)
 
 BOOST_AUTO_TEST_SUITE_END()
 
-BOOST_FIXTURE_TEST_SUITE(lzw_comp_suite, lzw_decomp_sample)
+BOOST_FIXTURE_TEST_SUITE(lzw_comp_suite, string_sample)
 
 BOOST_AUTO_TEST_CASE(lzw_comp_write)
 {

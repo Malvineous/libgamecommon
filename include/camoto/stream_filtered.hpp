@@ -54,6 +54,9 @@ typedef boost::shared_ptr<input_filtered> input_filtered_sptr;
 class output_filtered: virtual public output_string
 {
 	public:
+		virtual stream::len try_write(const uint8_t *buffer, stream::len len)
+			throw ();
+
 		virtual void truncate(stream::pos size)
 			throw (write_error);
 

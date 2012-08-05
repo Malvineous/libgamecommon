@@ -62,6 +62,17 @@ void input_filtered::open(input_sptr parent, filter_sptr read_filter)
 	return;
 }
 
+stream::len output_filtered::try_write(const uint8_t *buffer, stream::len len)
+	throw ()
+{
+if (this->done_filter) std::cerr
+<< "NOTE: Writing to previously flushed filtered stream." << std::endl;
+	// Data has changed, make sure we flush it
+	this->done_filter = false;
+
+	return this->output_string::try_write(buffer, len);
+}
+
 void output_filtered::truncate(stream::pos size)
 	throw (write_error)
 {
@@ -72,6 +83,10 @@ void output_filtered::truncate(stream::pos size)
 	//
 	// We perform the actual truncate of the parent stream in flush(), after we've
 	// performed the filtering operation.
+	//
+	// Since the docs say truncate() does an implicit flush(), we'd better do it
+	// all now anyway though.
+	this->flush();
 	return;
 }
 
@@ -117,7 +132,6 @@ void output_filtered::flush()
 		this->out_parent->write(bufOut, lenOut);
 	} while ((lenIn != 0) && (lenOut != 0));
 
-	this->out_parent->flush();
 	this->out_parent->truncate_here();
 	return;
 }
