@@ -28,66 +28,117 @@ void input_filtered::open(input_sptr parent, filter_sptr read_filter)
 {
 	assert(parent);
 	assert(read_filter);
+	assert(this->data.size() == 0);
+
+	this->in_parent = parent;
+	this->read_filter = read_filter;
+	this->populated = false;
+	return;
+}
+
+stream::len input_filtered::try_read(uint8_t *buffer, stream::len len)
+	throw (error)
+{
+	this->populate();
+	return this->input_memory::try_read(buffer, len);
+}
+
+void input_filtered::seekg(stream::delta off, seek_from from)
+	throw (error)
+{
+	this->populate();
+	return this->input_memory::seekg(off, from);
+}
+
+stream::pos input_filtered::tellg() const
+	throw (error)
+{
+	this->populate();
+	return this->input_memory::tellg();
+}
+
+stream::pos input_filtered::size() const
+	throw (error)
+{
+	this->populate();
+	return this->input_memory::size();
+}
+
+void input_filtered::populate() const
+	throw (error)
+{
+	if (this->populated) return;
+	input_filtered *self = const_cast<input_filtered *>(this);
+	self->realPopulate();
+	return;
+}
+
+void input_filtered::realPopulate()
+	throw (error)
+{
+	this->populated = true;
 
 	// Seek to the start here, because we will have to do the same when the time
 	// comes to write the change, so seeking here will make it obvious if the
 	// offset is wrong.
 	try {
-		parent->seekg(0, stream::start);
+		this->in_parent->seekg(0, stream::start);
 	} catch (const seek_error&) {
 		// Just ignore it, the stream might not be seekable (e.g. stdin)
 	}
 
 	// Read and filter the entire input into an in-memory buffer
 	uint8_t bufIn[BUFFER_SIZE];
-	uint8_t bufOut[BUFFER_SIZE];
 	stream::len lenIn, lenOut;
 	stream::len lenRead, lenLeftover = 0;
+	stream::len lenTotalOut = 0;
 	do {
 		lenOut = BUFFER_SIZE;
-		lenRead = parent->try_read(bufIn + lenLeftover, BUFFER_SIZE - lenLeftover);
+		lenRead = this->in_parent->try_read(bufIn + lenLeftover, BUFFER_SIZE - lenLeftover);
 		assert(lenRead <= BUFFER_SIZE - lenLeftover);
 		lenRead += lenLeftover;
 		lenIn = lenRead;
-		read_filter->transform(bufOut, &lenOut, bufIn, &lenIn);
+		this->data.resize(lenTotalOut + lenOut);
+		read_filter->transform((uint8_t *)(&this->data[lenTotalOut]), &lenOut, bufIn, &lenIn);
 		assert(lenIn <= BUFFER_SIZE);  // sanity check
 		assert(lenOut <= BUFFER_SIZE); // sanity check
+		lenTotalOut += lenOut;
 		lenLeftover = lenRead - lenIn;
 		if (lenLeftover) {
 			// Not all input data was processed, keep the leftovers
 			memmove(bufIn, bufIn + lenIn, lenLeftover);
 		}
-		this->data->append((char *)bufOut, lenOut);
 	} while ((lenIn != 0) || (lenOut != 0));
+
+	// Cut off any excess from the last read
+	this->data.resize(lenTotalOut);
+
 	return;
 }
 
 stream::len output_filtered::try_write(const uint8_t *buffer, stream::len len)
 	throw (error)
 {
-if (this->done_filter) std::cerr
-<< "NOTE: Writing to previously flushed filtered stream." << std::endl;
+	this->populate();
+
 	// Data has changed, make sure we flush it
 	this->done_filter = false;
 
-	return this->output_string::try_write(buffer, len);
+	return this->output_memory::try_write(buffer, len);
 }
 
-void output_filtered::truncate(stream::pos size)
+void output_filtered::seekp(stream::delta off, seek_from from)
 	throw (error)
 {
-	// The input side (decompressed, if we're a compressor filter) wants to be
-	// truncated.  We'll have to ignore this, because at this point we don't know
-	// where the output side (compressed data) should end.  We may not have even
-	// run the filter yet!
-	//
-	// We perform the actual truncate of the parent stream in flush(), after we've
-	// performed the filtering operation.
-	//
-	// Since the docs say truncate() does an implicit flush(), we'd better do it
-	// all now anyway though.
-	this->flush();
-	return;
+	this->populate();
+	return this->output_memory::seekp(off, from);
+}
+
+stream::pos output_filtered::tellp() const
+	throw (error)
+{
+	this->populate();
+	return this->output_memory::tellp();
 }
 
 void output_filtered::flush()
@@ -100,39 +151,54 @@ void output_filtered::flush()
 	}
 	this->done_filter = true;
 
-	this->output_string::flush();
+	std::vector<uint8_t> bufOut; // data is filtered to here first
+	unsigned long lenFinal = 0;
 
-	const uint8_t *bufIn = (const uint8_t *)this->data->c_str();
-	uint8_t bufOut[BUFFER_SIZE];
-	stream::len lenRemaining = this->data->length();
+	const uint8_t *bufIn = this->data.data();
+	stream::len lenRealSize = this->data.size();
+	stream::len lenRemaining = lenRealSize;
 	stream::len lenIn, lenOut;
 
-	// Notify the owner what the unfiltered size is
-	if (this->fn_resize) this->fn_resize(lenRemaining);
-
 	// Filter the in-memory buffer and write it out to the parent stream
-	this->out_parent->seekp(0, stream::start);
 	do {
 		lenIn = lenRemaining;
 		lenOut = BUFFER_SIZE;
+
+		// Resize the output buffer to allow a full write
+		bufOut.resize(lenFinal + lenOut);
+
 		try {
-			this->write_filter->transform(bufOut, &lenOut, bufIn, &lenIn);
+			this->write_filter->transform(&bufOut[lenFinal], &lenOut, bufIn, &lenIn);
 		} catch (const filter_error& e) {
 			throw write_error("Filter error: " + e.get_message());
 		}
+		// Keep the data that was written
+		lenFinal += lenOut;
 
-		// Sanity checks: Make sure the filter didn't write more data that it was
+		// Sanity checks: Make sure the filter didn't write more data than it was
 		// allowed to.
 		assert(lenOut <= BUFFER_SIZE);
 		// Make sure the filter didn't read more data than we gave it.
 		assert(lenIn <= lenRemaining);
+		// Make sure we didn't write past the end of the vector
+		assert(lenFinal <= bufOut.size());
 
 		bufIn += lenIn;
 		lenRemaining -= lenIn;
-		this->out_parent->write(bufOut, lenOut);
 	} while ((lenIn != 0) && (lenOut != 0));
 
-	this->out_parent->truncate_here();
+	this->out_parent->truncate(lenFinal);
+	this->out_parent->seekp(0, stream::start);
+	this->out_parent->write(&bufOut[0], lenFinal);
+
+	// Notify the owner what the unfiltered size is.  We have to do this after
+	// truncate(), because truncate() sets both stored and real sizes in case
+	// there are no filters active.  So once that is done, we override it and
+	// set the correct real size.
+	if (this->fn_resize) this->fn_resize(lenRealSize);
+
+	this->out_parent->flush();
+
 	return;
 }
 
@@ -150,10 +216,24 @@ void output_filtered::open(output_sptr parent, filter_sptr write_filter,
 	return;
 }
 
+void output_filtered::populate() const
+	throw (error)
+{
+	return;
+}
+
 
 filtered::filtered()
 	throw ()
 {
+}
+
+void filtered::truncate(stream::pos size)
+	throw (error)
+{
+	if (size == 0) this->populated = true;
+	this->output_filtered::truncate(size);
+	return;
 }
 
 void filtered::open(inout_sptr parent, filter_sptr read_filter,
@@ -162,6 +242,13 @@ void filtered::open(inout_sptr parent, filter_sptr read_filter,
 {
 	this->input_filtered::open(parent, read_filter);
 	this->output_filtered::open(parent, write_filter, resize);
+	return;
+}
+
+void filtered::populate() const
+	throw (error)
+{
+	this->input_filtered::populate();
 	return;
 }
 

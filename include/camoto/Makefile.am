@@ -11,6 +11,7 @@ nobase_library_include_HEADERS += metadata.hpp
 nobase_library_include_HEADERS += stream.hpp
 nobase_library_include_HEADERS += stream_file.hpp
 nobase_library_include_HEADERS += stream_filtered.hpp
+nobase_library_include_HEADERS += stream_memory.hpp
 nobase_library_include_HEADERS += stream_seg.hpp
 nobase_library_include_HEADERS += stream_string.hpp
 nobase_library_include_HEADERS += stream_sub.hpp

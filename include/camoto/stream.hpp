@@ -433,7 +433,10 @@ class output {
 		 *   New stream size.  This value will become the position the seek pointer
 		 *   is moved to when seeking to the end of the stream.
 		 *
-		 * @note There is an implicit call to flush() before the truncate happens.
+		 * @note There is no need to call flush() first.  Anything written to this
+		 *   stream will be processed before the truncate occurs.  If you have
+		 *   substreams open within this stream, you must flush them yourself
+		 *   first.
 		 *
 		 * @throw write_error
 		 *   The truncate could not be performed.
@@ -450,7 +453,10 @@ class output {
 
 		/// Set the stream size to end at the current position.
 		/**
-		 * @note There is an implicit call to flush() before the truncate happens.
+		 * @see truncate()
+		 *
+		 * This function is just shorthand for calling truncate() with the current
+		 * write position.
 		 *
 		 * @throw write_error
 		 *   The truncate could not be performed.

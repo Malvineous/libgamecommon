@@ -22,15 +22,27 @@
 #define _CAMOTO_STREAM_FILTERED_HPP_
 
 #include <camoto/filter.hpp>
-#include <camoto/stream_string.hpp>
+#include <camoto/stream_memory.hpp>
 
 namespace camoto {
 namespace stream {
 
 /// Read-only stream applying a filter to another read-only stream.
-class input_filtered: virtual public input_string
+class input_filtered: virtual public input_memory
 {
 	public:
+		virtual stream::len try_read(uint8_t *buffer, stream::len len)
+			throw (error);
+
+		virtual void seekg(stream::delta off, seek_from from)
+			throw (error);
+
+		virtual stream::pos tellg() const
+			throw (error);
+
+		virtual stream::pos size() const
+			throw (error);
+
 		/// Apply a filter to the given stream.
 		/**
 		 * As data is read from this stream (the input_filtered instance), data is
@@ -45,19 +57,43 @@ class input_filtered: virtual public input_string
 		 */
 		void open(input_sptr parent, filter_sptr read_filter)
 			throw (error);
+
+		/// A partial write is about to occur, ensure the unfiltered data is present.
+		/**
+		 * When opening a read/write stream, the data is not populated
+		 * automatically to avoid unnecessary computation in case it is going to be
+		 * overwritten.
+		 *
+		 * This function is overridden in a read/write stream so that the original
+		 * data is populated before any read or write occurs.
+		 */
+		virtual void populate() const
+			throw (error);
+
+		/// Non-const version of populate() that actually does the work.
+		void realPopulate()
+			throw (error);
+
+	protected:
+		filter_sptr read_filter; ///< Filter to pass data through
+		input_sptr in_parent;   ///< Parent stream for reading
+		bool populated; ///< Has the input data been run through the filter yet?
 };
 
 /// Shared pointer to a readable filtered stream.
 typedef boost::shared_ptr<input_filtered> input_filtered_sptr;
 
 /// Write-only stream applying a filter to another write-only stream.
-class output_filtered: virtual public output_string
+class output_filtered: virtual public output_memory
 {
 	public:
 		virtual stream::len try_write(const uint8_t *buffer, stream::len len)
 			throw (error);
 
-		virtual void truncate(stream::pos size)
+		virtual void seekp(stream::delta off, seek_from from)
+			throw (error);
+
+		virtual stream::pos tellp() const
 			throw (error);
 
 		virtual void flush()
@@ -86,6 +122,18 @@ class output_filtered: virtual public output_string
 		void open(output_sptr parent, filter_sptr write_filter, fn_truncate resize)
 			throw ();
 
+		/// A partial write is about to occur, ensure the unfiltered data is present.
+		/**
+		 * When opening a read/write stream, the data is not populated
+		 * automatically to avoid unnecessary computation in case it is going to be
+		 * overwritten.
+		 *
+		 * This function is overridden in a read/write stream so that the original
+		 * data is populated before any read or write occurs.
+		 */
+		virtual void populate() const
+			throw (error);
+
 	protected:
 		filter_sptr write_filter; ///< Filter to pass data through
 		output_sptr out_parent;   ///< Parent stream for writing
@@ -104,6 +152,9 @@ class filtered: virtual public inout,
 	public:
 		filtered()
 			throw ();
+
+		virtual void truncate(stream::pos size)
+			throw (error);
 
 		/// Apply a filter to the given stream.
 		/**
@@ -136,6 +187,9 @@ class filtered: virtual public inout,
 		 */
 		void open(inout_sptr parent, filter_sptr read_filter,
 			filter_sptr write_filter, fn_truncate resize)
+			throw (error);
+
+		virtual void populate() const
 			throw (error);
 };
 

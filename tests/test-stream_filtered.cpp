@@ -20,6 +20,7 @@
 
 #include <boost/test/unit_test.hpp>
 #include <boost/algorithm/string.hpp> // for case-insensitive string compare
+#include <boost/bind.hpp>
 #include <camoto/stream.hpp>
 #include <camoto/stream_string.hpp>
 #include <camoto/stream_filtered.hpp>
@@ -112,6 +113,53 @@ BOOST_AUTO_TEST_CASE(stream_filtered_read_write)
 
 	BOOST_CHECK_MESSAGE(is_equal(std::string("FGHIJ12345"), std::string(buf, 10)),
 		"Read from stream_filtered failed");
+}
+
+void setVar(stream::len *var, stream::len val)
+{
+	*var = val;
+	return;
+}
+
+BOOST_AUTO_TEST_CASE(double_stream_filtered_write)
+{
+	BOOST_TEST_MESSAGE("Write to double stream_filtered");
+
+	this->out << "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	this->out->seekg(0, stream::start);
+
+	stream::len lenF = 0, lenH = 0;
+
+	stream::fn_truncate fnF = boost::bind<void>(setVar, &lenF, _1);
+	stream::fn_truncate fnH = boost::bind<void>(setVar, &lenH, _1);
+
+	filter_sptr algo(new filter_dummy());
+	stream::filtered_sptr f(new stream::filtered());
+	f->open(this->out, algo, algo, fnF);
+
+	f->seekp(10, stream::start);
+	f->write("1234567890", 10);
+	f->truncate(25);
+	f->flush();
+	BOOST_REQUIRE_EQUAL(lenF, 25);
+	BOOST_REQUIRE_EQUAL(f->size(), 25);
+
+	filter_sptr algoH(new filter_dummy());
+	stream::filtered_sptr h(new stream::filtered());
+	h->open(f, algoH, algoH, fnH);
+
+	h->seekp(11, stream::start);
+	h->write("!@#$%", 5);
+	h->truncate(24);
+	h->flush();
+	BOOST_REQUIRE_EQUAL(lenH, 24);
+	BOOST_REQUIRE_EQUAL(h->size(), 24);
+
+	// Make sure it's updated the parent stream
+	BOOST_REQUIRE_EQUAL(lenF, 24);
+
+	BOOST_CHECK_MESSAGE(is_equal("ABCDEFGHIJ1!@#$%7890UVWX"),
+		"Write to double stream_filtered failed");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

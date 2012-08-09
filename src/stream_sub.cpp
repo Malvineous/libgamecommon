@@ -209,7 +209,9 @@ void output_sub::truncate(stream::pos size)
 			"provided to notify the substream owner.");
 	}
 
-	this->flush();
+	// Since we haven't cached any writes ourself, there's nothing to flush now.
+	//this->flush();
+
 	this->fn_resize(size);
 	try {
 		this->seekp(size, stream::start);
