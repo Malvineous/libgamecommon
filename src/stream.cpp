@@ -62,7 +62,7 @@ incomplete_read::incomplete_read(stream::len read)
 }
 
 void input::read(uint8_t *buffer, stream::len len)
-	throw (incomplete_read, read_error)
+	throw (error)
 {
 	stream::len r = this->try_read(buffer, len);
 	assert(r <= len);
@@ -73,14 +73,14 @@ void input::read(uint8_t *buffer, stream::len len)
 }
 
 void input::read(char *buffer, stream::len len)
-	throw (incomplete_read, read_error)
+	throw (error)
 {
 	this->read((uint8_t *)buffer, len);
 	return;
 }
 
 std::string input::read(stream::len len)
-	throw (incomplete_read, read_error)
+	throw (error)
 {
 	std::string d;
 	d.resize(len);
@@ -89,7 +89,7 @@ std::string input::read(stream::len len)
 }
 
 void output::write(const uint8_t *buffer, stream::len len)
-	throw (incomplete_write, write_error)
+	throw (error)
 {
 	stream::len w = this->try_write(buffer, len);
 	assert(w <= len);
@@ -100,21 +100,21 @@ void output::write(const uint8_t *buffer, stream::len len)
 }
 
 void output::write(const char *buffer, stream::len len)
-	throw (incomplete_write, write_error)
+	throw (error)
 {
 	this->write((const uint8_t *)buffer, len);
 	return;
 }
 
 void output::write(const std::string& buffer)
-	throw (incomplete_write, write_error)
+	throw (error)
 {
 	this->write((const uint8_t *)buffer.data(), buffer.length());
 	return;
 }
 
 void output::truncate_here()
-	throw (write_error)
+	throw (error)
 {
 	try {
 		stream::pos here = this->tellp();
@@ -127,7 +127,7 @@ void output::truncate_here()
 }
 
 void copy(output_sptr dest, input_sptr src)
-	throw (read_error, write_error, incomplete_write)
+	throw (error)
 {
 	uint8_t buffer[BUFFER_SIZE];
 	stream::len total_written = 0;
@@ -147,7 +147,7 @@ void copy(output_sptr dest, input_sptr src)
 
 void move(inout_sptr data, stream::pos from, stream::pos to,
 	stream::len len)
-	throw (read_error, write_error, incomplete_write)
+	throw (error)
 {
 	if (from == to) return; // job done, that was easy
 

@@ -44,7 +44,7 @@ class input_filtered: virtual public input_string
 		 *   Filter to process data.
 		 */
 		void open(input_sptr parent, filter_sptr read_filter)
-			throw (filter_error, read_error);
+			throw (error);
 };
 
 /// Shared pointer to a readable filtered stream.
@@ -55,13 +55,13 @@ class output_filtered: virtual public output_string
 {
 	public:
 		virtual stream::len try_write(const uint8_t *buffer, stream::len len)
-			throw ();
+			throw (error);
 
 		virtual void truncate(stream::pos size)
-			throw (write_error);
+			throw (error);
 
 		virtual void flush()
-			throw (write_error);
+			throw (error);
 
 		/// Apply a filter to the given stream.
 		/**
@@ -136,7 +136,7 @@ class filtered: virtual public inout,
 		 */
 		void open(inout_sptr parent, filter_sptr read_filter,
 			filter_sptr write_filter, fn_truncate resize)
-			throw (filter_error, read_error);
+			throw (error);
 };
 
 /// Shared pointer to a readable and writable filtered stream.

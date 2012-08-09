@@ -2,7 +2,7 @@
  * @file   stream_filtered.cpp
  * @brief  Pass read/write operations through a filter to modify the data.
  *
- * Copyright (C) 2010-2011 Adam Nielsen <malvineous@shikadi.net>
+ * Copyright (C) 2010-2012 Adam Nielsen <malvineous@shikadi.net>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ namespace camoto {
 namespace stream {
 
 void input_filtered::open(input_sptr parent, filter_sptr read_filter)
-	throw (filter_error, read_error)
+	throw (error)
 {
 	assert(parent);
 	assert(read_filter);
@@ -63,7 +63,7 @@ void input_filtered::open(input_sptr parent, filter_sptr read_filter)
 }
 
 stream::len output_filtered::try_write(const uint8_t *buffer, stream::len len)
-	throw ()
+	throw (error)
 {
 if (this->done_filter) std::cerr
 << "NOTE: Writing to previously flushed filtered stream." << std::endl;
@@ -74,7 +74,7 @@ if (this->done_filter) std::cerr
 }
 
 void output_filtered::truncate(stream::pos size)
-	throw (write_error)
+	throw (error)
 {
 	// The input side (decompressed, if we're a compressor filter) wants to be
 	// truncated.  We'll have to ignore this, because at this point we don't know
@@ -91,7 +91,7 @@ void output_filtered::truncate(stream::pos size)
 }
 
 void output_filtered::flush()
-	throw (write_error)
+	throw (error)
 {
 	if (this->done_filter) {
 		std::cout << "WARNING: Tried to flush a filtered stream twice, ignoring "
@@ -158,7 +158,7 @@ filtered::filtered()
 
 void filtered::open(inout_sptr parent, filter_sptr read_filter,
 	filter_sptr write_filter, fn_truncate resize)
-	throw (filter_error, read_error)
+	throw (error)
 {
 	this->input_filtered::open(parent, read_filter);
 	this->output_filtered::open(parent, write_filter, resize);
