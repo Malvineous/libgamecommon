@@ -75,6 +75,7 @@ public:
 	void reset();
 };
 
+/// LZW decompressor
 class filter_lzw_decompress: public filter
 {
 	protected:
@@ -115,10 +116,33 @@ class filter_lzw_decompress: public filter
 		int oldCode;           ///< Previous codeword
 
 	public:
+		/// LZW decompressor.
 		/**
-		 * @param firstCode The first valid codeword.  Will be 256 for 9-bit
-		 *   codewords with no reserved values, or e.g. 258 for 9-bit codewords
-		 *   with two reserved values.
+		 * @param initialBits
+		 *   Length of the codeword in bits, when the decompression first starts
+		 *   or the dictionary is reset (unless LZW_NO_BITSIZE_RESET is used.)
+		 *
+		 * @param maxBits
+		 *   Maximum length of the codeword in bits.  Once it reaches this size it
+		 *   will either grow no larger or the dictionary will be reset, depending
+		 *   on the flags in use.
+		 *
+		 * @param firstCode
+		 *   The first valid codeword.  Will be 256 for 9-bit codewords with no
+		 *   reserved values, or e.g. 258 for 9-bit codewords with two reserved
+		 *   values.
+		 *
+		 * @param eofCode
+		 *   The code that signifies the end of the data.  Only used when
+		 *   the LZW_EOF_PARAM_VALID flag is given.
+		 *
+		 * @param resetCode
+		 *   Code that will reset (erase) the dictionary and possibly reduce the
+		 *   codeword back to initialBits in length.  Only used when the
+		 *   LZW_RESET_PARAM_VALID flag is given.
+		 *
+		 * @param flags
+		 *   One or more LZW_* flags to control the behaviour of the algorithm.
 		 */
 		filter_lzw_decompress(int initialBits, int maxBits, int firstCode,
 			int eofCode, int resetCode, int flags);
@@ -133,6 +157,7 @@ class filter_lzw_decompress: public filter
 		void recalcCodes();
 };
 
+/// LZW compressor
 class filter_lzw_compress: public filter
 {
 	protected:
@@ -157,6 +182,7 @@ class filter_lzw_compress: public filter
 		/// The maximum codeword value at the current bit length
 		unsigned int maxCode;
 
+		/// The first valid codeword
 		unsigned int firstCode;
 
 		/// Length of initial codeword, and codeword length after a dictionary
@@ -170,10 +196,38 @@ class filter_lzw_compress: public filter
 		bitstream data;
 
 	public:
+		/// LZW compression constructor.
 		/**
-		 * @param firstCode The first valid codeword.  Will be 256 for 9-bit
-		 *   codewords with no reserved values, or e.g. 258 for 9-bit codewords
-		 *   with two reserved values.
+		 * This is currently just a dummy compressor.  It writes out LZW-compatible
+		 * data that can be decompressed correctly, but it doesn't actually perform
+		 * any compression - so the output data will be slightly larger than the
+		 * input (as each 8-bit byte is written out as a 9-bit byte.)
+		 *
+		 * @param initialBits
+		 *   Length of the codeword in bits, when the decompression first starts
+		 *   or the dictionary is reset (unless LZW_NO_BITSIZE_RESET is used.)
+		 *
+		 * @param maxBits
+		 *   Maximum length of the codeword in bits.  Once it reaches this size it
+		 *   will either grow no larger or the dictionary will be reset, depending
+		 *   on the flags in use.
+		 *
+		 * @param firstCode
+		 *   The first valid codeword.  Will be 256 for 9-bit codewords with no
+		 *   reserved values, or e.g. 258 for 9-bit codewords with two reserved
+		 *   values.
+		 *
+		 * @param eofCode
+		 *   The code that signifies the end of the data.  Only used when
+		 *   the LZW_EOF_PARAM_VALID flag is given.
+		 *
+		 * @param resetCode
+		 *   Code that will reset (erase) the dictionary and possibly reduce the
+		 *   codeword back to initialBits in length.  Only used when the
+		 *   LZW_RESET_PARAM_VALID flag is given.
+		 *
+		 * @param flags
+		 *   One or more LZW_* flags to control the behaviour of the algorithm.
 		 */
 		filter_lzw_compress(int initialBits, int maxBits, int firstCode,
 			int eofCode, int resetCode, int flags);

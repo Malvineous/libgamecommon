@@ -101,7 +101,7 @@ class filter {
 		 * @throw filter_error
 		 *   The data was corrupted and could not be filtered.
 		 */
-		virtual void transform(uint8_t *out, stream::len *lenOut, const uint8_t *n,
+		virtual void transform(uint8_t *out, stream::len *lenOut, const uint8_t *in,
 			stream::len *lenIn)
 			throw (filter_error) = 0;
 };

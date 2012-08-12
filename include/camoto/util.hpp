@@ -2,7 +2,7 @@
  * @file   util.hpp
  * @brief  Utility functions used across the libraries.
  *
- * Copyright (C) 2010-2011 Adam Nielsen <malvineous@shikadi.net>
+ * Copyright (C) 2010-2012 Adam Nielsen <malvineous@shikadi.net>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,7 +50,9 @@ inline boost::shared_ptr<std::ostringstream> _createStream(void)
 
 /// Wrapper around _createStream()
 /**
- * @example createString std::string str = createString("The value is " << iValue);
+ * @code
+ * createString std::string str = createString("The value is " << iValue);
+ * @endcode
  */
 #define createString(a) \
   (static_cast<const std::ostringstream&>(*camoto::_createStream().get() << a).str())

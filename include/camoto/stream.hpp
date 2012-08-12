@@ -380,7 +380,7 @@ class output {
 			throw (error);
 
 		/// Convenience function.
-		/// @copydoc write(const uint8_t, stream::len)
+		/// @copydoc write(const uint8_t *, stream::len)
 		void write(const char *buffer, stream::len len)
 			throw (error);
 
@@ -526,6 +526,9 @@ void copy(output_sptr dest, input_sptr src)
  *
  * @param to
  *   Offset from the start of the stream where the data will be written to.
+ *
+ * @param len
+ *   Number of bytes to move.
  *
  * @throw read_error
  *   Data could not be read from src.

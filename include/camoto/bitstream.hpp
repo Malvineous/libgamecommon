@@ -89,10 +89,10 @@ class bitstream {
 		/// Stream-less constructor for using variant of read() with stream as
 		/// a parameter.
 		/**
-		 * @param et
+		 * @param endianType
 		 *   Endian type.
 		 */
-		bitstream(endian et)
+		bitstream(endian endianType)
 			throw ();
 
 		/// Destructor.

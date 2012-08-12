@@ -77,12 +77,6 @@ class seg: virtual public inout
 		/**
 		 * @param parent
 		 *   Parent stream supplying the data.
-		 *
-		 * @param fn_resize
-		 *   Callback function to notify someone if and when the parent needs to be
-		 *   resized, usually as a result of someone calling insert() to add a new
-		 *   block of data.  The resize is performed then (rather than in flush())
-		 *   so that any inability to resize doesn't corrupt the parent stream.
 		 */
 		void open(inout_sptr parent)
 			throw ();
@@ -124,7 +118,7 @@ class seg: virtual public inout
 		 *             ^ Seek position, len == 4
 		 * @endcode
 		 *
-		 * @param len
+		 * @param lenRemove
 		 *   Number of bytes to remove.
 		 *
 		 * @throw write_error
