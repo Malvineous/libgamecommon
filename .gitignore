@@ -27,9 +27,8 @@ libtool
 *.lo
 *.la
 
-# doxygen output
-doxygen/api/
-doxygen/full/
+# Generated docs
+doc/doxygen/
 
 # Compiled binaries
 tests/tests
