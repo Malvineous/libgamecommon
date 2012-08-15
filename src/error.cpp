@@ -23,8 +23,7 @@
 namespace camoto {
 
 error::error(const std::string& msg)
-	throw () :
-		msg(msg)
+	:	msg(msg)
 {
 }
 
@@ -40,7 +39,6 @@ const char *error::what() const
 }
 
 std::string error::get_message() const
-	throw ()
 {
 	return this->msg;
 }

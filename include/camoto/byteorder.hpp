@@ -191,8 +191,8 @@ struct number_format_write {
 
 template <typename T, typename E, typename I>
 struct number_format: public number_format_read, public number_format_write {
-	number_format(I& r) :
-		r(r)
+	number_format(I& r)
+		: r(r)
 	{
 	}
 
@@ -217,8 +217,8 @@ struct number_format: public number_format_read, public number_format_write {
 
 template <typename T, typename E, typename I>
 struct number_format_const: public number_format_write {
-	number_format_const(const I& r) :
-		r(r)
+	number_format_const(const I& r)
+		: r(r)
 	{
 	}
 

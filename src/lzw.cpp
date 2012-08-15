@@ -38,15 +38,14 @@
 
 namespace camoto {
 
-CodeString::CodeString(byte newByte, unsigned pI):
-	prefixIndex(pI), first(~0U),
-	nextLeft(~0U), nextRight(~0U),
-	k(newByte)
+CodeString::CodeString(byte newByte, unsigned pI)
+	:	prefixIndex(pI), first(~0U),
+		nextLeft(~0U), nextRight(~0U),
+		k(newByte)
 {
 }
 
 void Dictionary::fillDecodedString(unsigned code)
-	throw (filter_error)
 {
 	decodedString.clear();
 	unsigned int safety = 0;
@@ -71,9 +70,9 @@ void Dictionary::fillDecodedString(unsigned code)
 	}
 }
 
-Dictionary::Dictionary(unsigned maxBits, unsigned codeStart) :
-	table(1<<maxBits),
-	codeStart(codeStart), newCodeStringIndex(codeStart)
+Dictionary::Dictionary(unsigned maxBits, unsigned codeStart)
+	:	table(1<<maxBits),
+		codeStart(codeStart), newCodeStringIndex(codeStart)
 {
 	for(unsigned i = 0; i < codeStart; ++i)
 		table[i].k = i;
@@ -118,15 +117,15 @@ void Dictionary::reset()
 
 
 filter_lzw_decompress::filter_lzw_decompress(int initialBits, int maxBits,
-	int firstCode, int eofCode, int resetCode, int flags) :
-	maxBits(maxBits),
-	flags(flags),
-	eofCode(eofCode),
-	resetCode(resetCode),
-	initialBits(initialBits),
-	dictionary(maxBits, firstCode),
-	data(((flags & LZW_BIG_ENDIAN) != LZW_BIG_ENDIAN) ? bitstream::littleEndian : bitstream::bigEndian),
-	code(0)
+	int firstCode, int eofCode, int resetCode, int flags)
+	:	maxBits(maxBits),
+		flags(flags),
+		eofCode(eofCode),
+		resetCode(resetCode),
+		initialBits(initialBits),
+		dictionary(maxBits, firstCode),
+		data(((flags & LZW_BIG_ENDIAN) != LZW_BIG_ENDIAN) ? bitstream::littleEndian : bitstream::bigEndian),
+		code(0)
 {
 	if (this->flags & LZW_NO_BITSIZE_RESET) {
 		// If LZW_NO_BITSIZE_RESET is *not* set these things will be done in
@@ -150,7 +149,6 @@ int nextChar(const uint8_t **in, stream::len *lenIn, stream::len *r, uint8_t *ou
 
 void filter_lzw_decompress::transform(uint8_t *out, stream::len *lenOut,
 	const uint8_t *in, stream::len *lenIn)
-	throw (filter_error)
 {
 	stream::len r = 0, w = 0;
 	fn_getnextchar cbNext = boost::bind(nextChar, &in, lenIn, &r, _1);
@@ -276,16 +274,16 @@ void filter_lzw_decompress::recalcCodes()
 }
 
 filter_lzw_compress::filter_lzw_compress(int initialBits, int maxBits,
-	int firstCode, int eofCode, int resetCode, int flags) :
-	maxBits(maxBits),
-	flags(flags),
-	eofCode(eofCode),
-	resetCode(resetCode),
-	firstCode(firstCode),
-	initialBits(initialBits),
-	dictSize(256),
-	currentBits(initialBits),
-	data(((flags & LZW_BIG_ENDIAN) != LZW_BIG_ENDIAN) ? bitstream::littleEndian : bitstream::bigEndian)
+	int firstCode, int eofCode, int resetCode, int flags)
+	:	maxBits(maxBits),
+		flags(flags),
+		eofCode(eofCode),
+		resetCode(resetCode),
+		firstCode(firstCode),
+		initialBits(initialBits),
+		dictSize(256),
+		currentBits(initialBits),
+		data(((flags & LZW_BIG_ENDIAN) != LZW_BIG_ENDIAN) ? bitstream::littleEndian : bitstream::bigEndian)
 {
 	assert(initialBits > 0);
 	if (this->flags & LZW_NO_BITSIZE_RESET) {
@@ -310,7 +308,6 @@ int putChar(uint8_t **out, const stream::len *lenOut, stream::len *w, uint8_t in
 
 void filter_lzw_compress::transform(uint8_t *out, stream::len *lenOut,
 	const uint8_t *in, stream::len *lenIn)
-	throw (filter_error)
 {
 	stream::len r = 0, w = 0;
 	fn_putnextchar cbNext = boost::bind(putChar, &out, lenOut, &w, _1);

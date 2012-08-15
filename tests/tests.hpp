@@ -45,9 +45,9 @@ struct string_sample: public default_sample {
 	camoto::stream::string_sptr in;
 	camoto::stream::string_sptr out;
 
-	string_sample() :
-		in(new camoto::stream::string()),
-		out(new camoto::stream::string())
+	string_sample()
+		:	in(new camoto::stream::string()),
+			out(new camoto::stream::string())
 	{
 	}
 

@@ -35,7 +35,7 @@ struct stream_move_sample: public default_sample {
 	stream::string_sptr data;
 
 	stream_move_sample()
-		: data(new stream::string())
+		:	data(new stream::string())
 	{
 		this->data->write("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 	}

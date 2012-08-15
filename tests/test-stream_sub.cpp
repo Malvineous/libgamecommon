@@ -32,7 +32,6 @@ using namespace camoto;
 
 /// Truncate function to adjust a stream::string so it can hold an enlarging stream::sub
 void ss_resize(stream::output_sptr base, stream::output_sub_sptr sub, stream::len len)
-	throw (stream::write_error)
 {
 	base->truncate(sub->get_offset() + len);
 	sub->resize(len);
@@ -44,8 +43,8 @@ struct stream_sub_sample: public default_sample {
 	stream::sub_sptr sub;
 
 	stream_sub_sample()
-		: base(new stream::string()),
-		  sub(new stream::sub())
+		:	base(new stream::string()),
+			sub(new stream::sub())
 	{
 		this->base->write("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 

@@ -35,25 +35,21 @@ class string_core {
 		bool free;           ///< Delete \e data when done?
 		stream::pos offset;  ///< Current pointer position
 
-		string_core()
-			throw ();
+		string_core();
 
-		~string_core()
-			throw ();
+		~string_core();
 
 		/// Common seek function for reading and writing.
 		/**
 		 * @copydetails input::seekg()
 		 */
-		void seek(stream::delta off, seek_from from)
-			throw (seek_error);
+		void seek(stream::delta off, seek_from from);
 
 		/// Get access to the underlying storage.
 		/**
 		 * @return Reference to the underlying string.
 		 */
-		std::string& str()
-			throw ();
+		std::string& str();
 };
 
 /// Read-only stream to access a C++ string.
@@ -65,20 +61,15 @@ class input_string: virtual public input,
 		/**
 		 * @note Initialises with empty string.
 		 */
-		input_string()
-			throw ();
+		input_string();
 
-		virtual stream::len try_read(uint8_t *buffer, stream::len len)
-			throw ();
+		virtual stream::len try_read(uint8_t *buffer, stream::len len);
 
-		virtual void seekg(stream::delta off, seek_from from)
-			throw (seek_error);
+		virtual void seekg(stream::delta off, seek_from from);
 
-		virtual stream::pos tellg() const
-			throw (seek_error);
+		virtual stream::pos tellg() const;
 
-		virtual stream::pos size() const
-			throw (seek_error);
+		virtual stream::pos size() const;
 
 		/// Wrap around an existing string.
 		/**
@@ -88,8 +79,7 @@ class input_string: virtual public input,
 		 *
 		 * @see str();
 		 */
-		void open(const std::string *src)
-			throw ();
+		void open(const std::string *src);
 
 		using string_core::str;
 };
@@ -106,23 +96,17 @@ class output_string: virtual public output,
 		/**
 		 * @note Initialises with empty string.
 		 */
-		output_string()
-			throw ();
+		output_string();
 
-		virtual stream::len try_write(const uint8_t *buffer, stream::len len)
-			throw ();
+		virtual stream::len try_write(const uint8_t *buffer, stream::len len);
 
-		virtual void seekp(stream::delta off, seek_from from)
-			throw (seek_error);
+		virtual void seekp(stream::delta off, seek_from from);
 
-		virtual stream::pos tellp() const
-			throw (seek_error);
+		virtual stream::pos tellp() const;
 
-		virtual void truncate(stream::pos size)
-			throw (write_error);
+		virtual void truncate(stream::pos size);
 
-		virtual void flush()
-			throw (write_error);
+		virtual void flush();
 
 		/// Wrap around an existing string.
 		/**
@@ -132,8 +116,7 @@ class output_string: virtual public output,
 		 *
 		 * @see str();
 		 */
-		void open(std::string *src)
-			throw ();
+		void open(std::string *src);
 
 		using string_core::str;
 };
@@ -147,8 +130,7 @@ class string: virtual public inout,
               virtual public output_string
 {
 	public:
-		string()
-			throw ();
+		string();
 
 		// Pick this version (as opposed to input_string::open) as it will
 		// "open" the string in read/write mode.

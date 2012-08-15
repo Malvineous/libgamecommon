@@ -29,7 +29,6 @@ namespace camoto {
 namespace stream {
 
 stream::len seg::try_read(uint8_t *buffer, stream::len len)
-	throw ()
 {
 	// Make sure open() has been called
 	assert(this->parent);
@@ -105,7 +104,6 @@ stream::len seg::try_read(uint8_t *buffer, stream::len len)
 }
 
 void seg::seekg(stream::delta off, seek_from from)
-	throw (seek_error)
 {
 	// Calculate stream size
 	stream::pos lenFirst = this->off_endparent - this->off_parent;
@@ -152,13 +150,11 @@ void seg::seekg(stream::delta off, seek_from from)
 }
 
 stream::pos seg::tellg() const
-	throw (seek_error)
 {
 	return this->offset;
 }
 
 stream::pos seg::size() const
-	throw (seek_error)
 {
 	// Make sure open() has been called
 	assert(this->parent);
@@ -170,7 +166,6 @@ stream::pos seg::size() const
 }
 
 stream::len seg::try_write(const uint8_t *buffer, stream::len len)
-	throw ()
 {
 	// Make sure open() has been called
 	assert(this->parent);
@@ -245,20 +240,17 @@ stream::len seg::try_write(const uint8_t *buffer, stream::len len)
 }
 
 void seg::seekp(stream::delta off, seek_from from)
-	throw (seek_error)
 {
 	this->seekg(off, from);
 	return;
 }
 
 stream::pos seg::tellp() const
-	throw (seek_error)
 {
 	return this->tellg();
 }
 
 void seg::truncate(stream::pos size)
-	throw (write_error)
 {
 	try {
 		stream::len total = this->size();
@@ -272,7 +264,6 @@ void seg::truncate(stream::pos size)
 }
 
 void seg::flush()
-	throw ()
 {
 	// Make sure open() has been called
 	assert(this->parent);
@@ -332,7 +323,6 @@ void seg::flush()
 }
 
 void seg::open(inout_sptr parent)
-	throw ()
 {
 	assert(parent);
 
@@ -345,7 +335,6 @@ void seg::open(inout_sptr parent)
 }
 
 void seg::insert(stream::len lenInsert)
-	throw (write_error)
 {
 	stream::pos lenFirst = this->off_endparent - this->off_parent;
 	if (this->offset < lenFirst) {
@@ -378,7 +367,6 @@ void seg::insert(stream::len lenInsert)
 }
 
 void seg::remove(stream::len lenRemove)
-	throw (write_error)
 {
 	if (lenRemove == 0) return;
 
@@ -477,7 +465,6 @@ void seg::remove(stream::len lenRemove)
 }
 
 void seg::split()
-	throw ()
 {
 	assert(this->offset < (this->off_endparent - this->off_parent));
 
@@ -504,7 +491,6 @@ void seg::split()
 }
 
 void seg::commit(stream::pos poffWriteFirst)
-	throw (write_error)
 {
 	assert(this->off_parent <= this->off_endparent);
 

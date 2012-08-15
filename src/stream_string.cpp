@@ -27,21 +27,18 @@ namespace camoto {
 namespace stream {
 
 string_core::string_core()
-	throw () :
-		data(new std::string()),
+	:	data(new std::string()),
 		free(true),
 		offset(0)
 {
 }
 
 string_core::~string_core()
-	throw ()
 {
 	if (this->free) delete this->data;
 }
 
 void string_core::seek(stream::delta off, seek_from from)
-	throw (seek_error)
 {
 	stream::pos baseOffset;
 	std::string::size_type stringSize = this->data->length();
@@ -69,19 +66,16 @@ void string_core::seek(stream::delta off, seek_from from)
 }
 
 std::string& string_core::str()
-	throw ()
 {
 	return *this->data;
 }
 
 
 input_string::input_string()
-	throw ()
 {
 }
 
 stream::len input_string::try_read(uint8_t *buffer, stream::len len)
-	throw ()
 {
 	assert(this->data);
 
@@ -96,26 +90,22 @@ stream::len input_string::try_read(uint8_t *buffer, stream::len len)
 }
 
 void input_string::seekg(stream::delta off, seek_from from)
-	throw (seek_error)
 {
 	this->seek(off, from);
 	return;
 }
 
 stream::pos input_string::tellg() const
-	throw (seek_error)
 {
 	return this->offset;
 }
 
 stream::pos input_string::size() const
-	throw (seek_error)
 {
 	return this->data->length();
 }
 
 void input_string::open(const std::string *src)
-	throw ()
 {
 	if (this->free) {
 		delete this->data;
@@ -128,12 +118,10 @@ void input_string::open(const std::string *src)
 
 
 output_string::output_string()
-	throw ()
 {
 }
 
 stream::len output_string::try_write(const uint8_t *buffer, stream::len len)
-	throw ()
 {
 	assert(this->data);
 
@@ -155,20 +143,17 @@ stream::len output_string::try_write(const uint8_t *buffer, stream::len len)
 }
 
 void output_string::seekp(stream::delta off, seek_from from)
-	throw (seek_error)
 {
 	this->seek(off, from);
 	return;
 }
 
 stream::pos output_string::tellp() const
-	throw (seek_error)
 {
 	return this->offset;
 }
 
 void output_string::truncate(stream::pos size)
-	throw (write_error)
 {
 	this->flush();
 	try {
@@ -181,13 +166,11 @@ void output_string::truncate(stream::pos size)
 }
 
 void output_string::flush()
-	throw (write_error)
 {
 	return;
 }
 
 void output_string::open(std::string *src)
-	throw ()
 {
 	if (this->free) {
 		delete this->data;
@@ -200,7 +183,6 @@ void output_string::open(std::string *src)
 
 
 string::string()
-	throw ()
 {
 }
 

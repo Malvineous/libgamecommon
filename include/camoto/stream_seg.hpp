@@ -46,40 +46,30 @@ typedef boost::shared_ptr<seg> seg_sptr;
 class seg: virtual public inout
 {
 	public:
-		virtual stream::len try_read(uint8_t *buffer, stream::len len)
-			throw ();
+		virtual stream::len try_read(uint8_t *buffer, stream::len len);
 
-		virtual void seekg(stream::delta off, seek_from from)
-			throw (seek_error);
+		virtual void seekg(stream::delta off, seek_from from);
 
-		virtual stream::pos tellg() const
-			throw (seek_error);
+		virtual stream::pos tellg() const;
 
-		virtual stream::pos size() const
-			throw (seek_error);
+		virtual stream::pos size() const;
 
-		virtual stream::len try_write(const uint8_t *buffer, stream::len len)
-			throw ();
+		virtual stream::len try_write(const uint8_t *buffer, stream::len len);
 
-		virtual void seekp(stream::delta off, seek_from from)
-			throw (seek_error);
+		virtual void seekp(stream::delta off, seek_from from);
 
-		virtual stream::pos tellp() const
-			throw (seek_error);
+		virtual stream::pos tellp() const;
 
-		virtual void truncate(stream::pos size)
-			throw (write_error);
+		virtual void truncate(stream::pos size);
 
-		virtual void flush()
-			throw ();
+		virtual void flush();
 
 		/// Create a segmented stream backed onto another stream.
 		/**
 		 * @param parent
 		 *   Parent stream supplying the data.
 		 */
-		void open(inout_sptr parent)
-			throw ();
+		void open(inout_sptr parent);
 
 		/// Insert a block of data at the pointer.
 		/**
@@ -102,8 +92,7 @@ class seg: virtual public inout
 		 * @throw write_error
 		 *   The parent stream could not be resized to accommodate the new block.
 		 */
-		void insert(stream::len lenInsert)
-			throw (write_error);
+		void insert(stream::len lenInsert);
 
 		/// Remove a chunk of data starting at the pointer's location.
 		/**
@@ -124,8 +113,7 @@ class seg: virtual public inout
 		 * @throw write_error
 		 *   The parent stream could not be resized to accommodate the new block.
 		 */
-		void remove(stream::len lenRemove)
-			throw (write_error);
+		void remove(stream::len lenRemove);
 
 	protected:
 		inout_sptr parent;                  ///< Parent stream
@@ -154,8 +142,7 @@ class seg: virtual public inout
 		 * first --^   ^-- third (second is empty)
 		 * @endcode
 		 */
-		void split()
-			throw ();
+		void split();
 
 		/// Commit the data to the underlying stream.
 		/**
@@ -165,8 +152,7 @@ class seg: virtual public inout
 		 * the middle.  It has to be done in this order so that no data we need gets
 		 * overwritten before it has been moved out of the way.
 		 */
-		void commit(stream::pos poffWriteFirst)
-			throw (write_error);
+		void commit(stream::pos poffWriteFirst);
 
 };
 

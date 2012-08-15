@@ -30,10 +30,10 @@
 
 namespace camoto {
 
-null_padded_read::null_padded_read(std::string& r, stream::len len, bool chop) :
-	r(r),
-	len(len),
-	chop(chop)
+null_padded_read::null_padded_read(std::string& r, stream::len len, bool chop)
+	:	r(r),
+		len(len),
+		chop(chop)
 {
 }
 
@@ -52,9 +52,9 @@ void null_padded_read::read(stream::input_sptr s) const
 	return;
 }
 
-null_padded_write::null_padded_write(const std::string& r, stream::len len) :
-	r(r),
-	len(len)
+null_padded_write::null_padded_write(const std::string& r, stream::len len)
+	:	r(r),
+		len(len)
 {
 }
 
@@ -79,21 +79,21 @@ void null_padded_write::write(stream::output_sptr s) const
 	return;
 }
 
-null_padded_const::null_padded_const(const std::string& r, stream::len len) :
-	null_padded_write(r, len)
+null_padded_const::null_padded_const(const std::string& r, stream::len len)
+	:	null_padded_write(r, len)
 {
 }
 
-null_padded::null_padded(std::string& r, stream::len len, bool chop) :
-	null_padded_read(r, len, chop),
-	null_padded_write(r, len)
+null_padded::null_padded(std::string& r, stream::len len, bool chop)
+	:	null_padded_read(r, len, chop),
+		null_padded_write(r, len)
 {
 }
 
 
-null_terminated_read::null_terminated_read(std::string& r, stream::len maxlen) :
-	r(r),
-	maxlen(maxlen)
+null_terminated_read::null_terminated_read(std::string& r, stream::len maxlen)
+	:	r(r),
+		maxlen(maxlen)
 {
 }
 
@@ -109,8 +109,8 @@ void null_terminated_read::read(stream::input_sptr s) const
 }
 
 null_terminated_write::null_terminated_write(const std::string& r, stream::len maxlen)
-	: r(r),
-	  maxlen(maxlen)
+	:	r(r),
+		maxlen(maxlen)
 {
 }
 
@@ -129,19 +129,19 @@ void null_terminated_write::write(stream::output_sptr s) const
 }
 
 null_terminated_const::null_terminated_const(const std::string& r, stream::len maxlen)
-	: null_terminated_write(r, maxlen)
+	:	null_terminated_write(r, maxlen)
 {
 }
 
 null_terminated::null_terminated(std::string& r, stream::len maxlen)
-	: null_terminated_read(r, maxlen),
-	  null_terminated_write(r, maxlen)
+	:	null_terminated_read(r, maxlen),
+		null_terminated_write(r, maxlen)
 {
 }
 
 
-number_format_u8::number_format_u8(uint8_t& r) :
-	r(r)
+number_format_u8::number_format_u8(uint8_t& r)
+	:	r(r)
 {
 }
 
@@ -157,8 +157,8 @@ void number_format_u8::write(stream::output_sptr s) const
 	return;
 }
 
-number_format_const_u8::number_format_const_u8(const uint8_t& r) :
-	r(r)
+number_format_const_u8::number_format_const_u8(const uint8_t& r)
+	:	r(r)
 {
 }
 

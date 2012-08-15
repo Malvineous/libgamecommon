@@ -34,18 +34,15 @@ class memory_core
 		std::vector<uint8_t> data;   ///< Stream content
 		stream::pos offset;          ///< Current pointer position
 
-		memory_core()
-			throw ();
+		memory_core();
 
-		~memory_core()
-			throw ();
+		~memory_core();
 
 		/// Common seek function for reading and writing.
 		/**
 		 * @copydetails input::seekg()
 		 */
-		void seek(stream::delta off, seek_from from)
-			throw (error);
+		void seek(stream::delta off, seek_from from);
 };
 
 /// Read-only stream to access a C++ vector.
@@ -57,20 +54,15 @@ class input_memory: virtual public input,
 		/**
 		 * @note Initialises with empty memory.
 		 */
-		input_memory()
-			throw ();
+		input_memory();
 
-		virtual stream::len try_read(uint8_t *buffer, stream::len len)
-			throw (error);
+		virtual stream::len try_read(uint8_t *buffer, stream::len len);
 
-		virtual void seekg(stream::delta off, seek_from from)
-			throw (error);
+		virtual void seekg(stream::delta off, seek_from from);
 
-		virtual stream::pos tellg() const
-			throw (error);
+		virtual stream::pos tellg() const;
 
-		virtual stream::pos size() const
-			throw (error);
+		virtual stream::pos size() const;
 };
 
 /// Shared pointer to a readable memory.
@@ -85,23 +77,17 @@ class output_memory: virtual public output,
 		/**
 		 * @note Initialises with empty vector.
 		 */
-		output_memory()
-			throw ();
+		output_memory();
 
-		virtual stream::len try_write(const uint8_t *buffer, stream::len len)
-			throw (error);
+		virtual stream::len try_write(const uint8_t *buffer, stream::len len);
 
-		virtual void seekp(stream::delta off, seek_from from)
-			throw (error);
+		virtual void seekp(stream::delta off, seek_from from);
 
-		virtual stream::pos tellp() const
-			throw (error);
+		virtual stream::pos tellp() const;
 
-		virtual void truncate(stream::pos size)
-			throw (error);
+		virtual void truncate(stream::pos size);
 
-		virtual void flush()
-			throw (error);
+		virtual void flush();
 };
 
 /// Shared pointer to a writable memory.
@@ -113,8 +99,7 @@ class memory: virtual public inout,
               virtual public output_memory
 {
 	public:
-		memory()
-			throw ();
+		memory();
 };
 
 /// Shared pointer to a readable and writable memory.

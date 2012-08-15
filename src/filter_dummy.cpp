@@ -23,13 +23,11 @@
 namespace camoto {
 
 filter_dummy::filter_dummy()
-	throw ()
 {
 }
 
 void filter_dummy::transform(uint8_t *out, stream::len *lenOut,
 	const uint8_t *in, stream::len *lenIn)
-	throw (filter_error)
 {
 	// Copy as much data as will fit in the smallest buffer
 	stream::len minAmt = (*lenOut > *lenIn) ? *lenIn : *lenOut;

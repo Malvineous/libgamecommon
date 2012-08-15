@@ -28,12 +28,10 @@ namespace camoto {
 namespace stream {
 
 /// Get an input stream reading from standard input.
-input_sptr open_stdin()
-	throw ();
+input_sptr open_stdin();
 
 /// Get an output stream writing to standard output.
-output_sptr open_stdout()
-	throw ();
+output_sptr open_stdout();
 
 /// Exception thrown when a file could not be opened or created.
 class open_error: public error
@@ -57,19 +55,16 @@ class file_core {
 		FILE *handle;  ///< stdio file handle
 		bool close;    ///< Do we need to close \e handle ?
 
-		file_core()
-			throw ();
+		file_core();
 
 		/// Common seek function for reading and writing.
 		/**
 		 * @copydetails input::seekg()
 		 */
-		void seek(stream::delta off, seek_from from)
-			throw (seek_error);
+		void seek(stream::delta off, seek_from from);
 
 		/// Common function for obtaining current seek position.
-		stream::pos tell() const
-			throw (seek_error);
+		stream::pos tell() const;
 
 };
 
@@ -82,23 +77,17 @@ class input_file: virtual public input,
 		/**
 		 * @note Must call open() before any other functions.
 		 */
-		input_file()
-			throw ();
+		input_file();
 
-		virtual ~input_file()
-			throw ();
+		virtual ~input_file();
 
-		virtual stream::len try_read(uint8_t *buffer, stream::len len)
-			throw ();
+		virtual stream::len try_read(uint8_t *buffer, stream::len len);
 
-		virtual void seekg(stream::delta off, seek_from from)
-			throw (seek_error);
+		virtual void seekg(stream::delta off, seek_from from);
 
-		virtual stream::pos tellg() const
-			throw (seek_error);
+		virtual stream::pos tellg() const;
 
-		virtual stream::pos size() const
-			throw (seek_error);
+		virtual stream::pos size() const;
 
 		/// Open an existing file.
 		/**
@@ -108,15 +97,12 @@ class input_file: virtual public input,
 		 * @throw open_error
 		 *   The file could not be read or does not exist.
 		 */
-		void open(const char *filename)
-			throw (open_error);
+		void open(const char *filename);
 
 		/// @copydoc open(const char *)
-		void open(const std::string& filename)
-			throw (open_error);
+		void open(const std::string& filename);
 
-		friend input_sptr open_stdin()
-			throw ();
+		friend input_sptr open_stdin();
 
 };
 
@@ -132,26 +118,19 @@ class output_file: virtual public output,
 		/**
 		 * @note Must call open() or create() before any other functions.
 		 */
-		output_file()
-			throw ();
+		output_file();
 
-		virtual ~output_file()
-			throw ();
+		virtual ~output_file();
 
-		virtual stream::len try_write(const uint8_t *buffer, stream::len len)
-			throw ();
+		virtual stream::len try_write(const uint8_t *buffer, stream::len len);
 
-		virtual void seekp(stream::delta off, seek_from from)
-			throw (seek_error);
+		virtual void seekp(stream::delta off, seek_from from);
 
-		virtual stream::pos tellp() const
-			throw (seek_error);
+		virtual stream::pos tellp() const;
 
-		virtual void truncate(stream::pos size)
-			throw (write_error);
+		virtual void truncate(stream::pos size);
 
-		virtual void flush()
-			throw (write_error);
+		virtual void flush();
 
 		/// Open an existing file.
 		/**
@@ -161,12 +140,10 @@ class output_file: virtual public output,
 		 * @throw open_error
 		 *   The file could not be read or does not exist.
 		 */
-		void open(const char *filename)
-			throw (open_error);
+		void open(const char *filename);
 
 		/// @copydoc open(const char *)
-		void open(const std::string& filename)
-			throw (open_error);
+		void open(const std::string& filename);
 
 		/// Create a new file, or overwrite (blank out) an existing one.
 		/**
@@ -176,29 +153,23 @@ class output_file: virtual public output,
 		 * @throw open_error
 		 *   The file could not be created (e.g. no permission).
 		 */
-		void create(const char *filename)
-			throw (open_error);
+		void create(const char *filename);
 
 		/// @copydoc create(const char *)
-		void create(const std::string& filename)
-			throw (open_error);
+		void create(const std::string& filename);
 
 		/// Delete the file upon close.
-		void remove()
-			throw ();
+		void remove();
 
-		friend output_sptr open_stdout()
-			throw ();
+		friend output_sptr open_stdout();
 
 	protected:
 		bool do_remove;        ///< Delete file on close?
 		std::string filename;  ///< Copy of filename for deletion
 
-		void open()
-			throw (open_error);
+		void open();
 
-		void create()
-			throw (open_error);
+		void create();
 };
 
 /// Shared pointer to a writable file.
@@ -210,8 +181,7 @@ class file: virtual public inout,
             virtual public output_file
 {
 	public:
-		file()
-			throw ();
+		file();
 
 		// Pick this version (as opposed to input_file::open) as it happens to
 		// open the file in read/write mode.

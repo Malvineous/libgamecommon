@@ -30,8 +30,7 @@
 namespace camoto {
 
 bitstream::bitstream(stream::inout_sptr parent, bitstream::endian endianType)
-	throw () :
-		parent(parent),
+	:	parent(parent),
 		offset(0),
 		curBitPos(8), // 8 means update bufByte on next operation
 		bufByte(0),
@@ -41,8 +40,7 @@ bitstream::bitstream(stream::inout_sptr parent, bitstream::endian endianType)
 }
 
 bitstream::bitstream(bitstream::endian endianType)
-	throw () :
-		parent(),
+	:	parent(),
 		offset(0),
 		curBitPos(8), // 8 means update bufByte on next operation
 		bufByte(0),
@@ -52,19 +50,16 @@ bitstream::bitstream(bitstream::endian endianType)
 }
 
 bitstream::~bitstream()
-	throw ()
 {
 }
 
 int bitstream::read(int bits, int *out)
-	throw (stream::error)
 {
 	assert(this->parent);
 	return this->read(NULL, bits, out);
 }
 
 int bitstream::read(fn_getnextchar fnNextChar, int bits, int *out)
-	throw (stream::error)
 {
 	*out = 0;
 	int bitsread = 0;
@@ -173,14 +168,12 @@ int bitstream::read(fn_getnextchar fnNextChar, int bits, int *out)
 }
 
 int bitstream::write(int bits, int in)
-	throw (stream::error)
 {
 	assert(this->parent);
 	return this->write(NULL, bits, in);
 }
 
 int bitstream::write(fn_putnextchar fnNextChar, int bits, int in)
-	throw (stream::error)
 {
 	// Make sure the number being written can actually fit in this many bits.
 	assert(in < (1 << bits));
@@ -263,7 +256,6 @@ int bitstream::write(fn_putnextchar fnNextChar, int bits, int in)
 }
 
 stream::pos bitstream::seek(stream::delta off, stream::seek_from way)
-	throw (stream::error)
 {
 	assert(this->parent);
 	this->flush();
@@ -310,7 +302,6 @@ stream::pos bitstream::seek(stream::delta off, stream::seek_from way)
 }
 
 void bitstream::flush()
-	throw (stream::error)
 {
 	assert(this->parent);
 
@@ -329,27 +320,23 @@ void bitstream::flush()
 }
 
 void bitstream::changeEndian(bitstream::endian endianType)
-	throw ()
 {
 	this->endianType = endianType;
 	return;
 }
 
 bitstream::endian bitstream::getEndian()
-	throw ()
 {
 	return this->endianType;
 }
 
 void bitstream::flushByte()
-	throw ()
 {
 	this->flushByte(NULL);
 	return;
 }
 
 void bitstream::flushByte(fn_putnextchar fnNextChar)
-	throw ()
 {
 	// Write out the buf byte (if it has been changed)
 	if (this->parent) this->writeBufByte();
@@ -371,7 +358,6 @@ void bitstream::flushByte(fn_putnextchar fnNextChar)
 }
 
 void bitstream::writeBufByte()
-	throw (stream::error)
 {
 	assert(this->parent);
 	if (
@@ -404,7 +390,6 @@ void bitstream::writeBufByte()
 }
 
 void bitstream::peekByte(uint8_t *buf, uint8_t *mask)
-	throw ()
 {
 	*buf = (this->curBitPos == 8) ? 0x00 : this->bufByte;
 	if (this->endianType == bitstream::littleEndian) {

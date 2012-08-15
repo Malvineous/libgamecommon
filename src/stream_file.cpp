@@ -27,7 +27,6 @@ namespace camoto {
 namespace stream {
 
 input_sptr open_stdin()
-	throw ()
 {
 	input_file_sptr f(new input_file());
 	f->handle = stdin;
@@ -36,7 +35,6 @@ input_sptr open_stdin()
 }
 
 output_sptr open_stdout()
-	throw ()
 {
 	output_file_sptr f(new output_file());
 	f->handle = stdout;
@@ -45,14 +43,12 @@ output_sptr open_stdout()
 }
 
 file_core::file_core()
-	throw () :
-		handle(NULL),
+	:	handle(NULL),
 		close(false)
 {
 }
 
 void file_core::seek(stream::delta off, seek_from from)
-	throw (seek_error)
 {
 	int whence;
 	switch (from) {
@@ -67,7 +63,6 @@ void file_core::seek(stream::delta off, seek_from from)
 }
 
 stream::pos file_core::tell() const
-	throw (seek_error)
 {
 	long p = ftell(this->handle);
 	if (p < 0) {
@@ -78,12 +73,10 @@ stream::pos file_core::tell() const
 
 
 input_file::input_file()
-	throw ()
 {
 }
 
 input_file::~input_file()
-	throw ()
 {
 	if (this->close) {
 		fclose(this->handle);
@@ -92,26 +85,22 @@ input_file::~input_file()
 }
 
 stream::len input_file::try_read(uint8_t *buffer, stream::len len)
-	throw ()
 {
 	return fread(buffer, 1, len, this->handle);
 }
 
 void input_file::seekg(stream::delta off, seek_from from)
-	throw (seek_error)
 {
 	this->seek(off, from);
 	return;
 }
 
 stream::pos input_file::tellg() const
-	throw (seek_error)
 {
 	return this->tell();
 }
 
 stream::pos input_file::size() const
-	throw (seek_error)
 {
 	long start = ftell(this->handle);
 
@@ -123,7 +112,6 @@ stream::pos input_file::size() const
 }
 
 void input_file::open(const char *filename)
-	throw (open_error)
 {
 	this->handle = fopen(filename, "rb");
 	if (this->handle == NULL) throw open_error(strerror(errno));
@@ -133,7 +121,6 @@ void input_file::open(const char *filename)
 }
 
 void input_file::open(const std::string& filename)
-	throw (open_error)
 {
 	this->open(filename.c_str());
 	return;
@@ -141,13 +128,11 @@ void input_file::open(const std::string& filename)
 
 
 output_file::output_file()
-	throw ()
-	: do_remove(false)
+	:	do_remove(false)
 {
 }
 
 output_file::~output_file()
-	throw ()
 {
 	if (this->close) {
 		fclose(this->handle);
@@ -161,26 +146,22 @@ output_file::~output_file()
 }
 
 stream::len output_file::try_write(const uint8_t *buffer, stream::len len)
-	throw ()
 {
 	return fwrite(buffer, 1, len, this->handle);
 }
 
 void output_file::seekp(stream::delta off, seek_from from)
-	throw (seek_error)
 {
 	this->seek(off, from);
 	return;
 }
 
 stream::pos output_file::tellp() const
-	throw (seek_error)
 {
 	return this->tell();
 }
 
 void output_file::truncate(stream::pos size)
-	throw (write_error)
 {
 	this->flush();
 	int fd = fileno(this->handle);
@@ -198,7 +179,6 @@ void output_file::truncate(stream::pos size)
 }
 
 void output_file::flush()
-	throw (write_error)
 {
 	if (fflush(this->handle) < 0) {
 		throw write_error(strerror(errno));
@@ -207,7 +187,6 @@ void output_file::flush()
 }
 
 void output_file::open(const char *filename)
-	throw (open_error)
 {
 	this->filename = std::string(filename);
 	this->open();
@@ -215,7 +194,6 @@ void output_file::open(const char *filename)
 }
 
 void output_file::open(const std::string& filename)
-	throw (open_error)
 {
 	this->filename = filename;
 	this->open();
@@ -223,7 +201,6 @@ void output_file::open(const std::string& filename)
 }
 
 void output_file::open()
-	throw (open_error)
 {
 	// We have to open the file in read/write even though we aren't reading,
 	// because none of the other options allow us to seek around and overwrite
@@ -239,7 +216,6 @@ void output_file::open()
 }
 
 void output_file::create(const char *filename)
-	throw (open_error)
 {
 	this->filename = std::string(filename);
 	this->create();
@@ -247,7 +223,6 @@ void output_file::create(const char *filename)
 }
 
 void output_file::create(const std::string& filename)
-	throw (open_error)
 {
 	this->filename = filename;
 	this->create();
@@ -255,7 +230,6 @@ void output_file::create(const std::string& filename)
 }
 
 void output_file::create()
-	throw (open_error)
 {
 	// We have to open the file in read/write even though we aren't reading,
 	// because none of the other options allow us to seek around and overwrite
@@ -271,7 +245,6 @@ void output_file::create()
 }
 
 void output_file::remove()
-	throw ()
 {
 	this->do_remove = true;
 	return;
@@ -279,7 +252,6 @@ void output_file::remove()
 
 
 file::file()
-	throw ()
 {
 }
 

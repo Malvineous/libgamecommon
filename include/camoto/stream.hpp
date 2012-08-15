@@ -58,8 +58,7 @@ typedef signed_int_type delta;
  *
  * The function signature is:
  * @code
- * void fnTruncate(stream::pos new_length)
- *   throw (stream::write_error);
+ * void fnTruncate(stream::pos new_length);
  * @endcode
  *
  * This example uses boost::bind to package up a call to the Linux
@@ -94,8 +93,7 @@ class error: public camoto::error
 		 * @param msg
 		 *   Error description for UI messages.
 		 */
-		error(const std::string& msg)
-			throw ();
+		error(const std::string& msg);
 };
 
 /// Could not read data from stream.
@@ -107,8 +105,7 @@ class read_error: public error
 		 * @param msg
 		 *   Error description for UI messages.
 		 */
-		read_error(const std::string& msg)
-			throw ();
+		read_error(const std::string& msg);
 };
 
 /// Could not write data to stream.
@@ -120,8 +117,7 @@ class write_error: public error
 		 * @param msg
 		 *   Error description for UI messages.
 		 */
-		write_error(const std::string& msg)
-			throw ();
+		write_error(const std::string& msg);
 };
 
 /// Tried to seek before file start or after file end.
@@ -133,8 +129,7 @@ class seek_error: public error
 		 * @param msg
 		 *   Error description for UI messages.
 		 */
-		seek_error(const std::string& msg)
-			throw ();
+		seek_error(const std::string& msg);
 };
 
 /// Not all the expected data could be written to the stream.
@@ -149,8 +144,7 @@ class incomplete_write: public write_error
 		 * @param written
 		 *   Number of bytes that were actually written.
 		 */
-		incomplete_write(stream::len written)
-			throw ();
+		incomplete_write(stream::len written);
 };
 
 /// Not all the requested data could be read from the stream.
@@ -165,8 +159,7 @@ class incomplete_read: public read_error
 		 * @param read
 		 *   Number of bytes that were actually read.
 		 */
-		incomplete_read(stream::len read)
-			throw ();
+		incomplete_read(stream::len read);
 };
 
 /// Origin of a seek operation.
@@ -205,8 +198,7 @@ class input {
 		 *   There was an error decoding the data required to perform this
 		 *   operation.
 		 */
-		virtual stream::len try_read(uint8_t *buffer, stream::len len)
-			throw (error) = 0;
+		virtual stream::len try_read(uint8_t *buffer, stream::len len) = 0;
 
 		/// Read the given number of bytes from the stream.
 		/**
@@ -228,13 +220,11 @@ class input {
 		 *   There was an error decoding the data required to perform this
 		 *   operation.
 		 */
-		void read(uint8_t *buffer, stream::len len)
-			throw (error);
+		void read(uint8_t *buffer, stream::len len);
 
 		/// Convenience function.
 		/// @copydoc read(uint8_t *, stream::len)
-		void read(char *buffer, stream::len len)
-			throw (error);
+		void read(char *buffer, stream::len len);
 
 		/// Read the given number of bytes into a string.
 		/**
@@ -255,8 +245,7 @@ class input {
 		 *   There was an error decoding the data required to perform this
 		 *   operation.
 		 */
-		std::string read(stream::len len)
-			throw (error);
+		std::string read(stream::len len);
 
 		/// Move the stream's read pointer.
 		/**
@@ -283,8 +272,7 @@ class input {
 		 *   There was an error decoding the data required to perform this
 		 *   operation.
 		 */
-		virtual void seekg(stream::delta off, seek_from from)
-			throw (error) = 0;
+		virtual void seekg(stream::delta off, seek_from from) = 0;
 
 		/// Get the current location of the read pointer.
 		/**
@@ -299,8 +287,7 @@ class input {
 		 *   There was an error decoding the data required to perform this
 		 *   operation.
 		 */
-		virtual stream::pos tellg() const
-			throw (error) = 0;
+		virtual stream::pos tellg() const = 0;
 
 		/// Get the current file size.
 		/**
@@ -317,8 +304,7 @@ class input {
 		 *   There was an error decoding the data required to perform this
 		 *   operation.
 		 */
-		virtual stream::pos size() const
-			throw (error) = 0;
+		virtual stream::pos size() const = 0;
 };
 
 /// Shared pointer to an input stream.
@@ -351,8 +337,7 @@ class output {
 		 *   There was an error decoding the data required to perform this
 		 *   operation.
 		 */
-		virtual stream::len try_write(const uint8_t *buffer, stream::len len)
-			throw (error) = 0;
+		virtual stream::len try_write(const uint8_t *buffer, stream::len len) = 0;
 
 		/// Write all the data to the stream or throw an exception.
 		/**
@@ -376,13 +361,11 @@ class output {
 		 *   There was an error decoding the data required to perform this
 		 *   operation.
 		 */
-		void write(const uint8_t *buffer, stream::len len)
-			throw (error);
+		void write(const uint8_t *buffer, stream::len len);
 
 		/// Convenience function.
 		/// @copydoc write(const uint8_t *, stream::len)
-		void write(const char *buffer, stream::len len)
-			throw (error);
+		void write(const char *buffer, stream::len len);
 
 		/// Write a string to the stream.
 		/**
@@ -401,15 +384,13 @@ class output {
 		 *   There was an error decoding the data required to perform this
 		 *   operation.
 		 */
-		void write(const std::string& buffer)
-			throw (error);
+		void write(const std::string& buffer);
 
 		/// Move the stream's write pointer.
 		/**
 		 * @copydetails input::seekg()
 		 */
-		virtual void seekp(stream::delta off, seek_from from)
-			throw (error) = 0;
+		virtual void seekp(stream::delta off, seek_from from) = 0;
 
 		/// Get the current location of the write pointer.
 		/**
@@ -424,8 +405,7 @@ class output {
 		 *   There was an error decoding the data required to perform this
 		 *   operation.
 		 */
-		virtual stream::pos tellp() const
-			throw (error) = 0;
+		virtual stream::pos tellp() const = 0;
 
 		/// Set the current stream size.
 		/**
@@ -448,8 +428,7 @@ class output {
 		 * @post The seek position is moved to the end of the stream (at offset
 		 *   \e size)
 		 */
-		virtual void truncate(stream::pos size)
-			throw (error) = 0;
+		virtual void truncate(stream::pos size) = 0;
 
 		/// Set the stream size to end at the current position.
 		/**
@@ -465,8 +444,7 @@ class output {
 		 *   There was an error decoding the data required to perform this
 		 *   operation.
 		 */
-		virtual void truncate_here()
-			throw (error);
+		virtual void truncate_here();
 
 		/// Commit all changes to the underlying storage medium.
 		/**
@@ -478,8 +456,7 @@ class output {
 		 *   There was an error decoding the data required to perform this
 		 *   operation.
 		 */
-		virtual void flush()
-			throw (error) = 0;
+		virtual void flush() = 0;
 };
 
 /// Shared pointer to an output stream.
@@ -513,8 +490,7 @@ typedef boost::shared_ptr<inout> inout_sptr;
  *   There was an error decoding the data required to perform this
  *   operation.
  */
-void copy(output_sptr dest, input_sptr src)
-	throw (error);
+void copy(output_sptr dest, input_sptr src);
 
 /// Copy possibly overlapping data from one position in a stream to another.
 /**
@@ -548,8 +524,7 @@ void copy(output_sptr dest, input_sptr src)
  *   location \e from, if the regions overlapped.
  */
 void move(inout_sptr data, stream::pos from, stream::pos to,
-	stream::len len)
-	throw (error);
+	stream::len len);
 
 /// iostream-style output function for char strings
 inline stream::output_sptr operator << (stream::output_sptr s, const char *d) {

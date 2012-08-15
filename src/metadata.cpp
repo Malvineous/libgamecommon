@@ -23,13 +23,11 @@
 namespace camoto {
 
 Metadata::MetadataTypes Metadata::getMetadataList() const
-	throw ()
 {
 	return MetadataTypes();
 }
 
 std::string Metadata::getMetadata(MetadataType item) const
-	throw (stream::error)
 {
 	// This should never be called because getMetadataList() returned an empty
 	// list.
@@ -39,7 +37,6 @@ std::string Metadata::getMetadata(MetadataType item) const
 
 // Change the value of a metadata element.
 void Metadata::setMetadata(MetadataType item, const std::string& value)
-	throw (stream::error)
 {
 	// This should never be called because getMetadataList() returned an empty
 	// list.

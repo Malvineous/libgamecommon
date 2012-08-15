@@ -27,7 +27,6 @@ namespace camoto {
 namespace stream {
 
 void sub_core::seek(stream::delta off, seek_from from)
-	throw (seek_error)
 {
 	stream::pos baseOffset;
 	switch (from) {
@@ -54,7 +53,6 @@ void sub_core::seek(stream::delta off, seek_from from)
 }
 
 void sub_core::relocate(stream::delta off)
-	throw ()
 {
 	// Don't seek past the start of the parent stream
 	if (off < 0) assert(this->start > (unsigned)(off * -1));
@@ -68,7 +66,6 @@ void sub_core::relocate(stream::delta off)
 }
 
 void sub_core::resize(stream::len len)
-	throw ()
 {
 	this->stream_len = len;
 
@@ -78,14 +75,12 @@ void sub_core::resize(stream::len len)
 }
 
 stream::pos sub_core::get_offset()
-	throw ()
 {
 	return this->start;
 }
 
 
 stream::len input_sub::try_read(uint8_t *buffer, stream::len len)
-	throw ()
 {
 	// Make sure we didn't somehow end up past the end of the stream
 	assert(this->offset <= this->stream_len);
@@ -110,7 +105,6 @@ stream::len input_sub::try_read(uint8_t *buffer, stream::len len)
 }
 
 void input_sub::seekg(stream::delta off, seek_from from)
-	throw (seek_error)
 {
 	// Make sure we didn't somehow end up past the end of the stream
 	assert(this->offset <= this->stream_len);
@@ -123,19 +117,16 @@ void input_sub::seekg(stream::delta off, seek_from from)
 }
 
 stream::pos input_sub::tellg() const
-	throw (seek_error)
 {
 	return this->offset;
 }
 
 stream::pos input_sub::size() const
-	throw (seek_error)
 {
 	return this->stream_len;
 }
 
 void input_sub::open(input_sptr parent, stream::pos start, stream::len len)
-	throw ()
 {
 	this->in_parent = parent;
 	this->start = start;
@@ -146,7 +137,6 @@ void input_sub::open(input_sptr parent, stream::pos start, stream::len len)
 
 
 stream::len output_sub::try_write(const uint8_t *buffer, stream::len len)
-	throw (write_error)
 {
 	// Make sure we didn't somehow end up past the end of the stream
 	assert(this->offset <= this->stream_len);
@@ -182,7 +172,6 @@ stream::len output_sub::try_write(const uint8_t *buffer, stream::len len)
 }
 
 void output_sub::seekp(stream::delta off, seek_from from)
-	throw (seek_error)
 {
 	// Make sure we didn't somehow end up past the end of the stream
 	assert(this->offset <= this->stream_len);
@@ -195,13 +184,11 @@ void output_sub::seekp(stream::delta off, seek_from from)
 }
 
 stream::pos output_sub::tellp() const
-	throw (seek_error)
 {
 	return this->offset;
 }
 
 void output_sub::truncate(stream::pos size)
-	throw (write_error)
 {
 	if (this->stream_len == size) return; // nothing to do
 	if (!this->fn_resize) {
@@ -223,7 +210,6 @@ void output_sub::truncate(stream::pos size)
 }
 
 void output_sub::flush()
-	throw ()
 {
 	this->out_parent->flush();
 	return;
@@ -231,7 +217,6 @@ void output_sub::flush()
 
 void output_sub::open(output_sptr parent, stream::pos start, stream::len len,
 	fn_truncate fn_resize)
-	throw ()
 {
 	this->out_parent = parent;
 	this->start = start;
@@ -243,13 +228,11 @@ void output_sub::open(output_sptr parent, stream::pos start, stream::len len,
 
 
 sub::sub()
-	throw ()
 {
 }
 
 void sub::open(inout_sptr parent, stream::pos start, stream::len len,
 	fn_truncate fn_resize)
-	throw ()
 {
 	this->in_parent = parent;
 	this->out_parent = parent;

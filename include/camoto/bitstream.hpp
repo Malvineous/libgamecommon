@@ -83,8 +83,7 @@ class bitstream {
 		 *   0x102 as a nine-bit number, in little endian it would be written out
 		 *   as 02 80, in big endian it would be written as 81 00.
 		 */
-		bitstream(stream::inout_sptr parent, endian endianType)
-			throw ();
+		bitstream(stream::inout_sptr parent, endian endianType);
 
 		/// Stream-less constructor for using variant of read() with stream as
 		/// a parameter.
@@ -92,12 +91,10 @@ class bitstream {
 		 * @param endianType
 		 *   Endian type.
 		 */
-		bitstream(endian endianType)
-			throw ();
+		bitstream(endian endianType);
 
 		/// Destructor.
-		~bitstream()
-			throw ();
+		~bitstream();
 
 		/// Read some bits in from the stream.
 		/**
@@ -110,8 +107,7 @@ class bitstream {
 		 * @return The number of bits actually read.  Will be the same as the bits
 		 *   parameter if the read completed fully.
 		 */
-		int read(int bits, int *out)
-			throw (stream::error);
+		int read(int bits, int *out);
 
 		/// Read some bits from a particular stream.
 		/**
@@ -136,8 +132,7 @@ class bitstream {
 		 *
 		 * @return The number of *bits* read, or < 0 on error (e.g. EOF/-1)
 		 */
-		int read(fn_getnextchar fnNextChar, int bits, int *out)
-			throw (stream::error);
+		int read(fn_getnextchar fnNextChar, int bits, int *out);
 
 		/// Write some bits out to the stream.
 		/**
@@ -151,8 +146,7 @@ class bitstream {
 		 * @return The number of bits written.  Will be the same as the bits
 		 *   parameter if the write completed fully.
 		 */
-		int write(int bits, int in)
-			throw (stream::error);
+		int write(int bits, int in);
 
 		/// Write some bits to a particular stream.
 		/**
@@ -178,8 +172,7 @@ class bitstream {
 		 *
 		 * @return The number of *bits* written, or < 0 on error (e.g. EOF/-1)
 		 */
-		int write(fn_putnextchar fnNextChar, int bits, int in)
-			throw (stream::error);
+		int write(fn_putnextchar fnNextChar, int bits, int in);
 
 		/// Seek to a given bit position within the stream.
 		/**
@@ -195,39 +188,34 @@ class bitstream {
 		 *
 		 * @return Current offset (in bits from start of file)
 		 */
-		stream::pos seek(stream::delta off, stream::seek_from way)
-			throw (stream::error);
+		stream::pos seek(stream::delta off, stream::seek_from way);
 
 		/// Write out any partially written byte to the underlying stream.
 		/**
 		 * @note Uses this->parent, so it only works with the read() and write()
 		 *   functions which do NOT take an fnNextChar parameter.
 		 */
-		void flush()
-			throw (stream::error);
+		void flush();
 
 		/// Alter the endian type without affecting the current seek position.
 		/**
 		 * @param endianType
 		 *   New endian type.
 		 */
-		void changeEndian(endian endianType)
-			throw ();
+		void changeEndian(endian endianType);
 
 		/// Get the current endian setting.
 		/**
 		 * @return Current endian type.
 		 */
-		endian getEndian()
-			throw ();
+		endian getEndian();
 
 		/// Flush the byte currently cached.
 		/**
 		 * This will cause the next read operation to start at the following byte
 		 * boundary.
 		 */
-		void flushByte()
-			throw ();
+		void flushByte();
 
 		/// Flush the byte currently cached, ensuring it is written out.
 		/**
@@ -237,16 +225,14 @@ class bitstream {
 		 * @param fnNextChar
 		 *   The function to call to write the next byte.
 		 */
-		void flushByte(fn_putnextchar fnNextChar)
-			throw ();
+		void flushByte(fn_putnextchar fnNextChar);
 
 		/// Write bufByte out to the parent stream if it has changed.
 		/**
 		 * @note Uses this->parent, so it only works with the read() and write()
 		 *   functions which do NOT take an fnNextChar parameter.
 		 */
-		void writeBufByte()
-			throw (stream::error);
+		void writeBufByte();
 
 		/// Peek at the next byte that will be written out.
 		/**
@@ -257,8 +243,7 @@ class bitstream {
 		 *   Mask of valid bits, e.g. 0xF0 indicates only the four most-significant
 		 *   bits in \e buf are valid.
 		 */
-		void peekByte(uint8_t *buf, uint8_t *mask)
-			throw ();
+		void peekByte(uint8_t *buf, uint8_t *mask);
 };
 
 typedef boost::shared_ptr<bitstream> bitstream_sptr;

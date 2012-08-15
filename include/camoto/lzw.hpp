@@ -61,8 +61,7 @@ class Dictionary
 	unsigned codeStart, newCodeStringIndex;
 	std::vector<byte> decodedString;
 
-	void fillDecodedString(unsigned code)
-		throw (filter_error);
+	void fillDecodedString(unsigned code);
 
 public:
 	Dictionary(unsigned maxBits, unsigned codeStart);
@@ -148,8 +147,7 @@ class filter_lzw_decompress: public filter
 			int eofCode, int resetCode, int flags);
 
 		virtual void transform(uint8_t *out, stream::len *lenOut, const uint8_t *in,
-			stream::len *lenIn)
-			throw (filter_error);
+			stream::len *lenIn);
 
 		void resetDictionary();
 
@@ -233,8 +231,7 @@ class filter_lzw_compress: public filter
 			int eofCode, int resetCode, int flags);
 
 		virtual void transform(uint8_t *out, stream::len *lenOut, const uint8_t *in,
-			stream::len *lenIn)
-			throw (filter_error);
+			stream::len *lenIn);
 
 		void resetDictionary();
 

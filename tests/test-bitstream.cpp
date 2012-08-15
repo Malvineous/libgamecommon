@@ -99,7 +99,7 @@ struct bitstream_read_sample: public default_sample {
 	intvector result;
 
 	bitstream_read_sample()
-		: base(new stream::string())
+		:	base(new stream::string())
 	{
 		this->base << DATA_BYTES;
 		this->bit.reset(new bitstream(this->base, bitstream::littleEndian));
@@ -177,7 +177,7 @@ struct bitstream_write_sample: public default_sample {
 	intvector result;
 
 	bitstream_write_sample()
-		: base(new stream::string())
+		:	base(new stream::string())
 	{
 		this->bit.reset(new bitstream(this->base, bitstream::littleEndian));
 	}
@@ -739,7 +739,6 @@ BOOST_AUTO_TEST_CASE(bitstream_rwseek_1bit)
 }
 
 int putNextChar(stream::output_sptr src, uint8_t out)
-	throw (stream::write_error)
 {
 	return src->try_write(&out, 1);
 }

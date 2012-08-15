@@ -35,8 +35,7 @@ class error: public std::exception
 		 * @param msg
 		 *   Error description for UI messages.
 		 */
-		error(const std::string& msg)
-			throw ();
+		error(const std::string& msg);
 
 		~error()
 			throw ();
@@ -46,8 +45,7 @@ class error: public std::exception
 			throw ();
 
 		/// Get the error message as a string instead.
-		std::string get_message() const
-			throw ();
+		std::string get_message() const;
 
 	protected:
 		std::string msg;  ///< Detailed error message for UI

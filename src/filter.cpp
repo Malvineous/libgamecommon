@@ -23,8 +23,7 @@
 namespace camoto {
 
 filter_error::filter_error(const std::string& msg)
-	throw () :
-		error(msg)
+	:	error(msg)
 {
 }
 

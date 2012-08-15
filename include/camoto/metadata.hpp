@@ -72,8 +72,7 @@ class Metadata {
 		 *
 		 * @return std::vector of \ref MetadataType items.
 		 */
-		virtual MetadataTypes getMetadataList() const
-			throw ();
+		virtual MetadataTypes getMetadataList() const;
 
 		/// Get the value of a metadata element.
 		/**
@@ -88,8 +87,7 @@ class Metadata {
 		 *         returned by getMetadataList().
 		 * @return A string containing the metadata (may be empty.)
 		 */
-		virtual std::string getMetadata(MetadataType item) const
-			throw (stream::error);
+		virtual std::string getMetadata(MetadataType item) const;
 
 		/// Change the value of a metadata element.
 		/**
@@ -105,8 +103,7 @@ class Metadata {
 		 *         the metadata element if possible, otherwise it will be set to
 		 *         a blank.
 		 */
-		virtual void setMetadata(MetadataType item, const std::string& value)
-			throw (stream::error);
+		virtual void setMetadata(MetadataType item, const std::string& value);
 
 };
 

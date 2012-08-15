@@ -26,18 +26,15 @@ namespace camoto {
 namespace stream {
 
 memory_core::memory_core()
-	throw () :
-		offset(0)
+	:	offset(0)
 {
 }
 
 memory_core::~memory_core()
-	throw ()
 {
 }
 
 void memory_core::seek(stream::delta off, seek_from from)
-	throw (error)
 {
 	stream::pos baseOffset;
 	std::vector<uint8_t>::size_type vectorSize = this->data.size();
@@ -66,12 +63,10 @@ void memory_core::seek(stream::delta off, seek_from from)
 
 
 input_memory::input_memory()
-	throw ()
 {
 }
 
 stream::len input_memory::try_read(uint8_t *buffer, stream::len len)
-	throw (error)
 {
 	stream::pos done = this->offset + len;
 	stream::pos size = this->data.size();
@@ -84,32 +79,27 @@ stream::len input_memory::try_read(uint8_t *buffer, stream::len len)
 }
 
 void input_memory::seekg(stream::delta off, seek_from from)
-	throw (error)
 {
 	this->seek(off, from);
 	return;
 }
 
 stream::pos input_memory::tellg() const
-	throw (error)
 {
 	return this->offset;
 }
 
 stream::pos input_memory::size() const
-	throw (error)
 {
 	return this->data.size();
 }
 
 
 output_memory::output_memory()
-	throw ()
 {
 }
 
 stream::len output_memory::try_write(const uint8_t *buffer, stream::len len)
-	throw (error)
 {
 	stream::pos done = this->offset + len;
 	stream::pos size = this->data.size();
@@ -126,20 +116,17 @@ stream::len output_memory::try_write(const uint8_t *buffer, stream::len len)
 }
 
 void output_memory::seekp(stream::delta off, seek_from from)
-	throw (error)
 {
 	this->seek(off, from);
 	return;
 }
 
 stream::pos output_memory::tellp() const
-	throw (error)
 {
 	return this->offset;
 }
 
 void output_memory::truncate(stream::pos size)
-	throw (error)
 {
 	// Nothing is cached by try_write(), so there's nothing we need to flush
 	// before the truncate.
@@ -155,14 +142,12 @@ void output_memory::truncate(stream::pos size)
 }
 
 void output_memory::flush()
-	throw (error)
 {
 	return;
 }
 
 
 memory::memory()
-	throw ()
 {
 }
 

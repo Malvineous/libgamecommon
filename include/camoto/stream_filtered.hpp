@@ -31,17 +31,13 @@ namespace stream {
 class input_filtered: virtual public input_memory
 {
 	public:
-		virtual stream::len try_read(uint8_t *buffer, stream::len len)
-			throw (error);
+		virtual stream::len try_read(uint8_t *buffer, stream::len len);
 
-		virtual void seekg(stream::delta off, seek_from from)
-			throw (error);
+		virtual void seekg(stream::delta off, seek_from from);
 
-		virtual stream::pos tellg() const
-			throw (error);
+		virtual stream::pos tellg() const;
 
-		virtual stream::pos size() const
-			throw (error);
+		virtual stream::pos size() const;
 
 		/// Apply a filter to the given stream.
 		/**
@@ -55,8 +51,7 @@ class input_filtered: virtual public input_memory
 		 * @param read_filter
 		 *   Filter to process data.
 		 */
-		void open(input_sptr parent, filter_sptr read_filter)
-			throw (error);
+		void open(input_sptr parent, filter_sptr read_filter);
 
 		/// A partial write is about to occur, ensure the unfiltered data is present.
 		/**
@@ -67,12 +62,10 @@ class input_filtered: virtual public input_memory
 		 * This function is overridden in a read/write stream so that the original
 		 * data is populated before any read or write occurs.
 		 */
-		virtual void populate() const
-			throw (error);
+		virtual void populate() const;
 
 		/// Non-const version of populate() that actually does the work.
-		void realPopulate()
-			throw (error);
+		void realPopulate();
 
 	protected:
 		filter_sptr read_filter; ///< Filter to pass data through
@@ -87,17 +80,13 @@ typedef boost::shared_ptr<input_filtered> input_filtered_sptr;
 class output_filtered: virtual public output_memory
 {
 	public:
-		virtual stream::len try_write(const uint8_t *buffer, stream::len len)
-			throw (error);
+		virtual stream::len try_write(const uint8_t *buffer, stream::len len);
 
-		virtual void seekp(stream::delta off, seek_from from)
-			throw (error);
+		virtual void seekp(stream::delta off, seek_from from);
 
-		virtual stream::pos tellp() const
-			throw (error);
+		virtual stream::pos tellp() const;
 
-		virtual void flush()
-			throw (error);
+		virtual void flush();
 
 		/// Apply a filter to the given stream.
 		/**
@@ -119,8 +108,7 @@ class output_filtered: virtual public output_memory
 		 *   during the flush() call, while parent->truncate() will be called with
 		 *   the compressed size.
 		 */
-		void open(output_sptr parent, filter_sptr write_filter, fn_truncate resize)
-			throw ();
+		void open(output_sptr parent, filter_sptr write_filter, fn_truncate resize);
 
 		/// A partial write is about to occur, ensure the unfiltered data is present.
 		/**
@@ -131,8 +119,7 @@ class output_filtered: virtual public output_memory
 		 * This function is overridden in a read/write stream so that the original
 		 * data is populated before any read or write occurs.
 		 */
-		virtual void populate() const
-			throw (error);
+		virtual void populate() const;
 
 	protected:
 		filter_sptr write_filter; ///< Filter to pass data through
@@ -150,11 +137,9 @@ class filtered: virtual public inout,
                 virtual public output_filtered
 {
 	public:
-		filtered()
-			throw ();
+		filtered();
 
-		virtual void truncate(stream::pos size)
-			throw (error);
+		virtual void truncate(stream::pos size);
 
 		/// Apply a filter to the given stream.
 		/**
@@ -186,11 +171,9 @@ class filtered: virtual public inout,
 		 *   during the flush() call.
 		 */
 		void open(inout_sptr parent, filter_sptr read_filter,
-			filter_sptr write_filter, fn_truncate resize)
-			throw (error);
+			filter_sptr write_filter, fn_truncate resize);
 
-		virtual void populate() const
-			throw (error);
+		virtual void populate() const;
 };
 
 /// Shared pointer to a readable and writable filtered stream.

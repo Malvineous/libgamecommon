@@ -40,8 +40,8 @@ struct stream_seg_sample: public default_sample {
 	stream::seg_sptr seg;
 
 	stream_seg_sample()
-		: base(new stream::string()),
-		  seg(new stream::seg())
+		:	base(new stream::string()),
+			seg(new stream::seg())
 	{
 		this->base->write("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 

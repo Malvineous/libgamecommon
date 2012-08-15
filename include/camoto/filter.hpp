@@ -40,8 +40,7 @@ class filter_error: public stream::error
 		 * @param msg
 		 *   Error description for UI messages.
 		 */
-		filter_error(const std::string& msg)
-			throw ();
+		filter_error(const std::string& msg);
 };
 
 /// Base filter interface.
@@ -102,8 +101,7 @@ class filter {
 		 *   The data was corrupted and could not be filtered.
 		 */
 		virtual void transform(uint8_t *out, stream::len *lenOut, const uint8_t *in,
-			stream::len *lenIn)
-			throw (filter_error) = 0;
+			stream::len *lenIn) = 0;
 };
 
 /// Shared pointer to a filter.

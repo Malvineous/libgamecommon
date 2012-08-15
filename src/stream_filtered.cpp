@@ -24,7 +24,6 @@ namespace camoto {
 namespace stream {
 
 void input_filtered::open(input_sptr parent, filter_sptr read_filter)
-	throw (error)
 {
 	assert(parent);
 	assert(read_filter);
@@ -37,35 +36,30 @@ void input_filtered::open(input_sptr parent, filter_sptr read_filter)
 }
 
 stream::len input_filtered::try_read(uint8_t *buffer, stream::len len)
-	throw (error)
 {
 	this->populate();
 	return this->input_memory::try_read(buffer, len);
 }
 
 void input_filtered::seekg(stream::delta off, seek_from from)
-	throw (error)
 {
 	this->populate();
 	return this->input_memory::seekg(off, from);
 }
 
 stream::pos input_filtered::tellg() const
-	throw (error)
 {
 	this->populate();
 	return this->input_memory::tellg();
 }
 
 stream::pos input_filtered::size() const
-	throw (error)
 {
 	this->populate();
 	return this->input_memory::size();
 }
 
 void input_filtered::populate() const
-	throw (error)
 {
 	if (this->populated) return;
 	input_filtered *self = const_cast<input_filtered *>(this);
@@ -74,7 +68,6 @@ void input_filtered::populate() const
 }
 
 void input_filtered::realPopulate()
-	throw (error)
 {
 	this->populated = true;
 
@@ -117,7 +110,6 @@ void input_filtered::realPopulate()
 }
 
 stream::len output_filtered::try_write(const uint8_t *buffer, stream::len len)
-	throw (error)
 {
 	this->populate();
 
@@ -128,21 +120,18 @@ stream::len output_filtered::try_write(const uint8_t *buffer, stream::len len)
 }
 
 void output_filtered::seekp(stream::delta off, seek_from from)
-	throw (error)
 {
 	this->populate();
 	return this->output_memory::seekp(off, from);
 }
 
 stream::pos output_filtered::tellp() const
-	throw (error)
 {
 	this->populate();
 	return this->output_memory::tellp();
 }
 
 void output_filtered::flush()
-	throw (error)
 {
 	if (this->done_filter) {
 		std::cout << "WARNING: Tried to flush a filtered stream twice, ignoring "
@@ -204,7 +193,6 @@ void output_filtered::flush()
 
 void output_filtered::open(output_sptr parent, filter_sptr write_filter,
 	fn_truncate resize)
-	throw ()
 {
 	assert(parent);
 	assert(write_filter);
@@ -217,19 +205,16 @@ void output_filtered::open(output_sptr parent, filter_sptr write_filter,
 }
 
 void output_filtered::populate() const
-	throw (error)
 {
 	return;
 }
 
 
 filtered::filtered()
-	throw ()
 {
 }
 
 void filtered::truncate(stream::pos size)
-	throw (error)
 {
 	if (size == 0) this->populated = true;
 	this->output_filtered::truncate(size);
@@ -238,7 +223,6 @@ void filtered::truncate(stream::pos size)
 
 void filtered::open(inout_sptr parent, filter_sptr read_filter,
 	filter_sptr write_filter, fn_truncate resize)
-	throw (error)
 {
 	this->input_filtered::open(parent, read_filter);
 	this->output_filtered::open(parent, write_filter, resize);
@@ -246,7 +230,6 @@ void filtered::open(inout_sptr parent, filter_sptr read_filter,
 }
 
 void filtered::populate() const
-	throw (error)
 {
 	this->input_filtered::populate();
 	return;
