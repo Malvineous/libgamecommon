@@ -2,7 +2,7 @@
  * @file   tests.cpp
  * @brief  Test code core.
  *
- * Copyright (C) 2010-2011 Adam Nielsen <malvineous@shikadi.net>
+ * Copyright (C) 2010-2012 Adam Nielsen <malvineous@shikadi.net>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,10 +19,7 @@
  */
 
 #define BOOST_TEST_MODULE libgamecommon
-#ifndef __WIN32__
-// Dynamically link to the Boost library on non-Windows platforms.
 #define BOOST_TEST_DYN_LINK
-#endif
 #include <boost/test/unit_test.hpp>
 
 #include <boost/algorithm/string.hpp> // for case-insensitive string compare
