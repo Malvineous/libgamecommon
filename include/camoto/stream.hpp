@@ -469,6 +469,32 @@ class inout: virtual public input, virtual public output {
 /// Shared pointer to an inout stream.
 typedef boost::shared_ptr<inout> inout_sptr;
 
+/// Output stream that automatically expands as needed.
+/**
+ * A normal stream::output will return an incomplete write once data has reached
+ * the end of the available space, and requires an advance call to truncate() to
+ * ensure there is enough data available to be written.
+ *
+ * The stream::expanding_output will handle this automatically, and will enlarge
+ * itself as required in order to fit each write operation.
+ *
+ * Users should still either call truncate(0) before starting, or call
+ * truncate_here() at the end, in case the stream started off much larger than
+ * the amount of data that was written.
+ */
+class expanding_output: virtual public output {
+};
+
+/// Shared pointer to an expanding_output stream.
+typedef boost::shared_ptr<expanding_output> expanding_output_sptr;
+
+/// Base stream interface for reading and writing data.
+class expanding_inout: virtual public inout, virtual public expanding_output {
+};
+
+/// Shared pointer to an inout stream.
+typedef boost::shared_ptr<expanding_inout> expanding_inout_sptr;
+
 /// Copy one stream into another.
 /**
  * @param dest

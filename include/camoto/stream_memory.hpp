@@ -35,7 +35,6 @@ class memory_core
 		stream::pos offset;          ///< Current pointer position
 
 		memory_core();
-
 		~memory_core();
 
 		/// Common seek function for reading and writing.
@@ -57,11 +56,8 @@ class input_memory: virtual public input,
 		input_memory();
 
 		virtual stream::len try_read(uint8_t *buffer, stream::len len);
-
 		virtual void seekg(stream::delta off, seek_from from);
-
 		virtual stream::pos tellg() const;
-
 		virtual stream::pos size() const;
 };
 
@@ -69,7 +65,7 @@ class input_memory: virtual public input,
 typedef boost::shared_ptr<input_memory> input_memory_sptr;
 
 /// Write-only stream to access a C++ vector.
-class output_memory: virtual public output,
+class output_memory: virtual public expanding_output,
                      virtual protected memory_core
 {
 	public:
@@ -80,13 +76,9 @@ class output_memory: virtual public output,
 		output_memory();
 
 		virtual stream::len try_write(const uint8_t *buffer, stream::len len);
-
 		virtual void seekp(stream::delta off, seek_from from);
-
 		virtual stream::pos tellp() const;
-
 		virtual void truncate(stream::pos size);
-
 		virtual void flush();
 };
 
@@ -94,7 +86,7 @@ class output_memory: virtual public output,
 typedef boost::shared_ptr<output_memory> output_memory_sptr;
 
 /// Read/write stream accessing a C++ memory.
-class memory: virtual public inout,
+class memory: virtual public expanding_inout,
               virtual public input_memory,
               virtual public output_memory
 {
