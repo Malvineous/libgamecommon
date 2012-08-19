@@ -39,15 +39,24 @@ null_padded_read::null_padded_read(std::string& r, stream::len len, bool chop)
 
 void null_padded_read::read(stream::input_sptr s) const
 {
-	// Make the buffer the length of the whole operation
-	this->r.resize(this->len);
-
-	// Read in the whole data
-	s->read((uint8_t *)&this->r[0], this->len);
-
 	if (this->chop) {
+		// Make the buffer the length of the whole operation
+		this->r.resize(this->len);
+
+		// Read in the whole data
+		stream::len lenRead = s->try_read((uint8_t *)&this->r[0], this->len);
+
+		// Shorten the string if not all the data was read
+		this->r.resize(lenRead);
+
 		// Shrink the string back to the first null
 		this->r.resize(strlen(this->r.c_str()));
+	} else {
+		// Make the buffer the length of the whole operation
+		this->r.resize(this->len);
+
+		// Read in the whole data
+		s->read((uint8_t *)&this->r[0], this->len);
 	}
 	return;
 }
