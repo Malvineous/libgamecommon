@@ -18,15 +18,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <iostream>
+#include <errno.h>
 #include <boost/test/unit_test.hpp>
 #include <boost/bind.hpp>
-#include <unistd.h>
-#include <errno.h>
-
 #include <camoto/stream_seg.hpp>
 #include <camoto/stream_string.hpp>
 #include <camoto/stream_sub.hpp>
-
 #include "tests.hpp"
 
 using namespace camoto;

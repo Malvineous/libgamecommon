@@ -18,12 +18,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <boost/test/unit_test.hpp>
-#include <unistd.h>
 #include <errno.h>
-
+#include <boost/test/unit_test.hpp>
 #include <camoto/stream_string.hpp>
-
 #include "tests.hpp"
 
 using namespace camoto;
