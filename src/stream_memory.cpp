@@ -73,8 +73,12 @@ stream::len input_memory::try_read(uint8_t *buffer, stream::len len)
 	stream::len amt;
 	if (done > size) amt = size - this->offset;
 	else amt = len;
-	memcpy(buffer, &this->data[this->offset], amt);
-	this->offset += amt;
+	if (amt > 0) {
+		// Don't do a zero-read past the last element, because the vector will throw
+		// an error trying to retrieve the element just past the end.
+		memcpy(buffer, &this->data[this->offset], amt);
+		this->offset += amt;
+	}
 	return amt;
 }
 
