@@ -170,6 +170,7 @@ BOOST_AUTO_TEST_CASE(lzw_comp_write)
 	bit_exp->write(9, 'o');
 	bit_exp->write(9, '.');
 	bit_exp->write(9, 0x100);
+	bit_exp->flushByte();
 
 	this->in->write("Hello hello hello.");
 
@@ -194,6 +195,7 @@ BOOST_AUTO_TEST_CASE(lzw_comp_write_dict_grow)
 	}
 	bit_exp->write(10, 'b');
 	bit_exp->write(10, 0x100);
+	bit_exp->flushByte();
 
 	for (int i = 0; i < 256; i++) {
 		this->in->write("a");
@@ -223,6 +225,7 @@ BOOST_AUTO_TEST_CASE(lzw_comp_write_dict_overflow)
 	bit_exp->write(12, 'e');
 	bit_exp->write(12, 'e');
 	bit_exp->write(12, 0x100);
+	bit_exp->flushByte();
 
 	for (int i = 0; i < (1<<8); i++) this->in->write("a");
 	for (int i = 0; i < (1<<9); i++) this->in->write("b");
@@ -253,6 +256,7 @@ BOOST_AUTO_TEST_CASE(lzw_comp_write_dict_overflow_reset)
 	bit_exp->write(9, 'e');
 	bit_exp->write(9, 'e');
 	bit_exp->write(9, 0x100);
+	bit_exp->flushByte();
 
 	for (int i = 0; i < (1<<8); i++) this->in->write("a");
 	for (int i = 0; i < (1<<9); i++) this->in->write("b");
@@ -269,6 +273,22 @@ BOOST_AUTO_TEST_CASE(lzw_comp_write_dict_overflow_reset)
 
 	BOOST_CHECK_MESSAGE(is_equal(exp->str()),
 		"Compressing LZW data with an autoreset dictionary failed");
+}
+
+BOOST_AUTO_TEST_CASE(lzw_comp_end_write_midbyte)
+{
+	BOOST_TEST_MESSAGE("Compress some LZW data and ensure it ends mid-byte");
+
+	this->in->write("aa");
+
+	filter_sptr filt(new filter_lzw_compress(9, 12, 0x101, 0x100, 0, LZW_BIG_ENDIAN | LZW_EOF_PARAM_VALID));
+	stream::input_filtered_sptr processed(new stream::input_filtered());
+	processed->open(this->in, filt);
+
+	stream::copy(this->out, processed);
+
+	BOOST_CHECK_MESSAGE(is_equal(makeString("\x30\x98\x60\x00")),
+		"Compressing LZW data ensuring it ends mid-byte failed");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

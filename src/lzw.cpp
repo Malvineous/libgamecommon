@@ -357,6 +357,10 @@ void filter_lzw_compress::transform(uint8_t *out, stream::len *lenOut,
 			this->curEOFCode = 0;
 		}
 	}
+	// Do the flush separately, in case we just ran out of output space
+	if ((w < *lenOut) && (*lenIn == 0)) {
+		this->data.flushByte(cbNext);
+	}
 	*lenIn = r;
 	*lenOut = w;
 	return;
