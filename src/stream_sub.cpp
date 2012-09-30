@@ -143,7 +143,6 @@ stream::len output_sub::try_write(const uint8_t *buffer, stream::len len)
 
 	if ((this->offset + len) > this->stream_len) {
 		// Stream is too small to accommodate entire write, attempt to enlarge
-		this->flush();
 		// Don't call truncate() because we don't want the pointer moved
 		try {
 			if (this->fn_resize) this->fn_resize(this->offset + len);
