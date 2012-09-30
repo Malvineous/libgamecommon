@@ -170,6 +170,20 @@ template <> inline uint32_t host_to  <uint32_t, big_endian>(uint32_t value) { re
 template <> inline uint64_t host_from<uint64_t, big_endian>(uint64_t value) { return be64toh(value); }
 template <> inline uint64_t host_to  <uint64_t, big_endian>(uint64_t value) { return htobe64(value); }
 
+template <> inline int16_t host_from<int16_t, little_endian>(int16_t value) { return (int16_t)le16toh((uint16_t)value); }
+template <> inline int16_t host_to  <int16_t, little_endian>(int16_t value) { return (int16_t)htole16((uint16_t)value); }
+template <> inline int32_t host_from<int32_t, little_endian>(int32_t value) { return (int32_t)le32toh((uint32_t)value); }
+template <> inline int32_t host_to  <int32_t, little_endian>(int32_t value) { return (int32_t)htole32((uint32_t)value); }
+template <> inline int64_t host_from<int64_t, little_endian>(int64_t value) { return (int64_t)le64toh((uint64_t)value); }
+template <> inline int64_t host_to  <int64_t, little_endian>(int64_t value) { return (int64_t)htole64((uint64_t)value); }
+
+template <> inline int16_t host_from<int16_t, big_endian>(int16_t value) { return (int16_t)be16toh((uint16_t)value); }
+template <> inline int16_t host_to  <int16_t, big_endian>(int16_t value) { return (int16_t)htobe16((uint16_t)value); }
+template <> inline int32_t host_from<int32_t, big_endian>(int32_t value) { return (int32_t)be32toh((uint32_t)value); }
+template <> inline int32_t host_to  <int32_t, big_endian>(int32_t value) { return (int32_t)htobe32((uint32_t)value); }
+template <> inline int64_t host_from<int64_t, big_endian>(int64_t value) { return (int64_t)be64toh((uint64_t)value); }
+template <> inline int64_t host_to  <int64_t, big_endian>(int64_t value) { return (int64_t)htobe64((uint64_t)value); }
+
 #endif // BYTEORDER_PROVIDE_TYPED_FUNCTIONS || BYTEORDER_USE_IOSTREAMS
 
 #ifdef BYTEORDER_USE_IOSTREAMS
@@ -272,6 +286,9 @@ inline BYTEORDER_OSTREAM operator << (BYTEORDER_OSTREAM s, const number_format_w
 DEFINE_TYPE(uint16_t, u16);
 DEFINE_TYPE(uint32_t, u32);
 DEFINE_TYPE(uint64_t, u64);
+DEFINE_TYPE(int16_t, s16);
+DEFINE_TYPE(int32_t, s32);
+DEFINE_TYPE(int64_t, s64);
 
 #endif // BYTEORDER_USE_IOSTREAMS
 

@@ -33,10 +33,12 @@ BOOST_AUTO_TEST_CASE(functions)
 {
 	uint8_t data[] = {0x01,0x23,0x45,0x67, 0x89,0xAB,0xCD,0xEF};
 
+	BOOST_CHECK_EQUAL((host_from<uint16_t, little_endian>(*( (uint16_t *)&data ))), 0x2301);
 	BOOST_CHECK_EQUAL(le16toh(*( (uint16_t *)&data )), 0x2301);
 	BOOST_CHECK_EQUAL(le32toh(*( (uint32_t *)&data )), 0x67452301);
 	BOOST_CHECK_EQUAL(le64toh(*( (uint64_t *)&data )), 0xEFCDAB8967452301);
 
+	BOOST_CHECK_EQUAL((host_from<uint16_t, big_endian>(*( (uint16_t *)&data ))), 0x123);
 	BOOST_CHECK_EQUAL(be16toh(*( (uint16_t *)&data )), 0x123);
 	BOOST_CHECK_EQUAL(be32toh(*( (uint32_t *)&data )), 0x1234567);
 	BOOST_CHECK_EQUAL(be64toh(*( (uint64_t *)&data )), 0x123456789ABCDEF);
@@ -48,6 +50,25 @@ BOOST_AUTO_TEST_CASE(functions)
 	BOOST_CHECK_EQUAL(htobe16(0x123),              *( (uint16_t *)&data ));
 	BOOST_CHECK_EQUAL(htobe32(0x1234567),          *( (uint32_t *)&data ));
 	BOOST_CHECK_EQUAL(htobe64(0x123456789ABCDEF),  *( (uint64_t *)&data ));
+}
+
+BOOST_AUTO_TEST_CASE(functions_signed)
+{
+	BOOST_CHECK_EQUAL((host_from<int16_t, little_endian>(*( (int16_t *)"\xFE\xFF" ))), -2);
+	BOOST_CHECK_EQUAL((host_from<int32_t, little_endian>(*( (int32_t *)"\xFE\xFF\xFF\xFF" ))), -2);
+	BOOST_CHECK_EQUAL((host_from<int64_t, little_endian>(*( (int64_t *)"\xFE\xFF\xFF\xFF\xFF\xFF\xFF\xFF" ))), -2);
+
+	BOOST_CHECK_EQUAL((host_from<int16_t, big_endian>(*( (int16_t *)"\xFF\xFE" ))), -2);
+	BOOST_CHECK_EQUAL((host_from<int32_t, big_endian>(*( (int32_t *)"\xFF\xFF\xFF\xFE" ))), -2);
+	BOOST_CHECK_EQUAL((host_from<int64_t, big_endian>(*( (int64_t *)"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFE" ))), -2);
+
+	BOOST_CHECK_EQUAL((host_to<int16_t, little_endian>(-2)), *( (int16_t *)"\xFE\xFF" ));
+	BOOST_CHECK_EQUAL((host_to<int32_t, little_endian>(-2)), *( (int32_t *)"\xFE\xFF\xFF\xFF" ));
+	BOOST_CHECK_EQUAL((host_to<int64_t, little_endian>(-2)), *( (int64_t *)"\xFE\xFF\xFF\xFF\xFF\xFF\xFF\xFF" ));
+
+	BOOST_CHECK_EQUAL((host_to<int16_t, big_endian>(-2)), *( (int16_t *)"\xFF\xFE" ));
+	BOOST_CHECK_EQUAL((host_to<int32_t, big_endian>(-2)), *( (int32_t *)"\xFF\xFF\xFF\xFE" ));
+	BOOST_CHECK_EQUAL((host_to<int64_t, big_endian>(-2)), *( (int64_t *)"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFE" ));
 }
 
 BOOST_AUTO_TEST_CASE(stream_write)
