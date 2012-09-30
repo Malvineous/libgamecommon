@@ -57,6 +57,15 @@ class filter_error: public stream::error
 class filter {
 
 	public:
+		/// Reset this filter back to its initial state.
+		/**
+		 * Often a filter will need to be called multiple times, such as saving some
+		 * data, making more changes, then saving again.  This function will be
+		 * called before each read or write operation begins, to ensure the filter
+		 * is set back to its initial state.
+		 */
+		virtual void reset() = 0;
+
 		/// Process some bytes through this filter.
 		/**
 		 * A block of input data is supplied, and this function transforms it as

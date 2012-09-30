@@ -26,6 +26,10 @@ filter_dummy::filter_dummy()
 {
 }
 
+void filter_dummy::reset()
+{
+}
+
 void filter_dummy::transform(uint8_t *out, stream::len *lenOut,
 	const uint8_t *in, stream::len *lenIn)
 {

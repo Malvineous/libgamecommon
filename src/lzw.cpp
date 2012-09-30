@@ -127,6 +127,10 @@ filter_lzw_decompress::filter_lzw_decompress(int initialBits, int maxBits,
 		data(((flags & LZW_BIG_ENDIAN) != LZW_BIG_ENDIAN) ? bitstream::littleEndian : bitstream::bigEndian),
 		code(0)
 {
+}
+
+void filter_lzw_decompress::reset()
+{
 	if (this->flags & LZW_NO_BITSIZE_RESET) {
 		// If LZW_NO_BITSIZE_RESET is *not* set these things will be done in
 		// resetDictionary() instead.
@@ -134,6 +138,7 @@ filter_lzw_decompress::filter_lzw_decompress(int initialBits, int maxBits,
 		this->recalcCodes();
 	}
 	this->resetDictionary();
+	return;
 }
 
 int nextChar(const uint8_t **in, stream::len *lenIn, stream::len *r, uint8_t *out)
@@ -286,13 +291,18 @@ filter_lzw_compress::filter_lzw_compress(int initialBits, int maxBits,
 		data(((flags & LZW_BIG_ENDIAN) != LZW_BIG_ENDIAN) ? bitstream::littleEndian : bitstream::bigEndian)
 {
 	assert(initialBits > 0);
+}
+
+void filter_lzw_compress::reset()
+{
 	if (this->flags & LZW_NO_BITSIZE_RESET) {
 		// If LZW_NO_BITSIZE_RESET is *not* set these things will be done in
 		// resetDictionary() instead.
-		this->currentBits = initialBits;
+		this->currentBits = this->initialBits;
 		this->recalcCodes();
 	}
 	this->resetDictionary();
+	return;
 }
 
 int putChar(uint8_t **out, const stream::len *lenOut, stream::len *w, uint8_t in)

@@ -30,6 +30,7 @@ class filter_dummy: public filter
 	public:
 		filter_dummy();
 
+		virtual void reset();
 		virtual void transform(uint8_t *out, stream::len *lenOut, const uint8_t *in,
 			stream::len *lenIn);
 };

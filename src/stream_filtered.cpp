@@ -85,6 +85,7 @@ void input_filtered::realPopulate()
 	stream::len lenIn, lenOut;
 	stream::len lenRead, lenLeftover = 0;
 	stream::len lenTotalOut = 0;
+	this->read_filter->reset();
 	do {
 		lenOut = BUFFER_SIZE;
 		lenRead = this->in_parent->try_read(bufIn + lenLeftover, BUFFER_SIZE - lenLeftover);
@@ -147,6 +148,8 @@ void output_filtered::flush()
 	stream::len lenRealSize = this->data.size();
 	stream::len lenRemaining = lenRealSize;
 	stream::len lenIn, lenOut;
+
+	this->write_filter->reset();
 
 	// Filter the in-memory buffer and write it out to the parent stream
 	do {
