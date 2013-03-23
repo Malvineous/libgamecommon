@@ -53,7 +53,8 @@ struct SuppItem {
 
 		// Maps
 		Layer1,      ///< A map layer
-		Layer2,      ///< Another map layer
+		Layer2,      ///< A second map layer
+		Layer3,      ///< A third map layer
 
 		// Generic
 		Extra1,      ///< Additional file
