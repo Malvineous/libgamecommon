@@ -2,7 +2,7 @@
  * @file   stream_memory.hpp
  * @brief  Provide a stream implementation around a C++ vector.
  *
- * Copyright (C) 2010-2012 Adam Nielsen <malvineous@shikadi.net>
+ * Copyright (C) 2010-2013 Adam Nielsen <malvineous@shikadi.net>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

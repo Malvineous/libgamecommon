@@ -3,7 +3,7 @@
  * @brief  Boost iostream filter for compressing and decompressing data using
  *         a few variants of the LZW algorithm.
  *
- * Copyright (C) 2010-2012 Adam Nielsen <malvineous@shikadi.net>
+ * Copyright (C) 2010-2013 Adam Nielsen <malvineous@shikadi.net>
  *
  * LZW algorithm based on GPL code by Juha Nieminen
  *   http://warp.povusers.org/EfficientLZW/
