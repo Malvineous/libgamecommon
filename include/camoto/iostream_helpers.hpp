@@ -63,7 +63,7 @@ struct null_padded_const: public null_padded_write {
 };
 
 /**
- * fixedLength will pad a string with nulls when writing it to a stream, e.g.
+ * nullPadded will pad a string with nulls when writing it to a stream, e.g.
  *
  * @code
  * file << nullPadded("hello", 10);  // write 10 bytes, "hello" and five nulls
