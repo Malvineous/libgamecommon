@@ -26,6 +26,10 @@
 #include <map>
 #include <camoto/stream.hpp>
 
+#ifndef DLL_EXPORT
+#define DLL_EXPORT
+#endif
+
 namespace camoto {
 
 /// Interface for reading and writing metadata about a file.
@@ -37,7 +41,7 @@ namespace camoto {
  * The metadata functions all have no-op defaults, they only need to be
  * overridden for file formats that have metadata.
  */
-class Metadata {
+class DLL_EXPORT Metadata {
 
 	public:
 

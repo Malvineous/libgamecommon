@@ -28,7 +28,7 @@ namespace camoto {
 namespace stream {
 
 /// Read-only stream applying a filter to another read-only stream.
-class input_filtered: virtual public input_memory
+class DLL_EXPORT input_filtered: virtual public input_memory
 {
 	public:
 		virtual stream::len try_read(uint8_t *buffer, stream::len len);
@@ -77,7 +77,7 @@ class input_filtered: virtual public input_memory
 typedef boost::shared_ptr<input_filtered> input_filtered_sptr;
 
 /// Write-only stream applying a filter to another write-only stream.
-class output_filtered: virtual public output_memory
+class DLL_EXPORT output_filtered: virtual public output_memory
 {
 	public:
 		virtual stream::len try_write(const uint8_t *buffer, stream::len len);
@@ -132,7 +132,7 @@ class output_filtered: virtual public output_memory
 typedef boost::shared_ptr<output_filtered> output_filtered_sptr;
 
 /// Read/write stream applying a filter to another read/write stream.
-class filtered: virtual public inout,
+class DLL_EXPORT filtered: virtual public inout,
                 virtual public input_filtered,
                 virtual public output_filtered
 {

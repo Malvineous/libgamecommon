@@ -28,6 +28,10 @@
 #include <camoto/bitstream.hpp>
 #include <camoto/filter.hpp>
 
+#ifndef DLL_EXPORT
+#define DLL_EXPORT
+#endif
+
 namespace camoto {
 
 #define LZW_LITTLE_ENDIAN     0x00 ///< Read bytes in little-endian order
@@ -40,7 +44,7 @@ namespace camoto {
 
 typedef char byte;
 // The string element:
-struct CodeString
+struct DLL_EXPORT CodeString
 {
 	unsigned prefixIndex;
 
@@ -55,7 +59,7 @@ struct CodeString
 	CodeString(byte newByte = 0, unsigned pI = ~0U);
 };
 
-class Dictionary
+class DLL_EXPORT Dictionary
 {
 	std::vector<CodeString> table;
 	unsigned codeStart, newCodeStringIndex;
@@ -75,7 +79,7 @@ public:
 };
 
 /// LZW decompressor
-class filter_lzw_decompress: public filter
+class DLL_EXPORT filter_lzw_decompress: public filter
 {
 	protected:
 		const unsigned int maxBits;  ///< Maximum codeword size (dictionary size limit)
@@ -157,7 +161,7 @@ class filter_lzw_decompress: public filter
 };
 
 /// LZW compressor
-class filter_lzw_compress: public filter
+class DLL_EXPORT filter_lzw_compress: public filter
 {
 	protected:
 		const unsigned int maxBits;  ///< Maximum codeword size (dictionary size limit)

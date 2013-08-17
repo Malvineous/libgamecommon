@@ -25,6 +25,10 @@
 #include <boost/function.hpp>
 #include <camoto/stream.hpp>
 
+#ifndef DLL_EXPORT
+#define DLL_EXPORT
+#endif
+
 namespace camoto {
 
 typedef boost::function<int (uint8_t *)> fn_getnextchar;
@@ -32,7 +36,7 @@ typedef boost::function<int (uint8_t)> fn_putnextchar;
 
 /// Class for reading and writing to iostreams at the bit level rather than
 /// the byte level.
-class bitstream {
+class DLL_EXPORT bitstream {
 	private:
 		/// Parent stream, where the actual data is read from and written to.
 		stream::inout_sptr parent;

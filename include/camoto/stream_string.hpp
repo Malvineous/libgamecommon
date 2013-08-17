@@ -28,7 +28,7 @@ namespace camoto {
 namespace stream {
 
 /// String stream parts in common with read and write
-class string_core {
+class DLL_EXPORT string_core {
 
 	protected:
 		std::string *data;   ///< String data
@@ -53,7 +53,7 @@ class string_core {
 };
 
 /// Read-only stream to access a C++ string.
-class input_string: virtual public input,
+class DLL_EXPORT input_string: virtual public input,
                     virtual protected string_core
 {
 	public:
@@ -88,7 +88,7 @@ class input_string: virtual public input,
 typedef boost::shared_ptr<input_string> input_string_sptr;
 
 /// Write-only stream to access a C++ string.
-class output_string: virtual public output,
+class DLL_EXPORT output_string: virtual public output,
                      virtual protected string_core
 {
 	public:
@@ -125,7 +125,7 @@ class output_string: virtual public output,
 typedef boost::shared_ptr<output_string> output_string_sptr;
 
 /// Read/write stream accessing a C++ string.
-class string: virtual public inout,
+class DLL_EXPORT string: virtual public inout,
               virtual public input_string,
               virtual public output_string
 {

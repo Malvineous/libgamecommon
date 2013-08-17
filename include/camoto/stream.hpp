@@ -85,7 +85,7 @@ typedef signed_int_type delta;
 typedef boost::function<void(stream::pos)> fn_truncate;
 
 /// Base exception for stream functions.
-class error: public camoto::error
+class DLL_EXPORT error: public camoto::error
 {
 	public:
 		/// Constructor.
@@ -97,7 +97,7 @@ class error: public camoto::error
 };
 
 /// Could not read data from stream.
-class read_error: public error
+class DLL_EXPORT read_error: public error
 {
 	public:
 		/// Constructor.
@@ -109,7 +109,7 @@ class read_error: public error
 };
 
 /// Could not write data to stream.
-class write_error: public error
+class DLL_EXPORT write_error: public error
 {
 	public:
 		/// Constructor.
@@ -121,7 +121,7 @@ class write_error: public error
 };
 
 /// Tried to seek before file start or after file end.
-class seek_error: public error
+class DLL_EXPORT seek_error: public error
 {
 	public:
 		/// Constructor.
@@ -133,7 +133,7 @@ class seek_error: public error
 };
 
 /// Not all the expected data could be written to the stream.
-class incomplete_write: public write_error
+class DLL_EXPORT incomplete_write: public write_error
 {
 	public:
 		/// Number of bytes written before the error.
@@ -148,7 +148,7 @@ class incomplete_write: public write_error
 };
 
 /// Not all the requested data could be read from the stream.
-class incomplete_read: public read_error
+class DLL_EXPORT incomplete_read: public read_error
 {
 	public:
 		/// Number of bytes written before the error.
@@ -173,7 +173,7 @@ enum seek_from {
 /**
  * @post A newly created stream's seek pointer is always at the start (offset 0).
  */
-class input {
+class DLL_EXPORT input {
 
 	public:
 		/// Read some bytes from the stream if possible.
@@ -315,7 +315,7 @@ typedef boost::shared_ptr<input> input_sptr;
  * @post A newly created stream's seek pointer is always at the start (offset
  *   0).
  */
-class output {
+class DLL_EXPORT output {
 
 	public:
 		/// Write as much as possible to the stream.
@@ -463,7 +463,7 @@ class output {
 typedef boost::shared_ptr<output> output_sptr;
 
 /// Base stream interface for reading and writing data.
-class inout: virtual public input, virtual public output {
+class DLL_EXPORT inout: virtual public input, virtual public output {
 };
 
 /// Shared pointer to an inout stream.
@@ -482,14 +482,14 @@ typedef boost::shared_ptr<inout> inout_sptr;
  * truncate_here() at the end, in case the stream started off much larger than
  * the amount of data that was written.
  */
-class expanding_output: virtual public output {
+class DLL_EXPORT expanding_output: virtual public output {
 };
 
 /// Shared pointer to an expanding_output stream.
 typedef boost::shared_ptr<expanding_output> expanding_output_sptr;
 
 /// Base stream interface for reading and writing data.
-class expanding_inout: virtual public inout, virtual public expanding_output {
+class DLL_EXPORT expanding_inout: virtual public inout, virtual public expanding_output {
 };
 
 /// Shared pointer to an inout stream.
@@ -516,7 +516,7 @@ typedef boost::shared_ptr<expanding_inout> expanding_inout_sptr;
  *   There was an error decoding the data required to perform this
  *   operation.
  */
-void copy(output_sptr dest, input_sptr src);
+void DLL_EXPORT copy(output_sptr dest, input_sptr src);
 
 /// Copy possibly overlapping data from one position in a stream to another.
 /**
@@ -549,7 +549,7 @@ void copy(output_sptr dest, input_sptr src);
  *   this function call are now at location \e to.  They may no longer exist at
  *   location \e from, if the regions overlapped.
  */
-void move(inout_sptr data, stream::pos from, stream::pos to,
+void DLL_EXPORT move(inout_sptr data, stream::pos from, stream::pos to,
 	stream::len len);
 
 /// iostream-style output function for char strings

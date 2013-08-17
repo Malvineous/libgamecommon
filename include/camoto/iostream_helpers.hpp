@@ -34,10 +34,14 @@
 #define BYTEORDER_PROVIDE_TYPED_FUNCTIONS
 #include <camoto/byteorder.hpp>
 
+#ifndef DLL_EXPORT
+#define DLL_EXPORT
+#endif
+
 namespace camoto {
 
 /// @sa null_padded
-struct null_padded_read {
+struct DLL_EXPORT null_padded_read {
 	null_padded_read(std::string& r, stream::len len, bool chop);
 	void read(stream::input_sptr s) const;
 
@@ -48,7 +52,7 @@ struct null_padded_read {
 };
 
 /// @sa null_padded
-struct null_padded_write {
+struct DLL_EXPORT null_padded_write {
 	null_padded_write(const std::string& r, stream::len len);
 	void write(stream::output_sptr s) const;
 
@@ -58,7 +62,7 @@ struct null_padded_write {
 };
 
 /// @sa null_padded
-struct null_padded_const: public null_padded_write {
+struct DLL_EXPORT null_padded_const: public null_padded_write {
 	null_padded_const(const std::string& r, stream::len len);
 };
 
@@ -96,7 +100,7 @@ struct null_padded_const: public null_padded_write {
  * @note fixedLength throws an incomplete_read if not enough data was available
  *   to be read in full, while nullPadded will just return an incomplete string.
  */
-struct null_padded: public null_padded_read, public null_padded_write {
+struct DLL_EXPORT null_padded: public null_padded_read, public null_padded_write {
 	null_padded(std::string& r, stream::len len, bool chop);
 };
 
@@ -128,7 +132,7 @@ inline null_padded fixedLength(std::string& r, int len)
 // null terminated strings
 
 /// @sa null_terminated
-struct null_terminated_read {
+struct DLL_EXPORT null_terminated_read {
 	null_terminated_read(std::string& r, stream::len len);
 	void read(stream::input_sptr s) const;
 
@@ -138,7 +142,7 @@ struct null_terminated_read {
 };
 
 /// @sa null_terminated
-struct null_terminated_write {
+struct DLL_EXPORT null_terminated_write {
 	null_terminated_write(const std::string& r, stream::len len);
 	void write(stream::output_sptr s) const;
 
@@ -148,7 +152,7 @@ struct null_terminated_write {
 };
 
 /// @sa null_terminated
-struct null_terminated_const: public null_terminated_write {
+struct DLL_EXPORT null_terminated_const: public null_terminated_write {
 	null_terminated_const(const std::string& r, stream::len len);
 };
 
@@ -176,7 +180,7 @@ struct null_terminated_const: public null_terminated_write {
  * is truncated (only 255 characters written) and a null will be placed as the
  * 256th character written.
  */
-struct null_terminated: public null_terminated_read, public null_terminated_write {
+struct DLL_EXPORT null_terminated: public null_terminated_read, public null_terminated_write {
 	null_terminated(std::string& r, stream::len maxlen);
 };
 
@@ -203,7 +207,7 @@ inline null_terminated_const nullTerminated(const std::string& r, int maxlen)
 
 // uint8_t / byte iostream operators
 
-struct number_format_u8: public number_format_read, public number_format_write {
+struct DLL_EXPORT number_format_u8: public number_format_read, public number_format_write {
 	number_format_u8(uint8_t& r);
 	void read(stream::input_sptr s) const;
 	void write(stream::output_sptr s) const;
@@ -212,7 +216,7 @@ struct number_format_u8: public number_format_read, public number_format_write {
 		uint8_t& r;
 };
 
-struct number_format_const_u8: public number_format_write {
+struct DLL_EXPORT number_format_const_u8: public number_format_write {
 	number_format_const_u8(const uint8_t& r);
 	void write(stream::output_sptr s) const;
 

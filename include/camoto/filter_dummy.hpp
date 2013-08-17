@@ -25,7 +25,7 @@
 
 namespace camoto {
 
-class filter_dummy: public filter
+class DLL_EXPORT filter_dummy: public filter
 {
 	public:
 		filter_dummy();

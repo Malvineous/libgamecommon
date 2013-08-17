@@ -43,7 +43,7 @@ typedef boost::shared_ptr<seg> seg_sptr;
  *
  * @see insert() and remove()
  */
-class seg: virtual public inout
+class DLL_EXPORT seg: virtual public inout
 {
 	public:
 		virtual stream::len try_read(uint8_t *buffer, stream::len len);

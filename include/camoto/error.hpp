@@ -24,10 +24,14 @@
 #include <exception>
 #include <string>
 
+#ifndef DLL_EXPORT
+#define DLL_EXPORT
+#endif
+
 namespace camoto {
 
 /// Base exception for stream functions.
-class error: public std::exception
+class DLL_EXPORT error: public std::exception
 {
 	public:
 		/// Constructor.

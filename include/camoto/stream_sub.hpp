@@ -27,7 +27,7 @@ namespace camoto {
 namespace stream {
 
 /// Substream parts in common with read and write
-class sub_core {
+class DLL_EXPORT sub_core {
 
 	protected:
 		stream::pos start;      ///< Offset into parent stream
@@ -70,7 +70,7 @@ class sub_core {
 };
 
 /// Read-only stream to access a section within another stream.
-class input_sub: virtual public input,
+class DLL_EXPORT input_sub: virtual public input,
                  virtual protected sub_core
 {
 	public:
@@ -109,7 +109,7 @@ class input_sub: virtual public input,
 typedef boost::shared_ptr<input_sub> input_sub_sptr;
 
 /// Write-only stream to access a section within another stream.
-class output_sub: virtual public output,
+class DLL_EXPORT output_sub: virtual public output,
                   virtual protected sub_core
 {
 	public:
@@ -160,7 +160,7 @@ class output_sub: virtual public output,
 typedef boost::shared_ptr<output_sub> output_sub_sptr;
 
 /// Read/write stream accessing a section within another stream.
-class sub: virtual public inout,
+class DLL_EXPORT sub: virtual public inout,
            virtual public input_sub,
            virtual public output_sub
 {

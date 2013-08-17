@@ -28,13 +28,13 @@ namespace camoto {
 namespace stream {
 
 /// Get an input stream reading from standard input.
-input_sptr open_stdin();
+input_sptr DLL_EXPORT open_stdin();
 
 /// Get an output stream writing to standard output.
-output_sptr open_stdout();
+output_sptr DLL_EXPORT open_stdout();
 
 /// Exception thrown when a file could not be opened or created.
-class open_error: public error
+class DLL_EXPORT open_error: public error
 {
 	public:
 		/// Constructor.
@@ -49,7 +49,7 @@ class open_error: public error
 };
 
 /// File stream parts in common with read and write
-class file_core {
+class DLL_EXPORT file_core {
 
 	protected:
 		FILE *handle;  ///< stdio file handle
@@ -69,7 +69,7 @@ class file_core {
 };
 
 /// Read-only stream to access a local file.
-class input_file: virtual public input,
+class DLL_EXPORT input_file: virtual public input,
                   virtual protected file_core
 {
 	public:
@@ -110,7 +110,7 @@ class input_file: virtual public input,
 typedef boost::shared_ptr<input_file> input_file_sptr;
 
 /// Write-only stream to access a local file.
-class output_file: virtual public output,
+class DLL_EXPORT output_file: virtual public output,
                    virtual protected file_core
 {
 	public:
@@ -176,7 +176,7 @@ class output_file: virtual public output,
 typedef boost::shared_ptr<output_file> output_file_sptr;
 
 /// Read/write stream accessing a local file.
-class file: virtual public inout,
+class DLL_EXPORT file: virtual public inout,
             virtual public input_file,
             virtual public output_file
 {

@@ -29,10 +29,14 @@
 
 #include <camoto/stream.hpp>
 
+#ifndef DLL_EXPORT
+#define DLL_EXPORT
+#endif
+
 namespace camoto {
 
 /// Could not read data from stream.
-class filter_error: public stream::error
+class DLL_EXPORT filter_error: public stream::error
 {
 	public:
 		/// Constructor.
@@ -54,7 +58,7 @@ class filter_error: public stream::error
  * and output data would be the same size.  Since the XOR encryption algorithm
  * is symmetric, the same filter could be used to decrypt the data as well.
  */
-class filter {
+class DLL_EXPORT filter {
 
 	public:
 		/// Reset this filter back to its initial state.

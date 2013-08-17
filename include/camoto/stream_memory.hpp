@@ -28,7 +28,7 @@ namespace camoto {
 namespace stream {
 
 /// memory stream parts in common with read and write
-class memory_core
+class DLL_EXPORT memory_core
 {
 	protected:
 		std::vector<uint8_t> data;   ///< Stream content
@@ -45,8 +45,8 @@ class memory_core
 };
 
 /// Read-only stream to access a C++ vector.
-class input_memory: virtual public input,
-                    virtual protected memory_core
+class DLL_EXPORT input_memory: virtual public input,
+                               virtual protected memory_core
 {
 	public:
 		/// Default constructor.
@@ -65,8 +65,8 @@ class input_memory: virtual public input,
 typedef boost::shared_ptr<input_memory> input_memory_sptr;
 
 /// Write-only stream to access a C++ vector.
-class output_memory: virtual public expanding_output,
-                     virtual protected memory_core
+class DLL_EXPORT output_memory: virtual public expanding_output,
+                                virtual protected memory_core
 {
 	public:
 		/// Default constructor.
@@ -86,9 +86,9 @@ class output_memory: virtual public expanding_output,
 typedef boost::shared_ptr<output_memory> output_memory_sptr;
 
 /// Read/write stream accessing a C++ memory.
-class memory: virtual public expanding_inout,
-              virtual public input_memory,
-              virtual public output_memory
+class DLL_EXPORT memory: virtual public expanding_inout,
+                         virtual public input_memory,
+                         virtual public output_memory
 {
 	public:
 		memory();

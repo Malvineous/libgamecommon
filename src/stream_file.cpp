@@ -20,7 +20,11 @@
 
 #include <errno.h>
 #include <string.h>
+#ifndef WIN32
 #include <unistd.h>
+#else
+#include <io.h>
+#endif
 #include <camoto/stream_file.hpp>
 
 namespace camoto {
@@ -165,7 +169,11 @@ void output_file::truncate(stream::pos size)
 {
 	this->flush();
 	int fd = fileno(this->handle);
+#ifndef WIN32
 	if (ftruncate(fd, size) < 0) {
+#else
+	if (_chsize(fd, size) < 0) {
+#endif
 		throw write_error(strerror(errno));
 	}
 
