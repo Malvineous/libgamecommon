@@ -2,7 +2,7 @@
  * @file   debug.hpp
  * @brief  Helper functions to assist with debugging.
  *
- * Copyright (C) 2009 Adam Nielsen <malvineous@shikadi.net>
+ * Copyright (C) 2009-2013 Adam Nielsen <malvineous@shikadi.net>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,13 +28,13 @@
 #include <config.h>
 #endif
 
-#define CLR_NORM   "\e[22;39m"
-#define CLR_GREY   "\e[1;30m"
-#define CLR_RED    "\e[1;31m"
-#define CLR_GREEN  "\e[1;32m"
-#define CLR_YELLOW "\e[1;33m"
-#define CLR_MAG    "\e[1;35m"
-#define CLR_CYAN   "\e[1;36m"
-#define CLR_WHITE  "\e[1;37m"
+#define CLR_NORM   "\033[22;39m"
+#define CLR_GREY   "\033[1;30m"
+#define CLR_RED    "\033[1;31m"
+#define CLR_GREEN  "\033[1;32m"
+#define CLR_YELLOW "\033[1;33m"
+#define CLR_MAG    "\033[1;35m"
+#define CLR_CYAN   "\033[1;36m"
+#define CLR_WHITE  "\033[1;37m"
 
 #endif // _CAMOTO_DEBUG_HPP_
