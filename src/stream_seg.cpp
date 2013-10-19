@@ -254,8 +254,13 @@ void seg::truncate(stream::pos size)
 {
 	try {
 		stream::len total = this->size();
-		this->seekp(size, stream::start);
-		this->remove(total - size);
+		if (size < total) {
+			this->seekp(size, stream::start);
+			this->remove(total - size);
+		} else if (size > total) {
+			this->seekp(total, stream::start);
+			this->insert(size - total);
+		}
 		this->flush();
 	} catch (const seek_error& e) {
 		throw write_error("Unable to seek during truncate: " + e.get_message());
