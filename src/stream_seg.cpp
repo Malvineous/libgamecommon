@@ -457,6 +457,7 @@ void seg::remove(stream::len lenRemove)
 		}
 	}
 
+	// TESTED BY: segstream_remove_from_eof
 	if (lenRemove == 0) return; // No more data to remove
 
 	// If we've gotten this far there's still some data to remove from
