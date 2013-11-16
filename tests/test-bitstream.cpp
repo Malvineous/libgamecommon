@@ -44,27 +44,27 @@ using namespace camoto;
 
 #define DATA_BYTES "\x12\x34\x56\x78\x9a"
 
-int values_8le[] = {0x12, 0x34, 0x56, 0x78, 0x9a};
+unsigned int values_8le[] = {0x12, 0x34, 0x56, 0x78, 0x9a};
 
-int values_8be[] = {0x12, 0x34, 0x56, 0x78, 0x9a};
+unsigned int values_8be[] = {0x12, 0x34, 0x56, 0x78, 0x9a};
 #define PAD8 // Unused
 
 // 0x12       0x34       0x56       0x78       0x9a
 // 0001 0010  0011 0100  0101 0110  0111 1000  1001 1010
-int values_4le[] = {0x2, 0x1, 0x4, 0x3, 0x6, 0x5, 0x8, 0x7, 0xa, 0x9};
+unsigned int values_4le[] = {0x2, 0x1, 0x4, 0x3, 0x6, 0x5, 0x8, 0x7, 0xa, 0x9};
 
 // 0x12       0x34       0x56       0x78       0x9a
 // 0001 0010  0011 0100  0101 0110  0111 1000  1001 1010
-int values_4be[] = {0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa};
+unsigned int values_4be[] = {0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa};
 #define PAD4  // Unused
 
 // 0x12       0x34       0x56       0x78       0x9a
 // 0001 0010  0011 0100  0101 0110  0111 1000  1001 1010
-int values_12le[] = {0x412, 0x563, 0xa78, 0x9};
+unsigned int values_12le[] = {0x412, 0x563, 0xa78, 0x9};
 
 // 0x12       0x34       0x56       0x78       0x9a
 // 0001 0010  0011 0100  0101 0110  0111 1000  1001 1010 0000 0000
-int values_12be[] = {0x123, 0x456, 0x789, 0xa00};
+unsigned int values_12be[] = {0x123, 0x456, 0x789, 0xa00};
 #define PAD12 "\x00"
 
 // 0x12       0x34       0x56       0x78       0x9a
@@ -72,23 +72,30 @@ int values_12be[] = {0x123, 0x456, 0x789, 0xa00};
 // 0 0001 0010  1 0001 1010  0 0001 0101  1 0100 1111  1001
 // 0 0001 0010  01 011 0100  011 01 0110  1001 1 1000  1010
 // 0x012        0x11a        0x15         0x14f        0x9
-int values_9le[] = {0x012, 0x11a, 0x15, 0x14f, 0x9};
+unsigned int values_9le[] = {0x012, 0x11a, 0x15, 0x14f, 0x9};
 
 // 0x12       0x34       0x56       0x78       0x9a
 // 0001 0010  0011 0100  0101 0110  0111 1000  1001 1010
 // 0.001 0.010 0  0.11 01.00 01  0.1 011.0 011  1 1000 1001  1 0100 0000
 // 0x024          0x0d1          0x0b3          0x189        0x140
-int values_9be[] = {0x024, 0x0d1, 0x0b3, 0x189, 0x140};
+unsigned int values_9be[] = {0x024, 0x0d1, 0x0b3, 0x189, 0x140};
 #define PAD9  "\x00"
 
 // 0x12       0x34       0x56       0x78       0x9a
 // 0 0011 0100 0001 0010  1 0011 1100 0010 1011    10 0110
-int values_17le[] = {0x03412, 0x13c2b, 0x26};
+unsigned int values_17le[] = {0x03412, 0x13c2b, 0x26};
 
 // 0x12       0x34       0x56       0x78       0x9a
 // 0 0010 0100 0110 1000  1 0101 1001 1110 0010  0 1101 0000 0000 0000
-int values_17be[] = {0x02468, 0x159e2, 0x0d000};
+unsigned int values_17be[] = {0x02468, 0x159e2, 0x0d000};
 #define PAD17 "\x00\x00"  /// Extra bytes we don't want to pass to the read code, but the write code will output
+
+// 0x12       0x34       0x56       0x78       0x9a
+unsigned int values_32le[] = {0x78563412, 0x0000009a};
+
+// 0x12       0x34       0x56       0x78       0x9a
+unsigned int values_32be[] = {0x12345678, 0x9a000000};
+#define PAD32 "\x00\x00\x00"  /// Extra bytes we don't want to pass to the read code, but the write code will output
 
 typedef std::vector<int> intvector;
 
@@ -185,10 +192,10 @@ struct bitstream_write_sample: public default_sample {
 };
 
 #define make_vector(d)  make_vector_n((d), sizeof(d) / sizeof(int))
-intvector make_vector_n(const int *v, int n)
+intvector make_vector_n(const unsigned int *v, unsigned int n)
 {
 	intvector out;
-	for (int i = 0; i < n; i++) {
+	for (unsigned int i = 0; i < n; i++) {
 		out.push_back(v[i]);
 	}
 	return out;
@@ -199,7 +206,7 @@ BOOST_FIXTURE_TEST_SUITE(bitstream_read_suite, bitstream_read_sample)
 
 #define READ_BITS(n) \
 { \
-	int val, b; \
+	unsigned int val, b; \
 	while ((b = bit->read(n, &val)) == n) { \
 		this->result.push_back(val); \
 	} \
@@ -240,6 +247,8 @@ TEST_LE(9)
 TEST_BE(9)
 TEST_LE(17)
 TEST_BE(17)
+TEST_LE(32)
+TEST_BE(32)
 
 #undef TEST_LE
 #undef TEST_BE
@@ -249,7 +258,7 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_FIXTURE_TEST_SUITE(bitstream_write_suite, bitstream_write_sample)
 
 #define WRITE_BITS(n, values) \
-	for (int i = 0; i < sizeof(values) / sizeof(int); i++) { \
+	for (unsigned int i = 0; i < sizeof(values) / sizeof(int); i++) { \
 		bit->write(n, values[i]); \
 	} \
 	if ((n * sizeof(values) / sizeof(int)) % 8) { \
@@ -295,6 +304,8 @@ TEST_LE(9)
 TEST_BE(9)
 TEST_LE(17)
 TEST_BE(17)
+TEST_LE(32)
+TEST_BE(32)
 
 BOOST_AUTO_TEST_CASE(bitstream_write_partial_byte)
 {
@@ -480,7 +491,7 @@ BOOST_AUTO_TEST_CASE(bitstream_seek_ ## b ## d ## o) \
 { \
 	BOOST_TEST_MESSAGE("Seek to " __STRING(o) "@" __STRING(d) " - " __STRING(b) "-bit"); \
 \
-	int dummy; \
+	unsigned int dummy; \
 	bit->read(8+3, &dummy); \
 \
 	this->bit->seek(o, stream::d); \
@@ -495,7 +506,7 @@ BOOST_AUTO_TEST_CASE(bitstream_seek_ ## b ## d ## neg ## o) \
 { \
 	BOOST_TEST_MESSAGE("Seek to -" __STRING(o) "@" __STRING(d) " - " __STRING(b) "-bit"); \
 \
-	int dummy; \
+	unsigned int dummy; \
 	bit->read(8+3, &dummy); \
 \
 	this->bit->seek(-o, stream::d); \
@@ -505,29 +516,29 @@ BOOST_AUTO_TEST_CASE(bitstream_seek_ ## b ## d ## neg ## o) \
 		"Seek to -" __STRING(o) "@" __STRING(d) " - " __STRING(b) "-bit failed"); \
 }
 
-int values_8start16[] = {0x56, 0x78, 0x9a};
+unsigned int values_8start16[] = {0x56, 0x78, 0x9a};
 TEST_SEEK(8, start, 16);
 
-int values_8start32[] = {0x9a};
+unsigned int values_8start32[] = {0x9a};
 TEST_SEEK(8, start, 32);
 
 // Start at the offset of 3 in the test, seek +5, end up at byte offset 1
-int values_8cur5[] = {0x56, 0x78, 0x9a};
+unsigned int values_8cur5[] = {0x56, 0x78, 0x9a};
 TEST_SEEK(8, cur, 5);
 
-int values_8cur13[] = {0x78, 0x9a};
+unsigned int values_8cur13[] = {0x78, 0x9a};
 TEST_SEEK(8, cur, 13);
 
-int values_8curneg3[] = {0x34, 0x56, 0x78, 0x9a};
+unsigned int values_8curneg3[] = {0x34, 0x56, 0x78, 0x9a};
 TEST_NEG_SEEK(8, cur, 3);
 
-int values_8curneg11[] = {0x12, 0x34, 0x56, 0x78, 0x9a};
+unsigned int values_8curneg11[] = {0x12, 0x34, 0x56, 0x78, 0x9a};
 TEST_NEG_SEEK(8, cur, 11);
 
-int values_8endneg16[] = {0x78, 0x9a};
+unsigned int values_8endneg16[] = {0x78, 0x9a};
 TEST_NEG_SEEK(8, end, 16);
 
-int values_8endneg4[] = {0x9};
+unsigned int values_8endneg4[] = {0x9};
 TEST_NEG_SEEK(8, end, 4);
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -544,7 +555,7 @@ BOOST_AUTO_TEST_CASE(bitstream_rw_1bit)
 
 	bit->changeEndian(bitstream::bigEndian);
 
-	int val = 0;
+	unsigned int val = 0;
 
 	bit->read(1, &val);
 	BOOST_REQUIRE_EQUAL(val, 0x1);
@@ -575,7 +586,7 @@ BOOST_AUTO_TEST_CASE(bitstream_rwseek_8bit)
 	bit->write(8, 0xba);
 	bit->write(8, 0x98);
 
-	int val = 0;
+	unsigned int val = 0;
 	int p = this->bit->seek(8, stream::start);
 	BOOST_REQUIRE_EQUAL(p, 8);
 	bit->read(8, &val);
@@ -625,7 +636,7 @@ BOOST_AUTO_TEST_CASE(bitstream_rwseek_9bit)
 	bit->write(9, 0x1ba);
 	bit->write(4, 0x3);
 
-	int val = 0;
+	unsigned int val = 0;
 	int p = this->bit->seek(9, stream::start);
 	BOOST_REQUIRE_EQUAL(p, 9);
 	bit->read(9, &val);
@@ -672,7 +683,7 @@ BOOST_AUTO_TEST_CASE(bitstream_rwseek_1bit)
 	bit->write(32, 0xffffffff);
 	bit->write(8, 0xff);
 
-	int val = 0;
+	unsigned int val = 0;
 	int p = this->bit->seek(0, stream::start);
 	BOOST_REQUIRE_EQUAL(p, 0);
 	bit->write(1, 0);

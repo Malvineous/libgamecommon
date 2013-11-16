@@ -88,17 +88,17 @@ class DLL_EXPORT filter_lzw_decompress: public filter
 		/// The codeword for end-of-data.  Only used if LZW_EOF_PARAM_VALID used.
 		/// Values < 1 are from the maximum possible codeword (so -1 means the EOF
 		/// code is one less than the max codeword at the current bit depth.)
-		int eofCode;
+		unsigned int eofCode;
 		/// Actual eofCode at the moment, for those codewords which change with
 		/// the bit length.
-		int curEOFCode;
+		unsigned int curEOFCode;
 
 		/// Same as eofCode but the code to reset the dictionary.  As above, only
 		/// valid if LZW_RESET_PARAM_VALID included in c'tor flags.
-		int resetCode;
+		unsigned int resetCode;
 		/// Actual eofCode at the moment, for those codewords which change with
 		/// the bit length.
-		int curResetCode;
+		unsigned int curResetCode;
 
 		/// The maximum codeword value at the current bit length
 		unsigned int maxCode;
@@ -106,7 +106,7 @@ class DLL_EXPORT filter_lzw_decompress: public filter
 		/// Length of initial codeword, and codeword length after a dictionary
 		/// reset (unless LZW_NO_BITSIZE_RESET is given, when the codeword length
 		/// is unchanged after a dictionary reset.)
-		int initialBits;
+		unsigned int initialBits;
 
 		std::deque<char> buffer;
 		Dictionary dictionary;
@@ -115,8 +115,8 @@ class DLL_EXPORT filter_lzw_decompress: public filter
 
 		bitstream data;
 		bool isDictReset;      ///< Has the dict been reset but not yet inited?
-		int code;              ///< Curent codeword
-		int oldCode;           ///< Previous codeword
+		unsigned int code;     ///< Curent codeword
+		unsigned int oldCode;  ///< Previous codeword
 
 	public:
 		/// LZW decompressor.

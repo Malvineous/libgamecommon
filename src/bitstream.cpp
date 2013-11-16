@@ -53,13 +53,13 @@ bitstream::~bitstream()
 {
 }
 
-int bitstream::read(int bits, int *out)
+int bitstream::read(unsigned int bits, unsigned int *out)
 {
 	assert(this->parent);
 	return this->read(NULL, bits, out);
 }
 
-int bitstream::read(fn_getnextchar fnNextChar, int bits, int *out)
+int bitstream::read(fn_getnextchar fnNextChar, unsigned int bits, unsigned int *out)
 {
 	*out = 0;
 	int bitsread = 0;
@@ -134,8 +134,8 @@ int bitstream::read(fn_getnextchar fnNextChar, int bits, int *out)
 
 		// Read at most whatever is left in the buffer, which will always be
 		// eight bits or less.
-		int bufBitsRemaining = 8 - this->curBitPos;
-		int bitsNow = (bits > bufBitsRemaining) ? bufBitsRemaining : bits;
+		unsigned int bufBitsRemaining = 8 - this->curBitPos;
+		unsigned int bitsNow = (bits > bufBitsRemaining) ? bufBitsRemaining : bits;
 
 		// Figure out which bits in the buffered byte we're interested in
 		int exval;
@@ -167,18 +167,18 @@ int bitstream::read(fn_getnextchar fnNextChar, int bits, int *out)
 	return bitsread;
 }
 
-int bitstream::write(int bits, int in)
+int bitstream::write(unsigned int bits, unsigned int in)
 {
 	assert(this->parent);
 	return this->write(NULL, bits, in);
 }
 
-int bitstream::write(fn_putnextchar fnNextChar, int bits, int in)
+int bitstream::write(fn_putnextchar fnNextChar, unsigned int bits, unsigned int in)
 {
 	// Make sure the number being written can actually fit in this many bits.
-	assert(in < (1 << bits));
+	assert((bits == 32) || (in < (1u << bits)));
 
-	int bitswritten = 0;
+	unsigned int bitswritten = 0;
 	while (bitswritten < bits) {
 
 		// If the bit buffer is full, write out the byte.
@@ -209,8 +209,9 @@ int bitstream::write(fn_putnextchar fnNextChar, int bits, int in)
 
 		// Write at most whatever space is left in the buffer, which will
 		// always be eight bits or less.
-		int bufBitsRemaining = 8 - this->curBitPos;
-		int bitsNow = (bits-bitswritten > bufBitsRemaining) ? bufBitsRemaining : bits-bitswritten;
+		unsigned int bufBitsRemaining = 8 - this->curBitPos;
+		unsigned int bitsNow = (bits-bitswritten > bufBitsRemaining)
+			? bufBitsRemaining : bits-bitswritten;
 
 		int writeVal, writeMask;
 		if (this->endianType == bitstream::littleEndian) {
@@ -223,7 +224,7 @@ int bitstream::write(fn_putnextchar fnNextChar, int bits, int in)
 		} else {
 			// Extract the next bits we will be writing.
 
-			int mask = (1 << bits)-1; // could be up to sizeof(int)
+			unsigned int mask = (bits == 32) ? 0xFFFFFFFF : (1 << bits)-1; // could be up to sizeof(int)
 			// Isolate the bits in the input data (in) that we are interested in.
 			// These might be the upper two bits in a 9-bit number, for instance.
 			writeMask = ~(mask >> bitsNow) & mask;
@@ -294,8 +295,8 @@ stream::pos bitstream::seek(stream::delta off, stream::seek_from way)
 	this->curBitPos = 8;
 
 	// Read in the last few bits if the seek destination is inside a byte
-	int origOffset = this->offset;
-	int dummy;
+	unsigned int origOffset = this->offset;
+	unsigned int dummy;
 	this->read(bitOffset, &dummy);
 
 	return origOffset * 8 + (this->curBitPos % 8);
@@ -309,7 +310,7 @@ void bitstream::flush()
 
 	if (this->curBitPos < 8) {
 		// Partial byte.  Read the rest of the byte to trigger a merge.
-		int dummy;
+		unsigned int dummy;
 		this->read(0, &dummy);
 	}
 

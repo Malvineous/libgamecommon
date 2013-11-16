@@ -111,7 +111,7 @@ class DLL_EXPORT bitstream {
 		 * @return The number of bits actually read.  Will be the same as the bits
 		 *   parameter if the read completed fully.
 		 */
-		int read(int bits, int *out);
+		int read(unsigned int bits, unsigned int *out);
 
 		/// Read some bits from a particular stream.
 		/**
@@ -136,7 +136,7 @@ class DLL_EXPORT bitstream {
 		 *
 		 * @return The number of *bits* read, or < 0 on error (e.g. EOF/-1)
 		 */
-		int read(fn_getnextchar fnNextChar, int bits, int *out);
+		int read(fn_getnextchar fnNextChar, unsigned int bits, unsigned int *out);
 
 		/// Write some bits out to the stream.
 		/**
@@ -150,7 +150,7 @@ class DLL_EXPORT bitstream {
 		 * @return The number of bits written.  Will be the same as the bits
 		 *   parameter if the write completed fully.
 		 */
-		int write(int bits, int in);
+		int write(unsigned int bits, unsigned int in);
 
 		/// Write some bits to a particular stream.
 		/**
@@ -176,7 +176,7 @@ class DLL_EXPORT bitstream {
 		 *
 		 * @return The number of *bits* written, or < 0 on error (e.g. EOF/-1)
 		 */
-		int write(fn_putnextchar fnNextChar, int bits, int in);
+		int write(fn_putnextchar fnNextChar, unsigned int bits, unsigned int in);
 
 		/// Seek to a given bit position within the stream.
 		/**
