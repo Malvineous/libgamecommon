@@ -26,7 +26,7 @@ filter_dummy::filter_dummy()
 {
 }
 
-void filter_dummy::reset()
+void filter_dummy::reset(stream::len lenInput)
 {
 }
 

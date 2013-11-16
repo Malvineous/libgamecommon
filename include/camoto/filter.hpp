@@ -58,8 +58,8 @@ class DLL_EXPORT filter_error: public stream::error
  * and output data would be the same size.  Since the XOR encryption algorithm
  * is symmetric, the same filter could be used to decrypt the data as well.
  */
-class DLL_EXPORT filter {
-
+class DLL_EXPORT filter
+{
 	public:
 		/// Reset this filter back to its initial state.
 		/**
@@ -67,8 +67,13 @@ class DLL_EXPORT filter {
 		 * data, making more changes, then saving again.  This function will be
 		 * called before each read or write operation begins, to ensure the filter
 		 * is set back to its initial state.
+		 *
+		 * @param lenInput
+		 *   Length of the input data stream.  This value is often used when
+		 *   compressing data, and the length of the decompressed data must be
+		 *   written at the start of the output (compressed) stream.
 		 */
-		virtual void reset() = 0;
+		virtual void reset(stream::len lenInput) = 0;
 
 		/// Process some bytes through this filter.
 		/**

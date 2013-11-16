@@ -129,7 +129,7 @@ filter_lzw_decompress::filter_lzw_decompress(int initialBits, int maxBits,
 {
 }
 
-void filter_lzw_decompress::reset()
+void filter_lzw_decompress::reset(stream::len lenInput)
 {
 	if (this->flags & LZW_NO_BITSIZE_RESET) {
 		// If LZW_NO_BITSIZE_RESET is *not* set these things will be done in
@@ -293,7 +293,7 @@ filter_lzw_compress::filter_lzw_compress(int initialBits, int maxBits,
 	assert(initialBits > 0);
 }
 
-void filter_lzw_compress::reset()
+void filter_lzw_compress::reset(stream::len lenInput)
 {
 	if (this->flags & LZW_NO_BITSIZE_RESET) {
 		// If LZW_NO_BITSIZE_RESET is *not* set these things will be done in

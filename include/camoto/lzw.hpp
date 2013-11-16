@@ -150,7 +150,7 @@ class DLL_EXPORT filter_lzw_decompress: public filter
 		filter_lzw_decompress(int initialBits, int maxBits, int firstCode,
 			int eofCode, int resetCode, int flags);
 
-		virtual void reset();
+		virtual void reset(stream::len lenInput);
 		virtual void transform(uint8_t *out, stream::len *lenOut, const uint8_t *in,
 			stream::len *lenIn);
 
@@ -235,7 +235,7 @@ class DLL_EXPORT filter_lzw_compress: public filter
 		filter_lzw_compress(int initialBits, int maxBits, int firstCode,
 			int eofCode, int resetCode, int flags);
 
-		virtual void reset();
+		virtual void reset(stream::len lenInput);
 		virtual void transform(uint8_t *out, stream::len *lenOut, const uint8_t *in,
 			stream::len *lenIn);
 
