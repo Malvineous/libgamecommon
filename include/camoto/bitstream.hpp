@@ -85,7 +85,15 @@ class DLL_EXPORT bitstream {
 		 * @param endianType
 		 *   Whether the bytes are in little or big endian order.  To represent
 		 *   0x102 as a nine-bit number, in little endian it would be written out
-		 *   as 02 80, in big endian it would be written as 81 00.
+		 *   as 02 01, in big endian it would be written as 81 00.
+		 *
+		 *   Number: 0x102 (100000010)
+		 *   Little: 02 01 (00000010 00000001)
+		 *      Big: 81 00 (10000001 0)
+		 *
+		 * In other words, reading one bit at a time, the most-significant-bit (MSB)
+		 * of each byte is read first in big-endian order, while the LSB is read
+		 * first in little-endian order.
 		 */
 		bitstream(stream::inout_sptr parent, endian endianType);
 
