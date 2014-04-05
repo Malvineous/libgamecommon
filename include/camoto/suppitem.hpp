@@ -63,9 +63,13 @@ struct SuppItem {
 		Extra4,      ///< Additional file
 		Extra5,      ///< Additional file
 
+		MaxValue ///< Count to use with loops
 	};
 
 };
+
+/// Convert a supp item into its name as a string.
+std::string suppToString(SuppItem::Type s);
 
 /// A list of required supplemental files and their filenames.
 typedef std::map<SuppItem::Type, std::string> SuppFilenames;

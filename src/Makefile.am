@@ -14,6 +14,7 @@ libgamecommon_la_SOURCES += stream_memory.cpp
 libgamecommon_la_SOURCES += stream_seg.cpp
 libgamecommon_la_SOURCES += stream_string.cpp
 libgamecommon_la_SOURCES += stream_sub.cpp
+libgamecommon_la_SOURCES += suppitem.cpp
 
 WARNINGS = -Wall -Wextra -Wno-unused-parameter
 
