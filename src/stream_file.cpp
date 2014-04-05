@@ -260,7 +260,37 @@ void output_file::remove()
 
 
 file::file()
+	: isReadonly(false)
 {
+}
+
+void file::open_readonly(const char *filename)
+{
+	this->filename = std::string(filename);
+	this->open_readonly();
+	return;
+}
+
+void file::open_readonly(const std::string& filename)
+{
+	this->filename = filename;
+	this->open_readonly();
+	return;
+}
+
+bool file::readonly()
+{
+	return this->isReadonly;
+}
+
+void file::open_readonly()
+{
+	this->handle = fopen(this->filename.c_str(), "rb");
+	if (this->handle == NULL) throw open_error(strerror(errno));
+	this->close = true;
+	// no need to seek, fopen("rb") positions file pointer at start
+	this->isReadonly = true;
+	return;
 }
 
 } // namespace stream

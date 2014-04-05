@@ -70,7 +70,7 @@ class DLL_EXPORT file_core {
 
 /// Read-only stream to access a local file.
 class DLL_EXPORT input_file: virtual public input,
-                  virtual protected file_core
+	virtual protected file_core
 {
 	public:
 		/// Default constructor.
@@ -111,7 +111,7 @@ typedef boost::shared_ptr<input_file> input_file_sptr;
 
 /// Write-only stream to access a local file.
 class DLL_EXPORT output_file: virtual public output,
-                   virtual protected file_core
+	virtual protected file_core
 {
 	public:
 		/// Default constructor.
@@ -119,17 +119,12 @@ class DLL_EXPORT output_file: virtual public output,
 		 * @note Must call open() or create() before any other functions.
 		 */
 		output_file();
-
 		virtual ~output_file();
 
 		virtual stream::len try_write(const uint8_t *buffer, stream::len len);
-
 		virtual void seekp(stream::delta off, seek_from from);
-
 		virtual stream::pos tellp() const;
-
 		virtual void truncate(stream::pos size);
-
 		virtual void flush();
 
 		/// Open an existing file.
@@ -168,7 +163,6 @@ class DLL_EXPORT output_file: virtual public output,
 		std::string filename;  ///< Copy of filename for deletion
 
 		void open();
-
 		void create();
 };
 
@@ -177,8 +171,8 @@ typedef boost::shared_ptr<output_file> output_file_sptr;
 
 /// Read/write stream accessing a local file.
 class DLL_EXPORT file: virtual public inout,
-            virtual public input_file,
-            virtual public output_file
+	virtual public input_file,
+	virtual public output_file
 {
 	public:
 		file();
@@ -186,6 +180,30 @@ class DLL_EXPORT file: virtual public inout,
 		// Pick this version (as opposed to input_file::open) as it happens to
 		// open the file in read/write mode.
 		using output_file::open;
+
+		/// Open an existing file in read-only mode.
+		/**
+		 * @param filename
+		 *   Name of file to open.
+		 *
+		 * @throw open_error
+		 *   The file could not be read or does not exist.
+		 */
+		void open_readonly(const char *filename);
+
+		/// @copydoc open_readonly(const char *)
+		void open_readonly(const std::string& filename);
+
+		/// Is the file open in read-only mode?
+		/**
+		 * @return true if read-only, false if read-write.
+		 */
+		bool readonly();
+
+	protected:
+		bool isReadonly; ///< Is the file read-only?
+
+		void open_readonly();
 };
 
 /// Shared pointer to a readable and writable file.
