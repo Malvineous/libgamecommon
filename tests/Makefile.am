@@ -2,6 +2,7 @@ check_PROGRAMS = tests
 
 tests_SOURCES = tests.cpp
 tests_SOURCES += test-byteorder.cpp
+tests_SOURCES += test-iff.cpp
 tests_SOURCES += test-iostream_helpers.cpp
 tests_SOURCES += test-stream.cpp
 tests_SOURCES += test-stream_file.cpp
