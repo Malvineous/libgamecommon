@@ -87,7 +87,7 @@ stream::len IFFReader::open(unsigned int index, fourcc *type)
 void IFFReader::loadChunks(stream::len lenChunk)
 {
 	this->chunks.clear();
-	while (lenChunk) {
+	while (lenChunk > 8) {
 		lenChunk -= 8; // ID and chunk size fields
 		Chunk c;
 		c.start = this->iff->tellg() + 8;

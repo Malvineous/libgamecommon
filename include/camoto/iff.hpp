@@ -121,8 +121,8 @@ class IFFReader: public IFF
 		stream::len open(unsigned int index, fourcc *type);
 
 	protected:
-		stream::input_sptr iff;
-		Filetype filetype;
+		stream::input_sptr iff;         ///< File to read
+		Filetype filetype;              ///< Type of file (RIFF, IFF, etc.)
 		struct Chunk {
 			fourcc name;
 			stream::pos start;
@@ -170,8 +170,8 @@ class IFFWriter: public IFF
 		void end();
 
 	protected:
-		stream::output_sptr iff;
-		Filetype filetype;
+		stream::output_sptr iff;        ///< File to write
+		Filetype filetype;              ///< Type of file (RIFF, IFF, etc.)
 		std::vector<stream::pos> chunk; ///< Offset of start of most recent chunk
 };
 
