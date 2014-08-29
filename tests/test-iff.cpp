@@ -73,6 +73,7 @@ BOOST_AUTO_TEST_CASE(riff_read)
 	BOOST_REQUIRE_EQUAL(contentDem2, "bbbb");
 
 	iff.root();
+	iff.open("RIFF", &type);
 	stream::len lenTwo3 = iff.seek(3);
 	std::string contentTwo3;
 	this->in >> fixedLength(contentTwo3, lenTwo3);
@@ -140,6 +141,9 @@ BOOST_AUTO_TEST_CASE(iff_read)
 	BOOST_REQUIRE_EQUAL(chunks[0], "one ");
 	BOOST_REQUIRE_EQUAL(chunks[1], "LIST");
 	BOOST_REQUIRE_EQUAL(chunks[2], "two ");
+
+	// Make sure out-of-range seek request fails
+	BOOST_CHECK_THROW(iff.seek(4), stream::error);
 
 	iff.open("LIST", &type);
 	BOOST_REQUIRE_EQUAL(type, "demo");

@@ -18,6 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <camoto/util.hpp>
 #include <camoto/iostream_helpers.hpp>
 #include <camoto/iff.hpp>
 
@@ -58,11 +59,15 @@ stream::len IFFReader::seek(const fourcc& name)
 			return i->len;
 		}
 	}
-	return 0;
+	throw stream::error(createString("IFF: Could not find chunk " << name));
 }
 
 stream::len IFFReader::seek(unsigned int index)
 {
+	if (index >= this->chunks.size()) {
+		throw stream::error(createString("IFF: Chunk #" << index
+			<< " is out of range (max chunk is #" << this->chunks.size() << ")"));
+	}
 	Chunk& chunk = this->chunks[index];
 	this->iff->seekg(chunk.start, stream::start);
 	return chunk.len;
