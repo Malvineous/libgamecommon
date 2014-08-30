@@ -31,12 +31,12 @@ using namespace camoto;
 BOOST_FIXTURE_TEST_SUITE(iff_suite, string_sample)
 
 #define RIFF_CONTENT makeString( \
-	"RIFF" "\x59\x00\x00\x00" "test" \
+	"RIFF" "\x5C\x00\x00\x00" "test" \
 	"one " "\x07\x00\x00\x00" \
-		"abcdefg" \
-	"LIST" "\x1B\x00\x00\x00" "demo" \
+		"abcdefg" "\x00" \
+	"LIST" "\x1C\x00\x00\x00" "demo" \
 		"dem1" "\x03\x00\x00\x00" \
-			"aaa" \
+			"aaa" "\x00" \
 		"dem2" "\x04\x00\x00\x00" \
 			"bbbb" \
 	"two " "\x06\x00\x00\x00" \
@@ -44,7 +44,7 @@ BOOST_FIXTURE_TEST_SUITE(iff_suite, string_sample)
 	"two " "\x02\x00\x00\x00" \
 		"no" \
 	"two " "\x03\x00\x00\x00" \
-		"pqr" \
+		"pqr" "\x00" \
 )
 
 BOOST_AUTO_TEST_CASE(riff_read)
@@ -113,12 +113,12 @@ BOOST_AUTO_TEST_CASE(riff_write)
 }
 
 #define IFF_CONTENT makeString( \
-	"FORM" "\x00\x00\x00\x44" "test" \
+	"FORM" "\x00\x00\x00\x46" "test" \
 	"one " "\x00\x00\x00\x07" \
-		"abcdefg" \
-	"LIST" "\x00\x00\x00\x1B" "demo" \
+		"abcdefg" "\x00" \
+	"LIST" "\x00\x00\x00\x1C" "demo" \
 		"dem1" "\x00\x00\x00\x03" \
-			"aaa" \
+			"aaa" "\x00" \
 		"dem2" "\x00\x00\x00\x04" \
 			"bbbb" \
 	"two " "\x00\x00\x00\x06" \

@@ -107,8 +107,9 @@ void IFFReader::loadChunks(stream::len lenChunk)
 		}
 		if (lenChunk < c.len) c.len = lenChunk; // truncated
 		this->chunks.push_back(c);
-		lenChunk -= c.len;
-		this->iff->seekg(c.len, stream::cur);
+		unsigned int pad = (c.len % 2) ? 1 : 0;
+		lenChunk -= c.len + pad;
+		this->iff->seekg(c.len + pad, stream::cur);
 	}
 	return;
 }
@@ -147,6 +148,11 @@ void IFFWriter::end()
 	stream::pos start = this->chunk.back();
 	this->chunk.pop_back();
 	stream::len lenChunk = orig - (start + 8);
+	if (orig % 2) {
+		// Pad to even byte boundary
+		this->iff->write("", 1);
+		orig++;
+	}
 
 	this->iff->seekp(start + 4, stream::start);
 	switch (this->filetype) {
