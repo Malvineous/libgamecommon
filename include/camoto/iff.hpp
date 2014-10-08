@@ -36,8 +36,17 @@ class IFF
 		typedef std::string fourcc;
 
 		enum Filetype {
-			Filetype_RIFF = 0x00, ///< Little-endian length values
-			Filetype_IFF  = 0x01, ///< Big-endian length values
+			/// Standard Microsoft RIFF file with length values in little-endian
+			Filetype_RIFF = 0x00,
+
+			/// Standard EA/Amiga IFF file with length values in big-endian
+			Filetype_IFF  = 0x01,
+
+			/// Same as RIFF but with no padding bytes between chunks (non-standard)
+			Filetype_RIFF_Unpadded = 0x02,
+
+			/// Same as IFF but with no padding bytes between chunks (non-standard)
+			Filetype_IFF_Unpadded = 0x03,
 		};
 };
 

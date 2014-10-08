@@ -112,6 +112,31 @@ BOOST_AUTO_TEST_CASE(riff_write)
 		"Writing RIFF file failed");
 }
 
+BOOST_AUTO_TEST_CASE(riff_read_missing_pad)
+{
+	BOOST_TEST_MESSAGE("Read a padded RIFF file with a missing pad byte");
+
+	this->in->write(makeString(
+		"RIFF" "\x17\x00\x00\x00" "test"
+		"one " "\x03\x00\x00\x00" "aaa"
+		// missing final pad byte
+	));
+
+	IFFReader iff(this->in, IFF::Filetype_RIFF);
+
+	IFF::fourcc type;
+	iff.open("RIFF", &type);
+	BOOST_REQUIRE_EQUAL(type, "test");
+
+	std::vector<IFF::fourcc> chunks = iff.list();
+	BOOST_REQUIRE_EQUAL(chunks[0], "one ");
+
+	stream::len lenOne = iff.seek("one ");
+	std::string contentOne;
+	this->in >> fixedLength(contentOne, lenOne);
+	BOOST_REQUIRE_EQUAL(contentOne, "aaa");
+}
+
 #define IFF_CONTENT makeString( \
 	"FORM" "\x00\x00\x00\x46" "test" \
 	"one " "\x00\x00\x00\x07" \
@@ -178,6 +203,88 @@ BOOST_AUTO_TEST_CASE(iff_write)
 
 	BOOST_CHECK_MESSAGE(is_equal(IFF_CONTENT),
 		"Writing IFF file failed");
+}
+
+#define RIFF_CONTENT_UNPADDED makeString( \
+	"RIFF" "\x59\x00\x00\x00" "test" \
+	"one " "\x07\x00\x00\x00" \
+		"abcdefg" \
+	"LIST" "\x1B\x00\x00\x00" "demo" \
+		"dem1" "\x03\x00\x00\x00" \
+			"aaa" \
+		"dem2" "\x04\x00\x00\x00" \
+			"bbbb" \
+	"two " "\x06\x00\x00\x00" \
+		"hijklm" \
+	"two " "\x02\x00\x00\x00" \
+		"no" \
+	"two " "\x03\x00\x00\x00" \
+		"pqr" \
+)
+
+BOOST_AUTO_TEST_CASE(riff_read_unpadded)
+{
+	BOOST_TEST_MESSAGE("Read an unpadded RIFF file");
+
+	this->in->write(RIFF_CONTENT_UNPADDED);
+
+	IFFReader iff(this->in, IFF::Filetype_RIFF_Unpadded);
+
+	IFF::fourcc type;
+	iff.open("RIFF", &type);
+	BOOST_REQUIRE_EQUAL(type, "test");
+
+	std::vector<IFF::fourcc> chunks = iff.list();
+	BOOST_REQUIRE_EQUAL(chunks[0], "one ");
+	BOOST_REQUIRE_EQUAL(chunks[1], "LIST");
+	BOOST_REQUIRE_EQUAL(chunks[2], "two ");
+
+	iff.open("LIST", &type);
+	BOOST_REQUIRE_EQUAL(type, "demo");
+
+	stream::len lenDem2 = iff.seek("dem2");
+	std::string contentDem2;
+	this->in >> fixedLength(contentDem2, lenDem2);
+	BOOST_REQUIRE_EQUAL(contentDem2, "bbbb");
+
+	iff.root();
+	iff.open("RIFF", &type);
+	stream::len lenTwo3 = iff.seek(3);
+	std::string contentTwo3;
+	this->in >> fixedLength(contentTwo3, lenTwo3);
+	BOOST_REQUIRE_EQUAL(contentTwo3, "no");
+}
+
+BOOST_AUTO_TEST_CASE(riff_write_unpadded)
+{
+	BOOST_TEST_MESSAGE("Write a RIFF file");
+
+	IFFWriter iff(this->out, IFF::Filetype_RIFF_Unpadded);
+	iff.begin("RIFF", "test");
+		iff.begin("one ");
+		this->out->write("abcdefg");
+		iff.end();
+		iff.begin("LIST", "demo");
+			iff.begin("dem1");
+			this->out->write("aaa");
+			iff.end();
+			iff.begin("dem2");
+			this->out->write("bbbb");
+			iff.end();
+		iff.end();
+		iff.begin("two ");
+		this->out->write("hijklm");
+		iff.end();
+		iff.begin("two ");
+		this->out->write("no");
+		iff.end();
+		iff.begin("two ");
+		this->out->write("pqr");
+		iff.end();
+	iff.end();
+
+	BOOST_CHECK_MESSAGE(is_equal(RIFF_CONTENT_UNPADDED),
+		"Writing RIFF file failed");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

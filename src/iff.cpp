@@ -98,18 +98,34 @@ void IFFReader::loadChunks(stream::len lenChunk)
 		c.start = this->iff->tellg() + 8;
 		this->iff >> fixedLength(c.name, 4);
 		switch (this->filetype) {
+			case Filetype_RIFF_Unpadded:
 			case Filetype_RIFF:
 				this->iff >> u32le(c.len);
 				break;
+			case Filetype_IFF_Unpadded:
 			case Filetype_IFF:
 				this->iff >> u32be(c.len);
 				break;
 		}
+
+		unsigned int pad;
+		switch (this->filetype) {
+			case Filetype_RIFF:
+			case Filetype_IFF:
+				pad = (c.len % 2) ? 1 : 0;
+				break;
+			case Filetype_RIFF_Unpadded:
+			case Filetype_IFF_Unpadded:
+				pad = 0;
+				break;
+		}
+
+		stream::len lenPaddedSub = c.len + pad;
 		if (lenChunk < c.len) c.len = lenChunk; // truncated
+		if (lenChunk < lenPaddedSub) lenPaddedSub = lenChunk; // final pad truncated
 		this->chunks.push_back(c);
-		unsigned int pad = (c.len % 2) ? 1 : 0;
-		lenChunk -= c.len + pad;
-		this->iff->seekg(c.len + pad, stream::cur);
+		lenChunk -= lenPaddedSub;
+		this->iff->seekg(lenPaddedSub, stream::cur);
 	}
 	return;
 }
@@ -148,17 +164,28 @@ void IFFWriter::end()
 	stream::pos start = this->chunk.back();
 	this->chunk.pop_back();
 	stream::len lenChunk = orig - (start + 8);
-	if (orig % 2) {
-		// Pad to even byte boundary
-		this->iff->write("", 1);
-		orig++;
+
+	switch (this->filetype) {
+		case Filetype_RIFF_Unpadded:
+		case Filetype_IFF_Unpadded:
+			break;
+		case Filetype_RIFF:
+		case Filetype_IFF:
+			if (orig % 2) {
+				// Pad to even byte boundary
+				this->iff->write("", 1);
+				orig++;
+			}
+			break;
 	}
 
 	this->iff->seekp(start + 4, stream::start);
 	switch (this->filetype) {
+		case Filetype_RIFF_Unpadded:
 		case Filetype_RIFF:
 			this->iff << u32le(lenChunk);
 			break;
+		case Filetype_IFF_Unpadded:
 		case Filetype_IFF:
 			this->iff << u32be(lenChunk);
 			break;
