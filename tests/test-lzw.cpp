@@ -62,16 +62,66 @@ BOOST_AUTO_TEST_CASE(lzw_decomp_read)
 		"Decompressing LZW data failed");
 }
 
+BOOST_AUTO_TEST_CASE(lzw_decomp_codeword_length)
+{
+	BOOST_TEST_MESSAGE("Confirm codeword length changes at correct position (eof+reset)");
+
+	bitstream_sptr bit_in(new bitstream(this->in, bitstream::bigEndian));
+	bit_in->write(9, 'A'); // first byte isn't assigned a codeword
+	// finish at 0x1fd because 0x1fe is for reset and 0x1ff is for eof
+	for (unsigned int i = 0x100; i < 0x200 - 2; i++) {
+		bit_in->write(9, 'A');
+	}
+	bit_in->write(10, 'A'); // 256th 'A'
+	bit_in->write(10, 'B'); // 257th char
+	bit_in->write(10, 'B');
+	bit_in->write(10, 'B');
+	bit_in->write(10, 'B');
+	bit_in->write(10, 0x3ff);  // EOF is max possible code
+
+	filter_sptr filt(new filter_lzw_decompress(9, 14, 0x100,
+		0, // EOF is max possible code
+		-1, // Reset is max code minus one
+		LZW_BIG_ENDIAN | LZW_EOF_PARAM_VALID | LZW_RESET_PARAM_VALID));
+	stream::input_filtered_sptr processed(new stream::input_filtered());
+	processed->open(this->in, filt);
+
+	stream::copy(this->out, processed);
+
+	BOOST_CHECK_MESSAGE(is_equal(
+		"AAAAAAAAAAAAAAAA"
+		"AAAAAAAAAAAAAAAA"
+		"AAAAAAAAAAAAAAAA"
+		"AAAAAAAAAAAAAAAA"
+		"AAAAAAAAAAAAAAAA"
+		"AAAAAAAAAAAAAAAA"
+		"AAAAAAAAAAAAAAAA"
+		"AAAAAAAAAAAAAAAA"
+		"AAAAAAAAAAAAAAAA"
+		"AAAAAAAAAAAAAAAA"
+		"AAAAAAAAAAAAAAAA"
+		"AAAAAAAAAAAAAAAA"
+		"AAAAAAAAAAAAAAAA"
+		"AAAAAAAAAAAAAAAA"
+		"AAAAAAAAAAAAAAAA"
+		"AAAAAAAAAAAAAAAA"
+		"BBBB"
+	),
+		"Decompressing LZW data failed");
+}
+
 BOOST_AUTO_TEST_CASE(lzw_decomp_bitlength_expand)
 {
 	BOOST_TEST_MESSAGE("Codeword bit length expansion when LZW decompressing");
 
 	bitstream_sptr bit_in(new bitstream(this->in, bitstream::bigEndian));
-	for (int i = 0; i < 256; i++) {
+	bit_in->write(9, 'A'); // first byte isn't assigned a codeword
+	// start at 0x101 because 0x100 is used for EOF
+	for (int i = 0x101; i < 0x200; i++) {
 		bit_in->write(9, 'A');
 	}
 	// Codeword will have just expanded to 10 bits
-	bit_in->write(10, 'B');
+	bit_in->write(10, 'B'); // 257th char
 	bit_in->write(10, 0x100);
 
 	filter_sptr filt(new filter_lzw_decompress(9, 10, 0x101, 0x100, 0,
@@ -90,17 +140,19 @@ BOOST_AUTO_TEST_CASE(lzw_decomp_reset)
 	BOOST_TEST_MESSAGE("Dictionary reset shared with EOF codeword when LZW decompressing");
 
 	bitstream_sptr bit_in(new bitstream(this->in, bitstream::bigEndian));
-	for (int i = 0; i < 256; i++) {
+	bit_in->write(9, 'A'); // first byte isn't assigned a codeword
+	// start at 0x101 because 0x100 is used for reset
+	for (int i = 0x101; i < 0x200; i++) {
 		bit_in->write(9, 'A');
 	}
 	// Codeword will have just expanded to 10 bits
-	bit_in->write(10, 'B');
+	bit_in->write(10, 'B'); // 257th char
 	bit_in->write(10, 0x100);
 	bit_in->write(9, 'C');
 	bit_in->write(9, 'C');
 	bit_in->write(9, 0x100);
 
-	filter_sptr filt(new filter_lzw_decompress(9, 10, 0x101, 0x100, 0x100,
+	filter_sptr filt(new filter_lzw_decompress(9, 10, 0x101, 0, 0x100,
 		LZW_BIG_ENDIAN | LZW_RESET_PARAM_VALID));
 	stream::input_filtered_sptr processed(new stream::input_filtered());
 	processed->open(this->in, filt);

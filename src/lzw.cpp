@@ -185,7 +185,7 @@ void filter_lzw_decompress::transform(uint8_t *out, stream::len *lenOut,
 			}
 			assert(bitsRead > 0);
 
-			if ((this->flags & LZW_EOF_PARAM_VALID) && (this->code == this->curEOFCode)) break;
+			if ((this->flags & LZW_EOF_PARAM_VALID) && (this->code == this->curEOFCode)) continue;
 
 			if (this->isDictReset) {
 				// When the dictionary is empty, the next "codeword" is always the first
