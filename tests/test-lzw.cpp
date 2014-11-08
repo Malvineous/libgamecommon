@@ -236,6 +236,45 @@ BOOST_AUTO_TEST_CASE(lzw_comp_write)
 		"Compressing LZW data failed");
 }
 
+BOOST_AUTO_TEST_CASE(lzw_comp_write_neg_eof)
+{
+	BOOST_TEST_MESSAGE("Compress some LZW data with negative EOF code");
+
+	stream::string_sptr exp(new stream::string());
+	bitstream_sptr bit_exp(new bitstream(exp, bitstream::bigEndian));
+	bit_exp->write(9, 'H');
+	bit_exp->write(9, 'e');
+	bit_exp->write(9, 'l');
+	bit_exp->write(9, 'l');
+	bit_exp->write(9, 'o');
+	bit_exp->write(9, ' ');
+	bit_exp->write(9, 'h');
+	bit_exp->write(9, 'e');
+	bit_exp->write(9, 'l');
+	bit_exp->write(9, 'l');
+	bit_exp->write(9, 'o');
+	bit_exp->write(9, ' ');
+	bit_exp->write(9, 'h');
+	bit_exp->write(9, 'e');
+	bit_exp->write(9, 'l');
+	bit_exp->write(9, 'l');
+	bit_exp->write(9, 'o');
+	bit_exp->write(9, '.');
+	bit_exp->write(9, 0x1fe);
+	bit_exp->flushByte();
+
+	this->in->write("Hello hello hello.");
+
+	filter_sptr filt(new filter_lzw_compress(9, 9, 0x100, -1, 0, LZW_BIG_ENDIAN | LZW_EOF_PARAM_VALID));
+	stream::input_filtered_sptr processed(new stream::input_filtered());
+	processed->open(this->in, filt);
+
+	stream::copy(this->out, processed);
+
+	BOOST_CHECK_MESSAGE(is_equal(exp->str()),
+		"Compressing LZW data failed");
+}
+
 BOOST_AUTO_TEST_CASE(lzw_comp_write_dict_grow)
 {
 	BOOST_TEST_MESSAGE("Compress some LZW data with a growing dictionary");
