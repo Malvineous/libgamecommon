@@ -103,6 +103,21 @@ BOOST_AUTO_TEST_CASE(change_offset)
 		"Move substream's offset failed");
 }
 
+BOOST_AUTO_TEST_CASE(relocate_to_start)
+{
+	BOOST_TEST_MESSAGE("Move substream's offset to start of parent");
+
+	this->sub->open(this->base, 2, 4, boost::bind(ss_resize, this->base, this->sub, _1));
+
+	BOOST_CHECK_MESSAGE(is_equal("CDEF"),
+		"Open substream failed");
+
+	this->sub->relocate(-2);
+
+	BOOST_CHECK_MESSAGE(is_equal("ABCD"),
+		"Move substream's offset to start of parent failed");
+}
+
 BOOST_AUTO_TEST_CASE(write_then_move)
 {
 	BOOST_TEST_MESSAGE("Move substream's offset after writing");
