@@ -32,11 +32,11 @@ BOOST_AUTO_TEST_CASE(null_padded_write)
 	{
 		stream::string_sptr data(new stream::string());
 		data << nullPadded("AB", 4);
-		BOOST_REQUIRE_EQUAL(data->str().length(), 4);
-		BOOST_CHECK_EQUAL((uint8_t)data->str().at(0), 0x41);
-		BOOST_CHECK_EQUAL((uint8_t)data->str().at(1), 0x42);
-		BOOST_CHECK_EQUAL((uint8_t)data->str().at(2), 0x00);
-		BOOST_CHECK_EQUAL((uint8_t)data->str().at(3), 0x00);
+		BOOST_REQUIRE_EQUAL(data->str()->length(), 4);
+		BOOST_CHECK_EQUAL((uint8_t)data->str()->at(0), 0x41);
+		BOOST_CHECK_EQUAL((uint8_t)data->str()->at(1), 0x42);
+		BOOST_CHECK_EQUAL((uint8_t)data->str()->at(2), 0x00);
+		BOOST_CHECK_EQUAL((uint8_t)data->str()->at(3), 0x00);
 	}
 }
 
@@ -84,10 +84,10 @@ BOOST_AUTO_TEST_CASE(null_terminated_write)
 	{
 		stream::string_sptr data(new stream::string());
 		data << nullTerminated("AB", 4);
-		BOOST_REQUIRE_EQUAL(data->str().length(), 3);
-		BOOST_CHECK_EQUAL((uint8_t)data->str().at(0), 0x41);
-		BOOST_CHECK_EQUAL((uint8_t)data->str().at(1), 0x42);
-		BOOST_CHECK_EQUAL((uint8_t)data->str().at(2), 0x00);
+		BOOST_REQUIRE_EQUAL(data->str()->length(), 3);
+		BOOST_CHECK_EQUAL((uint8_t)data->str()->at(0), 0x41);
+		BOOST_CHECK_EQUAL((uint8_t)data->str()->at(1), 0x42);
+		BOOST_CHECK_EQUAL((uint8_t)data->str()->at(2), 0x00);
 	}
 }
 

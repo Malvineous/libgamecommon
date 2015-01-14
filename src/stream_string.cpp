@@ -28,14 +28,8 @@ namespace stream {
 
 string_core::string_core()
 	:	data(new std::string()),
-		free(true),
 		offset(0)
 {
-}
-
-string_core::~string_core()
-{
-	if (this->free) delete this->data;
 }
 
 void string_core::seek(stream::delta off, seek_from from)
@@ -65,9 +59,9 @@ void string_core::seek(stream::delta off, seek_from from)
 	return;
 }
 
-std::string& string_core::str()
+boost::shared_ptr<std::string> string_core::str()
 {
-	return *this->data;
+	return this->data;
 }
 
 
@@ -105,13 +99,9 @@ stream::pos input_string::size() const
 	return this->data->length();
 }
 
-void input_string::open(const std::string *src)
+void input_string::open(boost::shared_ptr<std::string> src)
 {
-	if (this->free) {
-		delete this->data;
-		this->free = false;
-	}
-	this->data = const_cast<std::string *>(src);
+	this->data = src;
 	this->offset = 0;
 	return;
 }
@@ -170,12 +160,8 @@ void output_string::flush()
 	return;
 }
 
-void output_string::open(std::string *src)
+void output_string::open(boost::shared_ptr<std::string> src)
 {
-	if (this->free) {
-		delete this->data;
-		this->free = false;
-	}
 	this->data = src;
 	this->offset = 0;
 	return;

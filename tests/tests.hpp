@@ -59,7 +59,7 @@ struct string_sample: public default_sample {
 	boost::test_tools::predicate_result is_equal(const std::string& strExpected)
 	{
 		// See if the stringstream now matches what we expected
-		return this->default_sample::is_equal(strExpected, out->str());
+		return this->default_sample::is_equal(strExpected, *(out->str()));
 	}
 
 };

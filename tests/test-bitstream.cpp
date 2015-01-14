@@ -112,7 +112,7 @@ struct bitstream_read_sample: public default_sample {
 		this->bit.reset(new bitstream(this->base, bitstream::littleEndian));
 
 		// Make sure the data went in correctly to begin the test
-		BOOST_REQUIRE(this->base->str().compare(DATA_BYTES) == 0);
+		BOOST_REQUIRE(this->base->str()->compare(DATA_BYTES) == 0);
 	}
 
 	void printNice(boost::test_tools::predicate_result& res,
@@ -275,7 +275,7 @@ BOOST_AUTO_TEST_CASE(bitstream_write_ ## n ## bit_le) \
 	bit->flush(); \
 \
 	BOOST_CHECK_MESSAGE(is_equal(std::string(DATA_BYTES PAD ## n, sizeof(DATA_BYTES PAD ## n)-1), \
-		this->base->str()), \
+		*(this->base->str())), \
 		"Writing " __STRING(n) "-bit LE values failed"); \
 }
 
@@ -290,7 +290,7 @@ BOOST_AUTO_TEST_CASE(bitstream_write_ ## n ## bit_be) \
 	bit->flush(); \
 \
 	BOOST_CHECK_MESSAGE(is_equal(std::string(DATA_BYTES PAD ## n, sizeof(DATA_BYTES PAD ## n)-1), \
-		this->base->str()), \
+		*(this->base->str())), \
 		"Writing " __STRING(n) "-bit BE values failed"); \
 }
 
@@ -324,7 +324,7 @@ BOOST_AUTO_TEST_CASE(bitstream_write_partial_byte)
 	bit->flush();
 
 	BOOST_CHECK_MESSAGE(is_equal(std::string("\x0f", 1),
-		this->base->str()),
+		*(this->base->str())),
 		"End write within a byte failed");
 }
 
@@ -344,14 +344,14 @@ BOOST_AUTO_TEST_CASE(bitstream_write_flush_partial_byte)
 	bit->flush();
 
 	BOOST_CHECK_MESSAGE(is_equal(std::string("\xd2", 1),
-		this->base->str()),
+		*(this->base->str())),
 		"Flush within a byte failed (flush didn't work)");
 
 	bit->write(4, 0xd);
 	bit->flush();
 
 	BOOST_CHECK_MESSAGE(is_equal(std::string("\xdd", 1),
-		this->base->str()),
+		*(this->base->str())),
 		"Flush within a byte failed (flush affected stream pointer)");
 }
 
@@ -376,7 +376,7 @@ BOOST_AUTO_TEST_CASE(bitstream_write_flushbyte)
 	bit->write(2, 0x3);
 	bit->flush();
 	BOOST_CHECK_MESSAGE(is_equal(std::string("\xd0\x08\x80\xc0", 4),
-		this->base->str()),
+		*(this->base->str())),
 		"Flush within a byte failed (flush didn't work)");
 }
 
@@ -399,7 +399,7 @@ BOOST_AUTO_TEST_CASE(bitstream_write_flushbyte_over)
 	bit->write(4, 0xd);
 	bit->flush();
 	BOOST_CHECK_MESSAGE(is_equal(std::string("\xd0\xff\xc0\xd0", 4),
-		this->base->str()),
+		*(this->base->str())),
 		"Flush within a byte failed (flush didn't work)");
 }
 
@@ -570,7 +570,7 @@ BOOST_AUTO_TEST_CASE(bitstream_rw_1bit)
 	bit->flush();
 
 	BOOST_CHECK_MESSAGE(is_equal(std::string("\x9f", 1),
-		this->base->str()),
+		*(this->base->str())),
 		"Read/write within a byte in 1-bit stream failed");
 }
 
@@ -620,7 +620,7 @@ BOOST_AUTO_TEST_CASE(bitstream_rwseek_8bit)
 	bit->flush();
 
 	BOOST_CHECK_MESSAGE(is_equal(std::string(DATA_BYTES, sizeof(DATA_BYTES)-1),
-		this->base->str()),
+		*(this->base->str())),
 		"Read/write/seek in 8-bit stream failed");
 }
 
@@ -670,7 +670,7 @@ BOOST_AUTO_TEST_CASE(bitstream_rwseek_9bit)
 	bit->flush();
 
 	BOOST_CHECK_MESSAGE(is_equal(std::string(DATA_BYTES, sizeof(DATA_BYTES)-1),
-		this->base->str()),
+		*(this->base->str())),
 		"Read/write/seek in 9-bit stream failed");
 }
 
@@ -745,7 +745,7 @@ BOOST_AUTO_TEST_CASE(bitstream_rwseek_1bit)
 	bit->flush();
 
 	BOOST_CHECK_MESSAGE(is_equal(std::string(DATA_BYTES, sizeof(DATA_BYTES)-1),
-		this->base->str()),
+		*(this->base->str())),
 		"Read/write/seek in 1-bit stream failed");
 }
 
@@ -783,7 +783,7 @@ BOOST_AUTO_TEST_CASE(bitstream_writeonly)
 	bit->flushByte(cbNext);
 
 	BOOST_CHECK_MESSAGE(is_equal(std::string("\x18\xE7", 2),
-		this->base->str()),
+		*(this->base->str())),
 		"Write only without stream failed");
 }
 
@@ -814,7 +814,7 @@ BOOST_AUTO_TEST_CASE(bitstream_write_partial)
 	bit->flushByte(cbNext);
 
 	BOOST_CHECK_MESSAGE(is_equal(std::string("\x18\xE4", 2),
-		this->base->str()),
+		*(this->base->str())),
 		"Write partial without stream failed");
 }
 

@@ -40,7 +40,7 @@ struct stream_move_sample: public default_sample {
 	boost::test_tools::predicate_result is_equal(const char *cExpected)
 	{
 		std::string strExpected = cExpected;
-		return this->default_sample::is_equal(strExpected, this->data->str());
+		return this->default_sample::is_equal(strExpected, *(this->data->str()));
 	}
 
 };

@@ -28,16 +28,13 @@ namespace camoto {
 namespace stream {
 
 /// String stream parts in common with read and write
-class DLL_EXPORT string_core {
-
+class DLL_EXPORT string_core
+{
 	protected:
-		std::string *data;   ///< String data
-		bool free;           ///< Delete \e data when done?
+		boost::shared_ptr<std::string> data;   ///< String data
 		stream::pos offset;  ///< Current pointer position
 
 		string_core();
-
-		~string_core();
 
 		/// Common seek function for reading and writing.
 		/**
@@ -49,12 +46,13 @@ class DLL_EXPORT string_core {
 		/**
 		 * @return Reference to the underlying string.
 		 */
-		std::string& str();
+		boost::shared_ptr<std::string> str();
 };
 
 /// Read-only stream to access a C++ string.
-class DLL_EXPORT input_string: virtual public input,
-                    virtual protected string_core
+class DLL_EXPORT input_string:
+	virtual public input,
+	virtual protected string_core
 {
 	public:
 		/// Default constructor.
@@ -64,11 +62,8 @@ class DLL_EXPORT input_string: virtual public input,
 		input_string();
 
 		virtual stream::len try_read(uint8_t *buffer, stream::len len);
-
 		virtual void seekg(stream::delta off, seek_from from);
-
 		virtual stream::pos tellg() const;
-
 		virtual stream::pos size() const;
 
 		/// Wrap around an existing string.
@@ -79,7 +74,7 @@ class DLL_EXPORT input_string: virtual public input,
 		 *
 		 * @see str();
 		 */
-		void open(const std::string *src);
+		void open(boost::shared_ptr<std::string> src);
 
 		using string_core::str;
 };
@@ -88,8 +83,9 @@ class DLL_EXPORT input_string: virtual public input,
 typedef boost::shared_ptr<input_string> input_string_sptr;
 
 /// Write-only stream to access a C++ string.
-class DLL_EXPORT output_string: virtual public output,
-                     virtual protected string_core
+class DLL_EXPORT output_string:
+	virtual public output,
+	virtual protected string_core
 {
 	public:
 		/// Default constructor.
@@ -99,24 +95,20 @@ class DLL_EXPORT output_string: virtual public output,
 		output_string();
 
 		virtual stream::len try_write(const uint8_t *buffer, stream::len len);
-
 		virtual void seekp(stream::delta off, seek_from from);
-
 		virtual stream::pos tellp() const;
-
 		virtual void truncate(stream::pos size);
-
 		virtual void flush();
 
 		/// Wrap around an existing string.
 		/**
 		 * @param src
-		 *   Reference to string.  The reference must remain valid as long
+		 *   Shared pointer to the new string.  The reference must remain valid as long
 		 *   as the input_string instance exists.
 		 *
 		 * @see str();
 		 */
-		void open(std::string *src);
+		void open(boost::shared_ptr<std::string> src);
 
 		using string_core::str;
 };
@@ -125,9 +117,10 @@ class DLL_EXPORT output_string: virtual public output,
 typedef boost::shared_ptr<output_string> output_string_sptr;
 
 /// Read/write stream accessing a C++ string.
-class DLL_EXPORT string: virtual public inout,
-              virtual public input_string,
-              virtual public output_string
+class DLL_EXPORT string:
+	virtual public inout,
+	virtual public input_string,
+	virtual public output_string
 {
 	public:
 		string();

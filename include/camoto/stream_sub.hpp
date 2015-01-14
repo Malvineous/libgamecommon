@@ -142,6 +142,14 @@ class DLL_EXPORT output_sub: virtual public output,
 		 *   returns false to indicate the resize was not performed, the substream's
 		 *   write function will throw incomplete_write (or try_write() will return
 		 *   only a partial write.)
+		 *
+		 * @note If using boost::bind to generate a function pointer for fn_resize,
+		 *   be sure to use boost::weak_ptr<> in place of any boost::shared_ptr<>
+		 *   parameters containing the substream.  If this is not done, the
+		 *   substream will hold a shared_ptr<> to itself, meaning it will never be
+		 *   deleted and it will result in a memory leak.
+		 *   If in doubt, wrap whatever you want to do in a free function that only
+		 *   takes weak_ptr<> arguments.
 		 */
 		void open(output_sptr parent, stream::pos start, stream::len len,
 			fn_truncate fn_resize);

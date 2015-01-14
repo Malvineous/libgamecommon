@@ -22,6 +22,7 @@
 #include <errno.h>
 #include <boost/test/unit_test.hpp>
 #include <boost/bind.hpp>
+#include <boost/weak_ptr.hpp>
 #include <camoto/stream_seg.hpp>
 #include <camoto/stream_string.hpp>
 #include <camoto/stream_sub.hpp>
@@ -44,7 +45,7 @@ struct stream_seg_sample: public default_sample {
 		this->base->write("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 
 		// Make sure the data went in correctly to begin the test
-		BOOST_REQUIRE(this->base->str().compare("ABCDEFGHIJKLMNOPQRSTUVWXYZ") == 0);
+		BOOST_REQUIRE(this->base->str()->compare("ABCDEFGHIJKLMNOPQRSTUVWXYZ") == 0);
 
 		this->seg->open(this->base);
 		BOOST_REQUIRE_EQUAL(this->seg->tellg(), 0);
@@ -57,7 +58,7 @@ struct stream_seg_sample: public default_sample {
 		if (pos >= 0) BOOST_CHECK_EQUAL(this->seg->tellp(), pos);
 
 		// See if the stringstream now matches what we expected
-		return this->default_sample::is_equal(strExpected, this->base->str());
+		return this->default_sample::is_equal(strExpected, *(this->base->str()));
 	}
 
 };
@@ -393,8 +394,14 @@ BOOST_AUTO_TEST_CASE(segstream_large_insert_gap)
 }
 
 
-bool substreamTruncate(stream::sub_sptr sub, stream::seg_sptr parent, int len)
+bool substreamTruncate(boost::weak_ptr<stream::sub> w_sub,
+	boost::weak_ptr<stream::seg> w_parent, int len)
 {
+	stream::sub_sptr sub = w_sub.lock();
+	if (!sub) return false;
+	stream::seg_sptr parent = w_parent.lock();
+	if (!parent) return false;
+
 	stream::pos off = sub->get_offset();
 	stream::pos oldLen = sub->size();
 	// Enlarge the end of the substream (in the parent)
@@ -427,7 +434,9 @@ BOOST_AUTO_TEST_CASE(segstream_insert_past_parent_eof)
 	this->seg->seekp(0, stream::start);
 
 	stream::sub_sptr sub(new stream::sub());
-	stream::fn_truncate t = boost::bind(substreamTruncate, sub, this->seg, _1);
+	stream::fn_truncate t = boost::bind(substreamTruncate,
+		boost::weak_ptr<stream::sub>(sub),
+		boost::weak_ptr<stream::seg>(this->seg), _1);
 	sub->open(this->seg, 15, 10, t);
 
 	stream::seg_sptr child(new stream::seg());
@@ -451,7 +460,9 @@ BOOST_AUTO_TEST_CASE(segstream_insert_past_parent_eof2)
 	this->seg->seekp(0, stream::start);
 
 	stream::sub_sptr sub(new stream::sub());
-	stream::fn_truncate t = boost::bind(substreamTruncate, sub, this->seg, _1);
+	stream::fn_truncate t = boost::bind(substreamTruncate,
+		boost::weak_ptr<stream::sub>(sub),
+		boost::weak_ptr<stream::seg>(this->seg), _1);
 	sub->open(this->seg, 15, 10, t);
 
 	stream::seg_sptr child(new stream::seg());

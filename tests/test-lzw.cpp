@@ -232,7 +232,7 @@ BOOST_AUTO_TEST_CASE(lzw_comp_write)
 
 	stream::copy(this->out, processed);
 
-	BOOST_CHECK_MESSAGE(is_equal(exp->str()),
+	BOOST_CHECK_MESSAGE(is_equal(*(exp->str())),
 		"Compressing LZW data failed");
 }
 
@@ -271,7 +271,7 @@ BOOST_AUTO_TEST_CASE(lzw_comp_write_neg_eof)
 
 	stream::copy(this->out, processed);
 
-	BOOST_CHECK_MESSAGE(is_equal(exp->str()),
+	BOOST_CHECK_MESSAGE(is_equal(*(exp->str())),
 		"Compressing LZW data failed");
 }
 
@@ -299,7 +299,7 @@ BOOST_AUTO_TEST_CASE(lzw_comp_write_dict_grow)
 
 	stream::copy(this->out, processed);
 
-	BOOST_CHECK_MESSAGE(is_equal(exp->str()),
+	BOOST_CHECK_MESSAGE(is_equal(*(exp->str())),
 		"Compressing LZW data with growing dictionary failed");
 }
 
@@ -330,7 +330,7 @@ BOOST_AUTO_TEST_CASE(lzw_comp_write_dict_overflow)
 
 	stream::copy(this->out, processed);
 
-	BOOST_CHECK_MESSAGE(is_equal(exp->str()),
+	BOOST_CHECK_MESSAGE(is_equal(*(exp->str())),
 		"Compressing LZW data with an overflowing dictionary failed");
 }
 
@@ -362,7 +362,7 @@ BOOST_AUTO_TEST_CASE(lzw_comp_write_dict_overflow_reset)
 
 	stream::copy(this->out, processed);
 
-	BOOST_CHECK_MESSAGE(is_equal(exp->str()),
+	BOOST_CHECK_MESSAGE(is_equal(*(exp->str())),
 		"Compressing LZW data with an autoreset dictionary failed");
 }
 

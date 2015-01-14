@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE(write)
 	out->seekp(4, stream::start);
 	out->write(" is a test");
 	out->flush();
-	std::string result = out->str();
+	std::string result = *(out->str());
 	out.reset();
 
 	BOOST_CHECK_MESSAGE(is_equal("abcd is a testo", result),
@@ -51,10 +51,10 @@ BOOST_AUTO_TEST_CASE(read_existing)
 
 	stream::input_string_sptr in;
 	std::string val;
-	const std::string src("123456790");
+	boost::shared_ptr<std::string> src(new std::string("123456790"));
 
 	in.reset(new stream::input_string());
-	in->open(&src);
+	in->open(src);
 	BOOST_REQUIRE_NO_THROW(
 		val = in->read(5);
 	);
@@ -69,16 +69,16 @@ BOOST_AUTO_TEST_CASE(write_existing)
 
 	stream::output_string_sptr out;
 
-	std::string src("1234567890");
+	boost::shared_ptr<std::string> src(new std::string("1234567890"));
 
 	out.reset(new stream::output_string());
-	out->open(&src);
+	out->open(src);
 	out->seekp(2, stream::start);
 	out->write("abc");
 	out->flush();
 	out.reset();
 
-	BOOST_CHECK_MESSAGE(is_equal("12abc67890", src),
+	BOOST_CHECK_MESSAGE(is_equal("12abc67890", *src),
 		"Error writing data to existing string");
 }
 
@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE(readwrite)
 
 	f->flush();
 
-	BOOST_CHECK_MESSAGE(is_equal("abcd12345j", f->str()),
+	BOOST_CHECK_MESSAGE(is_equal("abcd12345j", *(f->str())),
 		"Error getting underlying string data just written");
 
 	f.reset();
@@ -114,17 +114,17 @@ BOOST_AUTO_TEST_CASE(readwrite_existing)
 
 	stream::string_sptr f;
 	std::string val;
-	std::string src("1234567890");
+	boost::shared_ptr<std::string> src(new std::string("1234567890"));
 
 	f.reset(new stream::string());
 
 	// This next call must go to output_string::open() and not
 	// input_string::open().
-	f->open(&src);
+	f->open(src);
 
 	// This should be an error as it will try to call input_string::open()
 	//const std::string test = src;
-	//f->open(&test);
+	//f->open(test);
 
 	f->seekp(4, stream::start);
 	f->write("12345");
@@ -137,7 +137,7 @@ BOOST_AUTO_TEST_CASE(readwrite_existing)
 
 	f->flush();
 
-	BOOST_CHECK_MESSAGE(is_equal("1234123450", f->str()),
+	BOOST_CHECK_MESSAGE(is_equal("1234123450", *(f->str())),
 		"Error getting underlying string data just written to existing string");
 
 	f.reset();
