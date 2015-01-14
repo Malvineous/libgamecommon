@@ -30,7 +30,7 @@
 
 namespace camoto {
 
-class IFF
+class DLL_EXPORT IFF
 {
 	public:
 		typedef std::string fourcc;
@@ -50,7 +50,7 @@ class IFF
 		};
 };
 
-class IFFReader: public IFF
+class DLL_EXPORT IFFReader: public IFF
 {
 	public:
 		IFFReader(stream::input_sptr iff, Filetype filetype);
@@ -142,7 +142,7 @@ class IFFReader: public IFF
 		void loadChunks(stream::len lenChunk);
 };
 
-class IFFWriter: public IFF
+class DLL_EXPORT IFFWriter: public IFF
 {
 	public:
 		IFFWriter(stream::output_sptr iff, Filetype filetype);
