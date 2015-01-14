@@ -24,6 +24,10 @@
 #include <camoto/stream_file.hpp>
 #include "tests.hpp"
 
+#ifdef WIN32
+#define unlink(x) _unlink(x)
+#endif
+
 using namespace camoto;
 
 #define TEST_FILE "_test.$"

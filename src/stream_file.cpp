@@ -27,6 +27,22 @@
 #endif
 #include <camoto/stream_file.hpp>
 
+inline std::string strerror_str(int errno2)
+{
+	char buf[256];
+#ifdef WIN32
+	strerror_s(buf, sizeof(buf), errno2);
+#else
+	strerror_r(errno2, buf, sizeof(buf));
+#endif
+	return std::string(buf);
+}
+
+#ifdef WIN32
+#define unlink(x) _unlink(x)
+#define fileno _fileno
+#endif
+
 namespace camoto {
 namespace stream {
 
@@ -61,7 +77,7 @@ void file_core::seek(stream::delta off, seek_from from)
 		default: whence = SEEK_SET; break;
 	}
 	if (fseek(this->handle, off, whence) < 0) {
-		throw seek_error(strerror(errno));
+		throw seek_error(strerror_str(errno));
 	}
 	return;
 }
@@ -70,7 +86,7 @@ stream::pos file_core::tell() const
 {
 	long p = ftell(this->handle);
 	if (p < 0) {
-		throw seek_error(strerror(errno));
+		throw seek_error(strerror_str(errno));
 	}
 	return p;
 }
@@ -118,7 +134,7 @@ stream::pos input_file::size() const
 void input_file::open(const char *filename)
 {
 	this->handle = fopen(filename, "rb");
-	if (this->handle == NULL) throw open_error(strerror(errno));
+	if (this->handle == NULL) throw open_error(strerror_str(errno));
 	this->close = true;
 	// no need to seek, fopen("rb") positions file pointer at start
 	return;
@@ -174,7 +190,7 @@ void output_file::truncate(stream::pos size)
 #else
 	if (_chsize(fd, size) < 0) {
 #endif
-		throw write_error(strerror(errno));
+		throw write_error(strerror_str(errno));
 	}
 
 	// Have to seek last as the file might not have been large enough earlier
@@ -189,7 +205,7 @@ void output_file::truncate(stream::pos size)
 void output_file::flush()
 {
 	if (fflush(this->handle) < 0) {
-		throw write_error(strerror(errno));
+		throw write_error(strerror_str(errno));
 	}
 	return;
 }
@@ -217,7 +233,7 @@ void output_file::open()
 	// We also use this function as file::open() which *must* open in
 	// for read+write.
 	this->handle = fopen(this->filename.c_str(), "r+b");
-	if (this->handle == NULL) throw open_error(strerror(errno));
+	if (this->handle == NULL) throw open_error(strerror_str(errno));
 	this->close = true;
 	this->seek(0, start);
 	return;
@@ -246,7 +262,7 @@ void output_file::create()
 	// We also use this function as file::create() which *must* open in
 	// for read+write.
 	this->handle = fopen(this->filename.c_str(), "w+b");
-	if (this->handle == NULL) throw open_error(strerror(errno));
+	if (this->handle == NULL) throw open_error(strerror_str(errno));
 	this->close = true;
 	this->seek(0, start);
 	return;
@@ -286,7 +302,7 @@ bool file::readonly()
 void file::open_readonly()
 {
 	this->handle = fopen(this->filename.c_str(), "rb");
-	if (this->handle == NULL) throw open_error(strerror(errno));
+	if (this->handle == NULL) throw open_error(strerror_str(errno));
 	this->close = true;
 	// no need to seek, fopen("rb") positions file pointer at start
 	this->isReadonly = true;

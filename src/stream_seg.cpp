@@ -223,7 +223,7 @@ stream::len seg::try_write(const uint8_t *buffer, stream::len len)
 	}
 
 	// Write to the third source (the child segmented_stream_device)
-	int lenWroteThird;
+	stream::len lenWroteThird;
 	if ((lenRemaining > 0) && (this->psegThird)) {
 		// Some of the write will happen in the third stream
 		// No need to seek here, the segstream will do it when it realises the
