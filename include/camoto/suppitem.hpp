@@ -69,7 +69,7 @@ struct SuppItem {
 };
 
 /// Convert a supp item into its name as a string.
-std::string suppToString(SuppItem::Type s);
+std::string DLL_EXPORT suppToString(SuppItem::Type s);
 
 /// A list of required supplemental files and their filenames.
 typedef std::map<SuppItem::Type, std::string> SuppFilenames;
