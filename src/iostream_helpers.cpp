@@ -73,7 +73,9 @@ void null_padded_write::write(stream::output_sptr s) const
 	assert(lenData <= this->len);
 
 	// Write the content
-	s->write((const uint8_t *)this->r.c_str(), lenData);
+	if (lenData) {
+		s->write((const uint8_t *)this->r.c_str(), lenData);
+	}
 
 	// Pad out to the full length with nulls
 	uint8_t blank[ZEROPAD_BLOCK_SIZE];
