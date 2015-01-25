@@ -111,6 +111,10 @@ class DLL_EXPORT Metadata {
 
 };
 
+/// Convert a metadata item into text.
+DLL_EXPORT std::ostream& operator << (std::ostream& s,
+	const camoto::Metadata::MetadataType& m);
+
 } // namespace camoto
 
 #endif // _CAMOTO_METADATA_HPP_

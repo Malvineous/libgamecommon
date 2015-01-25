@@ -18,6 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <iostream>
 #include <camoto/metadata.hpp>
 
 namespace camoto {
@@ -42,6 +43,18 @@ void Metadata::setMetadata(MetadataType item, const std::string& value)
 	// list.
 	assert(false);
 	throw stream::error("unsupported metadata item");
+}
+
+std::ostream& operator << (std::ostream& s, const camoto::Metadata::MetadataType& m)
+{
+	switch (m) {
+		case camoto::Metadata::Description: s << "Description"; break;
+		case camoto::Metadata::PaletteFilename: s << "Palette Filename"; break;
+		case camoto::Metadata::Version: s << "Version"; break;
+		case camoto::Metadata::Title: s << "Title"; break;
+		case camoto::Metadata::Author: s << "Author"; break;
+	}
+	return s;
 }
 
 } // namespace camoto
