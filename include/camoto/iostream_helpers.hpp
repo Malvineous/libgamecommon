@@ -26,6 +26,10 @@
 #include <string.h>
 #include <camoto/stream.hpp>
 
+#ifdef _BYTEORDER_H_
+#error Do not include byteorder.h when including iostream_helpers.hpp
+#endif
+
 #define BYTEORDER_USE_IOSTREAMS
 #define BYTEORDER_ISTREAM camoto::stream::input_sptr
 #define BYTEORDER_OSTREAM camoto::stream::output_sptr
