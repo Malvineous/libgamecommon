@@ -156,6 +156,8 @@ struct little_endian { };
 template <typename T, class E> T host_from(T value);
 template <typename T, class E> T host_to(T value);
 
+template <> inline  uint8_t host_from< uint8_t, little_endian>( uint8_t value) { return value; }
+template <> inline  uint8_t host_to  < uint8_t, little_endian>( uint8_t value) { return value; }
 template <> inline uint16_t host_from<uint16_t, little_endian>(uint16_t value) { return le16toh(value); }
 template <> inline uint16_t host_to  <uint16_t, little_endian>(uint16_t value) { return htole16(value); }
 template <> inline uint32_t host_from<uint32_t, little_endian>(uint32_t value) { return le32toh(value); }
@@ -163,6 +165,8 @@ template <> inline uint32_t host_to  <uint32_t, little_endian>(uint32_t value) {
 template <> inline uint64_t host_from<uint64_t, little_endian>(uint64_t value) { return le64toh(value); }
 template <> inline uint64_t host_to  <uint64_t, little_endian>(uint64_t value) { return htole64(value); }
 
+template <> inline  uint8_t host_from< uint8_t, big_endian>( uint8_t value) { return value; }
+template <> inline  uint8_t host_to  < uint8_t, big_endian>( uint8_t value) { return value; }
 template <> inline uint16_t host_from<uint16_t, big_endian>(uint16_t value) { return be16toh(value); }
 template <> inline uint16_t host_to  <uint16_t, big_endian>(uint16_t value) { return htobe16(value); }
 template <> inline uint32_t host_from<uint32_t, big_endian>(uint32_t value) { return be32toh(value); }
@@ -170,6 +174,8 @@ template <> inline uint32_t host_to  <uint32_t, big_endian>(uint32_t value) { re
 template <> inline uint64_t host_from<uint64_t, big_endian>(uint64_t value) { return be64toh(value); }
 template <> inline uint64_t host_to  <uint64_t, big_endian>(uint64_t value) { return htobe64(value); }
 
+template <> inline  int8_t host_from< int8_t, little_endian>( int8_t value) { return value; }
+template <> inline  int8_t host_to  < int8_t, little_endian>( int8_t value) { return value; }
 template <> inline int16_t host_from<int16_t, little_endian>(int16_t value) { return (int16_t)le16toh((uint16_t)value); }
 template <> inline int16_t host_to  <int16_t, little_endian>(int16_t value) { return (int16_t)htole16((uint16_t)value); }
 template <> inline int32_t host_from<int32_t, little_endian>(int32_t value) { return (int32_t)le32toh((uint32_t)value); }
@@ -177,6 +183,8 @@ template <> inline int32_t host_to  <int32_t, little_endian>(int32_t value) { re
 template <> inline int64_t host_from<int64_t, little_endian>(int64_t value) { return (int64_t)le64toh((uint64_t)value); }
 template <> inline int64_t host_to  <int64_t, little_endian>(int64_t value) { return (int64_t)htole64((uint64_t)value); }
 
+template <> inline  int8_t host_from< int8_t, big_endian>( int8_t value) { return value; }
+template <> inline  int8_t host_to  < int8_t, big_endian>( int8_t value) { return value; }
 template <> inline int16_t host_from<int16_t, big_endian>(int16_t value) { return (int16_t)be16toh((uint16_t)value); }
 template <> inline int16_t host_to  <int16_t, big_endian>(int16_t value) { return (int16_t)htobe16((uint16_t)value); }
 template <> inline int32_t host_from<int32_t, big_endian>(int32_t value) { return (int32_t)be32toh((uint32_t)value); }
