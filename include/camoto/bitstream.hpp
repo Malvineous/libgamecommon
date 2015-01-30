@@ -1,7 +1,7 @@
 /**
- * @file   bitstream.hpp
- * @brief  iostream wrapper reading and writing a number of bits rather than
- *         bytes.
+ * @file  camoto/bitstream.hpp
+ * @brief iostream wrapper reading and writing a number of bits rather than
+ *        bytes.
  *
  * Copyright (C) 2010-2015 Adam Nielsen <malvineous@shikadi.net>
  *

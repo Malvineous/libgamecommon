@@ -1,6 +1,6 @@
 /**
- * @file   stream_sub.hpp
- * @brief  Provide a stream limited to a subsection within another stream.
+ * @file  camoto/stream_sub.hpp
+ * @brief Provide a stream limited to a subsection within another stream.
  *
  * Copyright (C) 2010-2015 Adam Nielsen <malvineous@shikadi.net>
  *

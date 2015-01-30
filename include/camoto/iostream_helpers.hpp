@@ -1,6 +1,6 @@
 /**
- * @file   iostream_helpers.hpp
- * @brief  Functions to get variables in and out of a stream.
+ * @file  camoto/iostream_helpers.hpp
+ * @brief Functions to get variables in and out of a stream.
  *
  * Copyright (C) 2010-2015 Adam Nielsen <malvineous@shikadi.net>
  *

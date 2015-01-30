@@ -1,6 +1,6 @@
 /**
- * @file   stream_string.hpp
- * @brief  Provide a stream implementation around a C++ string.
+ * @file  camoto/stream_string.hpp
+ * @brief Provide a stream implementation around a C++ string.
  *
  * Copyright (C) 2010-2015 Adam Nielsen <malvineous@shikadi.net>
  *

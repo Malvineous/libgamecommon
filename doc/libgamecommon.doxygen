@@ -14,3 +14,4 @@ RECURSIVE              = YES
 DOCSET_FEEDNAME        = "Camoto"
 DOCSET_BUNDLE_ID       = net.shikadi.Camoto
 GENERATE_LATEX         = NO
+GENERATE_TAGFILE       = libgamecommon.tag

@@ -1,6 +1,6 @@
 /**
- * @file   util.hpp
- * @brief  Utility functions used across the libraries.
+ * @file  camoto/util.hpp
+ * @brief Utility functions used across the libraries.
  *
  * Copyright (C) 2010-2015 Adam Nielsen <malvineous@shikadi.net>
  *
@@ -45,7 +45,7 @@ namespace camoto {
  */
 inline boost::shared_ptr<std::ostringstream> _createStream(void)
 {
-  return boost::shared_ptr<std::ostringstream>(new std::ostringstream);
+	return boost::shared_ptr<std::ostringstream>(new std::ostringstream);
 }
 
 /// Wrapper around _createStream()
@@ -55,7 +55,7 @@ inline boost::shared_ptr<std::ostringstream> _createStream(void)
  * @endcode
  */
 #define createString(a) \
-  (static_cast<const std::ostringstream&>(*camoto::_createStream().get() << a).str())
+	(static_cast<const std::ostringstream&>(*camoto::_createStream().get() << a).str())
 // The first variable after the ostringstream constructor always gets printed
 // as a number, so we need to add some null-output value instead - ios::dec
 // does the job nicely, and allows 'a' to start off with something that isn't a
@@ -68,20 +68,20 @@ inline boost::shared_ptr<std::ostringstream> _createStream(void)
 libgamecommon provides a number of utility functions for working with binary
 files.
 
-\section structure Classes
+\section libgamecommon_structure Classes
 
 <ul>
-  <li>
-    stream_seg - transparently add and remove chunks of data in the
-    middle of a stream
-  </li><li>
-    stream_sub - make a C++ iostream appear as a subsection of a larger stream
-  </li>
+	<li>
+		stream_seg - transparently add and remove chunks of data in the
+		middle of a stream
+	</li><li>
+		stream_sub - make a C++ iostream appear as a subsection of a larger stream
+	</li>
 </ul>
 
-\section example Examples
+\section libgamecommon_example Examples
 
-\subsection endian Reading endian-specific data
+\subsection libgamecommon_endian Reading endian-specific data
 
 @code
 using namespace camoto;
@@ -103,7 +103,7 @@ uint8_t byte;
 myfile >> u32le(value) >> u8(byte);
 @endcode
 
-\subsection substream Creating a substream
+\subsection libgamecommon_substream Creating a substream
 
 @code
 using namespace camoto;
@@ -119,14 +119,14 @@ sub->seekp(0, stream::start);
 sub->write(...); // data is written at offset 10 in test.dat
 @endcode
 
-\subsection substream Creating a segmented_stream
+\subsection libgamecommon_segmented_stream Creating a segmented_stream
 
 See the segmented_stream test code.
 
-\section info More information
+\section libgamecommon_info More information
 
-Additional information including a mailing list is available from the Camoto
-homepage <http://www.shikadi.net/camoto>.
+Additional information is available from the Camoto homepage
+<http://www.shikadi.net/camoto>.
 
 **/
 

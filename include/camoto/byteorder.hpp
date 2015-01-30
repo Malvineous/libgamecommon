@@ -1,5 +1,5 @@
 /**
- * @file  byteorder.hpp
+ * @file  camoto/byteorder.hpp
  * @brief Standard C and C++ implementations of byte order functions.
  *
  * Copyright (C) 2010-2015 Adam Nielsen <malvineous@shikadi.net>

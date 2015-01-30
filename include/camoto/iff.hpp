@@ -1,6 +1,6 @@
 /**
- * @file   iff.hpp
- * @brief  RIFF/IFF/RIFX reader/writer.
+ * @file  camoto/iff.hpp
+ * @brief RIFF/IFF/RIFX reader/writer.
  *
  * Copyright (C) 2010-2015 Adam Nielsen <malvineous@shikadi.net>
  *

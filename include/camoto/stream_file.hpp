@@ -1,6 +1,6 @@
 /**
- * @file   stream_file.hpp
- * @brief  Stream implementation for accessing local files.
+ * @file  camoto/stream_file.hpp
+ * @brief Stream implementation for accessing local files.
  *
  * Copyright (C) 2010-2015 Adam Nielsen <malvineous@shikadi.net>
  *
@@ -49,8 +49,8 @@ class DLL_EXPORT open_error: public error
 };
 
 /// File stream parts in common with read and write
-class DLL_EXPORT file_core {
-
+class DLL_EXPORT file_core
+{
 	protected:
 		FILE *handle;  ///< stdio file handle
 		bool close;    ///< Do we need to close \e handle ?
@@ -65,7 +65,6 @@ class DLL_EXPORT file_core {
 
 		/// Common function for obtaining current seek position.
 		stream::pos tell() const;
-
 };
 
 /// Read-only stream to access a local file.
@@ -78,15 +77,11 @@ class DLL_EXPORT input_file: virtual public input,
 		 * @note Must call open() before any other functions.
 		 */
 		input_file();
-
 		virtual ~input_file();
 
 		virtual stream::len try_read(uint8_t *buffer, stream::len len);
-
 		virtual void seekg(stream::delta off, seek_from from);
-
 		virtual stream::pos tellg() const;
-
 		virtual stream::pos size() const;
 
 		/// Open an existing file.
@@ -103,7 +98,6 @@ class DLL_EXPORT input_file: virtual public input,
 		void open(const std::string& filename);
 
 		friend input_sptr open_stdin();
-
 };
 
 /// Shared pointer to a readable file.

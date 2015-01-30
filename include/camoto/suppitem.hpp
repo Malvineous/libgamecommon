@@ -1,6 +1,6 @@
 /**
- * @file   suppitem.hpp
- * @brief  Supplemental files required to open other files.
+ * @file  camoto/suppitem.hpp
+ * @brief Supplemental files required to open other files.
  *
  * Copyright (C) 2010-2015 Adam Nielsen <malvineous@shikadi.net>
  *

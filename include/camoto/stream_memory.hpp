@@ -1,6 +1,6 @@
 /**
- * @file   stream_memory.hpp
- * @brief  Provide a stream implementation around a C++ vector.
+ * @file  camoto/stream_memory.hpp
+ * @brief Provide a stream implementation around a C++ vector.
  *
  * Copyright (C) 2010-2015 Adam Nielsen <malvineous@shikadi.net>
  *

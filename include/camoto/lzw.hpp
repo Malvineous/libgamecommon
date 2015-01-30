@@ -1,7 +1,7 @@
 /**
- * @file   lzw.hpp
- * @brief  Boost iostream filter for compressing and decompressing data using
- *         a few variants of the LZW algorithm.
+ * @file  camoto/lzw.hpp
+ * @brief Boost iostream filter for compressing and decompressing data using
+ *        a few variants of the LZW algorithm.
  *
  * Copyright (C) 2010-2015 Adam Nielsen <malvineous@shikadi.net>
  *

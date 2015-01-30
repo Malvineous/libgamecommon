@@ -1,6 +1,6 @@
 /**
- * @file   metadata.hpp
- * @brief  Interface for reading and writing metadata about a file.
+ * @file  camoto/metadata.hpp
+ * @brief Interface for reading and writing metadata about a file.
  *
  * Copyright (C) 2010-2015 Adam Nielsen <malvineous@shikadi.net>
  *
@@ -87,8 +87,10 @@ class DLL_EXPORT Metadata {
 		 * which always throws an exception.  Thus this only needs to be overridden
 		 * if metadata is actually supported.
 		 *
-		 * @param  item Item to retrieve.  Must have been included in the list
-		 *         returned by getMetadataList().
+		 * @param item
+		 *   Item to retrieve.  Must have been included in the list returned by
+		 *   getMetadataList().
+		 *
 		 * @return A string containing the metadata (may be empty.)
 		 */
 		virtual std::string getMetadata(MetadataType item) const;
@@ -101,8 +103,10 @@ class DLL_EXPORT Metadata {
 		 * which always throws an exception.  Thus this only needs to be overridden
 		 * if metadata is actually supported.
 		 *
-		 * @param  item Item to set.  Must have been included in the list returned
-		 *         by getMetadataList().
+		 * @param item
+		 *   Item to set.  Must have been included in the list returned by
+		 *   getMetadataList().
+		 *
 		 * @param  value The value to set.  Passing an empty string will remove
 		 *         the metadata element if possible, otherwise it will be set to
 		 *         a blank.

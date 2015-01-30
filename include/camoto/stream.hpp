@@ -1,6 +1,6 @@
 /**
- * @file   stream.hpp
- * @brief  Base stream implementation.
+ * @file  camoto/stream.hpp
+ * @brief Base stream implementation.
  *
  * Copyright (C) 2010-2015 Adam Nielsen <malvineous@shikadi.net>
  *

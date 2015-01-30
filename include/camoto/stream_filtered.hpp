@@ -1,6 +1,6 @@
 /**
- * @file   stream_filtered.hpp
- * @brief  Pass read/write operations through a filter to modify the data.
+ * @file  camoto/stream_filtered.hpp
+ * @brief Pass read/write operations through a filter to modify the data.
  *
  * Copyright (C) 2010-2015 Adam Nielsen <malvineous@shikadi.net>
  *

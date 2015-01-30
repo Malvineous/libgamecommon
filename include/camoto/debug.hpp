@@ -1,6 +1,6 @@
 /**
- * @file   debug.hpp
- * @brief  Helper functions to assist with debugging.
+ * @file  camoto/debug.hpp
+ * @brief Helper functions to assist with debugging.
  *
  * Copyright (C) 2009-2015 Adam Nielsen <malvineous@shikadi.net>
  *
@@ -62,7 +62,7 @@ namespace camoto {
  *   Only use hex codes.  Default is false which displays ASCII-printable
  *   characters.  Set to true to only display hex numbers.
  *
- * @postconditions Stream is unchanged - read pointer is restored to where it
+ * @post Stream is unchanged - read pointer is restored to where it
  *   was when this function was called.
  */
 inline void hexdumpStream(stream::input_sptr data, stream::len start = 0,

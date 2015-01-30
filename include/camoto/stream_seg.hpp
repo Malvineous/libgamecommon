@@ -1,8 +1,8 @@
 /**
- * @file   stream_seg.hpp
- * @brief  Segmented stream implementation providing the ability to insert and
- *         remove blocks of data at any point in the underlying stream, shifting
- *         data around as necessary.
+ * @file  camoto/stream_seg.hpp
+ * @brief Segmented stream implementation providing the ability to insert and
+ *        remove blocks of data at any point in the underlying stream, shifting
+ *        data around as necessary.
  *
  * Copyright (C) 2010-2015 Adam Nielsen <malvineous@shikadi.net>
  *
@@ -47,21 +47,13 @@ class DLL_EXPORT seg: virtual public inout
 {
 	public:
 		virtual stream::len try_read(uint8_t *buffer, stream::len len);
-
 		virtual void seekg(stream::delta off, seek_from from);
-
 		virtual stream::pos tellg() const;
-
 		virtual stream::pos size() const;
-
 		virtual stream::len try_write(const uint8_t *buffer, stream::len len);
-
 		virtual void seekp(stream::delta off, seek_from from);
-
 		virtual stream::pos tellp() const;
-
 		virtual void truncate(stream::pos size);
-
 		virtual void flush();
 
 		/// Create a segmented stream backed onto another stream.

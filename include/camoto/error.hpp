@@ -1,6 +1,6 @@
 /**
- * @file   error.hpp
- * @brief  Base error exception.
+ * @file  camoto/error.hpp
+ * @brief Base error exception.
  *
  * Copyright (C) 2010-2015 Adam Nielsen <malvineous@shikadi.net>
  *

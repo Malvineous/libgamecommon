@@ -1,6 +1,6 @@
 /**
- * @file   filter.hpp
- * @brief  Base filter implementation.
+ * @file  camoto/filter.hpp
+ * @brief Base filter implementation.
  *
  * Copyright (C) 2010-2015 Adam Nielsen <malvineous@shikadi.net>
  *
