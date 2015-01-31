@@ -26,16 +26,28 @@
 #include <io.h>
 #endif
 #include <camoto/stream_file.hpp>
+#include <camoto/util.hpp> // createString
 
 inline std::string strerror_str(int errno2)
 {
 	char buf[256];
+	buf[0] = 0;
+	char *pbuf = buf;
+	errno = 0;
 #ifdef WIN32
 	strerror_s(buf, sizeof(buf), errno2);
 #else
-	strerror_r(errno2, buf, sizeof(buf));
+	pbuf = strerror_r(errno2, buf, sizeof(buf));
 #endif
-	return std::string(buf);
+	if (errno != 0) {
+		return createString("[unable to get message for error code " << errno2
+			<< "]");
+	}
+	if (pbuf[0] == 0) {
+		return createString("[empty string returned with no failure code when "
+			"getting message for error code " << errno2 << "]");
+	}
+	return std::string(pbuf);
 }
 
 #ifdef WIN32
