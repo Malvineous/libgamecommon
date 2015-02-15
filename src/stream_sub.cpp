@@ -26,6 +26,13 @@
 namespace camoto {
 namespace stream {
 
+sub_core::sub_core(pos start, len len)
+	:	stream_start(start),
+		stream_len(len),
+		offset(0)
+{
+}
+
 void sub_core::seek(stream::delta off, seek_from from)
 {
 	stream::pos baseOffset;
@@ -55,13 +62,13 @@ void sub_core::seek(stream::delta off, seek_from from)
 void sub_core::relocate(stream::delta off)
 {
 	// Don't seek past the start of the parent stream
-	if (off < 0) assert(this->start >= (unsigned)(off * -1));
+	if (off < 0) assert(this->stream_start >= (unsigned)(off * -1));
 
 	// Don't seek beyond the end of the parent stream
-	//assert(this->start + off + this->stream_len < this->parent->size());
+	//assert(this->stream_start + off + this->stream_len < this->parent->size());
 	// Can't do this as we don't have access to any parent stream here
 
-	this->start += off;
+	this->stream_start += off;
 	return;
 }
 
@@ -74,11 +81,17 @@ void sub_core::resize(stream::len len)
 	return;
 }
 
-stream::pos sub_core::get_offset()
+stream::pos sub_core::start()
 {
-	return this->start;
+	return this->stream_start;
 }
 
+
+input_sub::input_sub(std::shared_ptr<input> parent, pos start, len len)
+	:	sub_core(start, len),
+		in_parent(parent)
+{
+}
 
 stream::len input_sub::try_read(uint8_t *buffer, stream::len len)
 {
@@ -92,7 +105,7 @@ stream::len input_sub::try_read(uint8_t *buffer, stream::len len)
 		len = this->stream_len - this->offset;
 	}
 
-	this->in_parent->seekg(this->start + this->offset, stream::start);
+	this->in_parent->seekg(this->stream_start + this->offset, stream::start);
 
 	stream::len r = this->in_parent->try_read(buffer, len);
 	assert(r <= len);
@@ -126,15 +139,14 @@ stream::pos input_sub::size() const
 	return this->stream_len;
 }
 
-void input_sub::open(input_sptr parent, stream::pos start, stream::len len)
-{
-	this->in_parent = parent;
-	this->start = start;
-	this->stream_len = len;
-	this->offset = 0;
-	return;
-}
 
+output_sub::output_sub(std::shared_ptr<output> parent, pos start, len len,
+	fn_truncate_sub fn_resize)
+	:	sub_core(start, len),
+		out_parent(parent),
+		fn_resize(fn_resize)
+{
+}
 
 stream::len output_sub::try_write(const uint8_t *buffer, stream::len len)
 {
@@ -145,8 +157,13 @@ stream::len output_sub::try_write(const uint8_t *buffer, stream::len len)
 		// Stream is too small to accommodate entire write, attempt to enlarge
 		// Don't call truncate() because we don't want the pointer moved
 		try {
-			if (this->fn_resize) this->fn_resize(this->offset + len);
-			else {
+			if (this->fn_resize) {
+				this->fn_resize(this, this->offset + len);
+				if ((this->offset + len) > this->stream_len) {
+					// Truncate failed, reduce write to available space
+					len = this->stream_len - this->offset;
+				}
+			} else {
 				std::cerr << "[stream::sub::try_write] No truncate function, cannot "
 					"enlarge substream.  Doing a partial write." << std::endl;
 			}
@@ -157,7 +174,7 @@ stream::len output_sub::try_write(const uint8_t *buffer, stream::len len)
 	}
 
 	try {
-		this->out_parent->seekp(this->start + this->offset, stream::start);
+		this->out_parent->seekp(this->stream_start + this->offset, stream::start);
 	} catch (const seek_error&) {
 		return 0;
 	}
@@ -198,7 +215,7 @@ void output_sub::truncate(stream::pos size)
 	// Since we haven't cached any writes ourself, there's nothing to flush now.
 	//this->flush();
 
-	this->fn_resize(size);
+	this->fn_resize(this, size);
 	try {
 		this->seekp(size, stream::start);
 	} catch (const seek_error& e) {
@@ -214,32 +231,13 @@ void output_sub::flush()
 	return;
 }
 
-void output_sub::open(output_sptr parent, stream::pos start, stream::len len,
-	fn_truncate fn_resize)
-{
-	this->out_parent = parent;
-	this->start = start;
-	this->stream_len = len;
-	this->fn_resize = fn_resize;
-	this->offset = 0;
-	return;
-}
 
-
-sub::sub()
+sub::sub(std::shared_ptr<inout> parent, pos start, len len,
+	fn_truncate_sub fn_resize)
+	:	sub_core(start, len),
+		input_sub(parent, start, len),
+		output_sub(parent, start, len, fn_resize)
 {
-}
-
-void sub::open(inout_sptr parent, stream::pos start, stream::len len,
-	fn_truncate fn_resize)
-{
-	this->in_parent = parent;
-	this->out_parent = parent;
-	this->start = start;
-	this->stream_len = len;
-	this->fn_resize = fn_resize;
-	this->offset = 0;
-	return;
 }
 
 } // namespace stream

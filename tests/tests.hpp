@@ -27,7 +27,8 @@
 // Allow a string constant to be passed around with embedded nulls
 #define makeString(x)  std::string((x), sizeof((x)) - 1)
 
-struct default_sample {
+struct default_sample
+{
 	default_sample();
 
 	void printNice(boost::test_tools::predicate_result& res,
@@ -40,17 +41,15 @@ struct default_sample {
 		const std::string& strCheck);
 
 	unsigned int outputWidth; ///< Width of output hexdump, as number of bytes shown per line
-
 };
 
-struct string_sample: public default_sample {
-
-	camoto::stream::string_sptr in;
-	camoto::stream::string_sptr out;
+struct string_sample: public default_sample
+{
+	std::shared_ptr<camoto::stream::string> in;
+	camoto::stream::string out;
 
 	string_sample()
-		:	in(new camoto::stream::string()),
-			out(new camoto::stream::string())
+		:	in(new camoto::stream::string)
 	{
 	}
 
@@ -59,9 +58,8 @@ struct string_sample: public default_sample {
 	boost::test_tools::predicate_result is_equal(const std::string& strExpected)
 	{
 		// See if the stringstream now matches what we expected
-		return this->default_sample::is_equal(strExpected, *(out->str()));
+		return this->default_sample::is_equal(strExpected, out.data);
 	}
-
 };
 
 #endif // _CAMOTO_TESTS_HPP_

@@ -24,8 +24,17 @@
 
 namespace camoto {
 
-IFFReader::IFFReader(stream::input_sptr iff, Filetype filetype)
-	:	iff(iff),
+IFFReader::IFFReader(std::shared_ptr<stream::input> iff_ptr, Filetype filetype)
+	:	iff_ptr(iff_ptr),
+		iff(*iff_ptr),
+		filetype(filetype)
+{
+	this->root();
+}
+
+IFFReader::IFFReader(stream::input& iff, Filetype filetype)
+	:	iff_ptr(),
+		iff(iff),
 		filetype(filetype)
 {
 	this->root();
@@ -33,30 +42,26 @@ IFFReader::IFFReader(stream::input_sptr iff, Filetype filetype)
 
 void IFFReader::root()
 {
-	this->iff->seekg(0, stream::start);
-	this->loadChunks(this->iff->size());
+	this->iff.seekg(0, stream::start);
+	this->loadChunks(this->iff.size());
 	return;
 }
 
 std::vector<IFFReader::fourcc> IFFReader::list()
 {
 	std::vector<fourcc> names;
-	for (std::vector<Chunk>::const_iterator
-		i = this->chunks.begin(); i != this->chunks.end(); i++
-	) {
-		names.push_back(i->name);
+	for (const auto& i : this->chunks) {
+		names.push_back(i.name);
 	}
 	return names;
 }
 
 stream::len IFFReader::seek(const fourcc& name)
 {
-	for (std::vector<Chunk>::const_iterator
-		i = this->chunks.begin(); i != this->chunks.end(); i++
-	) {
-		if (name.compare(i->name) == 0) {
-			this->iff->seekg(i->start, stream::start);
-			return i->len;
+	for (const auto& i : this->chunks) {
+		if (name.compare(i.name) == 0) {
+			this->iff.seekg(i.start, stream::start);
+			return i.len;
 		}
 	}
 	throw stream::error(createString("IFF: Could not find chunk " << name));
@@ -69,7 +74,7 @@ stream::len IFFReader::seek(unsigned int index)
 			<< " is out of range (max chunk is #" << this->chunks.size() << ")"));
 	}
 	Chunk& chunk = this->chunks[index];
-	this->iff->seekg(chunk.start, stream::start);
+	this->iff.seekg(chunk.start, stream::start);
 	return chunk.len;
 }
 
@@ -95,7 +100,7 @@ void IFFReader::loadChunks(stream::len lenChunk)
 	while (lenChunk > 8) {
 		lenChunk -= 8; // ID and chunk size fields
 		Chunk c;
-		c.start = this->iff->tellg() + 8;
+		c.start = this->iff.tellg() + 8;
 		this->iff >> fixedLength(c.name, 4);
 		switch (this->filetype) {
 			case Filetype_RIFF_Unpadded:
@@ -125,21 +130,29 @@ void IFFReader::loadChunks(stream::len lenChunk)
 		if (lenChunk < lenPaddedSub) lenPaddedSub = lenChunk; // final pad truncated
 		this->chunks.push_back(c);
 		lenChunk -= lenPaddedSub;
-		this->iff->seekg(lenPaddedSub, stream::cur);
+		this->iff.seekg(lenPaddedSub, stream::cur);
 	}
 	return;
 }
 
 
-IFFWriter::IFFWriter(stream::output_sptr iff, Filetype filetype)
-	:	iff(iff),
+IFFWriter::IFFWriter(std::shared_ptr<stream::output> iff_ptr, Filetype filetype)
+	:	iff_ptr(iff_ptr),
+		iff(*iff_ptr),
+		filetype(filetype)
+{
+}
+
+IFFWriter::IFFWriter(stream::output& iff, Filetype filetype)
+	:	iff_ptr(),
+		iff(iff),
 		filetype(filetype)
 {
 }
 
 void IFFWriter::begin(const fourcc& name)
 {
-	this->chunk.push_back(this->iff->tellp());
+	this->chunk.push_back(this->iff.tellp());
 	this->iff
 		<< nullPadded(name, 4)
 		<< nullPadded("", 4)
@@ -149,7 +162,7 @@ void IFFWriter::begin(const fourcc& name)
 
 void IFFWriter::begin(const fourcc& name, const fourcc& type)
 {
-	this->chunk.push_back(this->iff->tellp());
+	this->chunk.push_back(this->iff.tellp());
 	this->iff
 		<< nullPadded(name, 4)
 		<< nullPadded("", 4)
@@ -160,7 +173,7 @@ void IFFWriter::begin(const fourcc& name, const fourcc& type)
 
 void IFFWriter::end()
 {
-	stream::pos orig = this->iff->tellp();
+	stream::pos orig = this->iff.tellp();
 	stream::pos start = this->chunk.back();
 	this->chunk.pop_back();
 	stream::len lenChunk = orig - (start + 8);
@@ -173,13 +186,13 @@ void IFFWriter::end()
 		case Filetype_IFF:
 			if (orig % 2) {
 				// Pad to even byte boundary
-				this->iff->write("", 1);
+				this->iff.write("", 1);
 				orig++;
 			}
 			break;
 	}
 
-	this->iff->seekp(start + 4, stream::start);
+	this->iff.seekp(start + 4, stream::start);
 	switch (this->filetype) {
 		case Filetype_RIFF_Unpadded:
 		case Filetype_RIFF:
@@ -190,7 +203,7 @@ void IFFWriter::end()
 			this->iff << u32be(lenChunk);
 			break;
 	}
-	this->iff->seekp(orig, stream::start);
+	this->iff.seekp(orig, stream::start);
 	return;
 }
 

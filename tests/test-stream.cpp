@@ -27,20 +27,19 @@
 
 using namespace camoto;
 
-struct stream_move_sample: public default_sample {
-
-	stream::string_sptr data;
+struct stream_move_sample: public default_sample
+{
+	stream::string content;
 
 	stream_move_sample()
-		:	data(new stream::string())
 	{
-		this->data->write("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+		this->content.write("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 	}
 
 	boost::test_tools::predicate_result is_equal(const char *cExpected)
 	{
 		std::string strExpected = cExpected;
-		return this->default_sample::is_equal(strExpected, *(this->data->str()));
+		return this->default_sample::is_equal(strExpected, this->content.data);
 	}
 
 };
@@ -51,7 +50,7 @@ BOOST_AUTO_TEST_CASE(stream_move_fwd)
 {
 	BOOST_TEST_MESSAGE("Stream move forward");
 
-	stream::move(data, 5, 15, 5);
+	stream::move(this->content, 5, 15, 5);
 
 	BOOST_CHECK_MESSAGE(is_equal("ABCDEFGHIJKLMNOFGHIJUVWXYZ"),
 		"Error in stream move forward");
@@ -61,7 +60,7 @@ BOOST_AUTO_TEST_CASE(stream_move_bk)
 {
 	BOOST_TEST_MESSAGE("Stream move backward");
 
-	stream::move(data, 15, 5, 5);
+	stream::move(this->content, 15, 5, 5);
 
 	BOOST_CHECK_MESSAGE(is_equal("ABCDEPQRSTKLMNOPQRSTUVWXYZ"),
 		"Error in stream move backward");
@@ -71,7 +70,7 @@ BOOST_AUTO_TEST_CASE(stream_move_fwd_borderline)
 {
 	BOOST_TEST_MESSAGE("Stream move forward (blocks touching)");
 
-	stream::move(data, 5, 10, 5);
+	stream::move(this->content, 5, 10, 5);
 
 	BOOST_CHECK_MESSAGE(is_equal("ABCDEFGHIJFGHIJPQRSTUVWXYZ"),
 		"Error in stream move forward (blocks touching)");
@@ -81,7 +80,7 @@ BOOST_AUTO_TEST_CASE(stream_move_bk_borderline)
 {
 	BOOST_TEST_MESSAGE("Stream move backward (blocks touching)");
 
-	stream::move(data, 10, 5, 5);
+	stream::move(this->content, 10, 5, 5);
 
 	BOOST_CHECK_MESSAGE(is_equal("ABCDEKLMNOKLMNOPQRSTUVWXYZ"),
 		"Error in stream move backward (blocks touching)");
@@ -91,7 +90,7 @@ BOOST_AUTO_TEST_CASE(stream_move_fwd_overlap)
 {
 	BOOST_TEST_MESSAGE("Overlapping stream move forward (process from end to start)");
 
-	stream::move(data, 10, 15, 10);
+	stream::move(this->content, 10, 15, 10);
 
 	BOOST_CHECK_MESSAGE(is_equal("ABCDEFGHIJKLMNOKLMNOPQRSTZ"),
 		"Error in overlapping stream move forward (process from end to start)");
@@ -101,7 +100,7 @@ BOOST_AUTO_TEST_CASE(stream_move_back_overlap)
 {
 	BOOST_TEST_MESSAGE("Overlapping stream move backward (process from start to end)");
 
-	stream::move(data, 10, 5, 10);
+	stream::move(this->content, 10, 5, 10);
 
 	BOOST_CHECK_MESSAGE(is_equal("ABCDEKLMNOPQRSTPQRSTUVWXYZ"),
 		"Error in overlapping stream move backward (process from start to end)");
@@ -111,7 +110,7 @@ BOOST_AUTO_TEST_CASE(stream_move_fw2)
 {
 	BOOST_TEST_MESSAGE("Overlapping stream double-move forwards");
 
-	stream::move(data, 5, 10, 15);
+	stream::move(this->content, 5, 10, 15);
 
 	BOOST_CHECK_MESSAGE(is_equal("ABCDEFGHIJFGHIJKLMNOPQRSTZ"),
 		"Error in overlapping stream double-move forwards");
@@ -121,8 +120,8 @@ BOOST_AUTO_TEST_CASE(stream_move_bk2)
 {
 	BOOST_TEST_MESSAGE("Overlapping stream double-move backwards");
 
-	stream::move(data, 10, 5, 5);
-	stream::move(data, 20, 10, 4);
+	stream::move(this->content, 10, 5, 5);
+	stream::move(this->content, 20, 10, 4);
 
 	BOOST_CHECK_MESSAGE(is_equal("ABCDEKLMNOUVWXOPQRSTUVWXYZ"),
 		"Error in overlapping stream double-move backwards");
@@ -132,9 +131,9 @@ BOOST_AUTO_TEST_CASE(stream_move_extend)
 {
 	BOOST_TEST_MESSAGE("Stream move past EOF");
 
-	data->truncate(30); // extend stringstream to make room
+	this->content.truncate(30); // extend stringstream to make room
 
-	stream::move(data, 5, 20, 10);
+	stream::move(this->content, 5, 20, 10);
 
 	BOOST_CHECK_MESSAGE(is_equal("ABCDEFGHIJKLMNOPQRSTFGHIJKLMNO"),
 		"Error in stream move past EOF");
@@ -144,9 +143,9 @@ BOOST_AUTO_TEST_CASE(stream_move_extend_overlap)
 {
 	BOOST_TEST_MESSAGE("Overlapping stream move past EOF");
 
-	data->truncate(35); // extend stringstream to make room
+	this->content.truncate(35); // extend stringstream to make room
 
-	stream::move(data, 5, 15, 20);
+	stream::move(this->content, 5, 15, 20);
 
 	BOOST_CHECK_MESSAGE(is_equal("ABCDEFGHIJKLMNOFGHIJKLMNOPQRSTUVWXY"),
 		"Error in overlapping stream move past EOF");

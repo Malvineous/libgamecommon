@@ -75,7 +75,7 @@ std::string DLL_EXPORT suppToString(SuppItem::Type s);
 typedef std::map<SuppItem::Type, std::string> SuppFilenames;
 
 /// A list of the supplemental file types mapped to open file streams.
-typedef std::map<SuppItem::Type, stream::inout_sptr> SuppData;
+typedef std::map<SuppItem::Type, std::shared_ptr<stream::inout> > SuppData;
 
 } // namespace camoto
 

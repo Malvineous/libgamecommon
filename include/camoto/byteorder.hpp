@@ -70,7 +70,7 @@
 
 #include <stdint.h>
 
-#if defined(linux) || defined(_BSD_SOURCE)
+#if defined(linux) || defined(__posix) || defined(le16toh) || defined(_BSD_SOURCE)
 
 #ifndef _BSD_SOURCE
 #define _BSD_SOURCE

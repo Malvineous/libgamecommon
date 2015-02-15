@@ -37,14 +37,14 @@ null_padded_read::null_padded_read(std::string& r, stream::len len, bool chop)
 {
 }
 
-void null_padded_read::read(stream::input_sptr s) const
+void null_padded_read::read(stream::input& s) const
 {
 	if (this->chop) {
 		// Make the buffer the length of the whole operation
 		this->r.resize(this->len);
 
 		// Read in the whole data
-		stream::len lenRead = s->try_read((uint8_t *)&this->r[0], this->len);
+		stream::len lenRead = s.try_read((uint8_t *)&this->r[0], this->len);
 
 		// Shorten the string if not all the data was read
 		this->r.resize(lenRead);
@@ -56,7 +56,7 @@ void null_padded_read::read(stream::input_sptr s) const
 		this->r.resize(this->len);
 
 		// Read in the whole data
-		s->read((uint8_t *)&this->r[0], this->len);
+		s.read((uint8_t *)&this->r[0], this->len);
 	}
 	return;
 }
@@ -67,14 +67,14 @@ null_padded_write::null_padded_write(const std::string& r, stream::len len)
 {
 }
 
-void null_padded_write::write(stream::output_sptr s) const
+void null_padded_write::write(stream::output& s) const
 {
 	unsigned int lenData = this->r.length();
 	assert(lenData <= this->len);
 
 	// Write the content
 	if (lenData) {
-		s->write((const uint8_t *)this->r.c_str(), lenData);
+		s.write((const uint8_t *)this->r.c_str(), lenData);
 	}
 
 	// Pad out to the full length with nulls
@@ -84,7 +84,7 @@ void null_padded_write::write(stream::output_sptr s) const
 	int amt = ZEROPAD_BLOCK_SIZE;
 	while (lenRemaining > 0) {
 		if (lenRemaining < ZEROPAD_BLOCK_SIZE) amt = lenRemaining;
-		s->write(blank, amt);
+		s.write(blank, amt);
 		lenRemaining -= amt;
 	}
 	return;
@@ -108,11 +108,11 @@ null_terminated_read::null_terminated_read(std::string& r, stream::len maxlen)
 {
 }
 
-void null_terminated_read::read(stream::input_sptr s) const
+void null_terminated_read::read(stream::input& s) const
 {
 	uint8_t buf;
 	for (stream::len i = 0; i < this->maxlen; i++) {
-		s->read(&buf, 1);
+		s.read(&buf, 1);
 		if (buf == 0) break;
 		this->r += (char)buf;
 	}
@@ -125,16 +125,16 @@ null_terminated_write::null_terminated_write(const std::string& r, stream::len m
 {
 }
 
-void null_terminated_write::write(stream::output_sptr s) const
+void null_terminated_write::write(stream::output& s) const
 {
 	stream::len lenData = this->r.length();
 	if (lenData > this->maxlen - 1) lenData = this->maxlen - 1;
 
 	// Write the content
-	s->write((const uint8_t *)this->r.c_str(), lenData);
+	s.write((const uint8_t *)this->r.c_str(), lenData);
 
 	// Write the terminating null
-	s->write((const uint8_t *)"", 1);
+	s.write((const uint8_t *)"", 1);
 
 	return;
 }
@@ -156,15 +156,15 @@ number_format_u8::number_format_u8(uint8_t& r)
 {
 }
 
-void number_format_u8::read(stream::input_sptr s) const
+void number_format_u8::read(stream::input& s) const
 {
-	s->read((uint8_t *)&this->r, 1);
+	s.read((uint8_t *)&this->r, 1);
 	return;
 }
 
-void number_format_u8::write(stream::output_sptr s) const
+void number_format_u8::write(stream::output& s) const
 {
-	s->write((const uint8_t *)&this->r, 1);
+	s.write((const uint8_t *)&this->r, 1);
 	return;
 }
 
@@ -173,9 +173,9 @@ number_format_const_u8::number_format_const_u8(const uint8_t& r)
 {
 }
 
-void number_format_const_u8::write(stream::output_sptr s) const
+void number_format_const_u8::write(stream::output& s) const
 {
-	s->write((const uint8_t *)&this->r, 1);
+	s.write((const uint8_t *)&this->r, 1);
 	return;
 }
 

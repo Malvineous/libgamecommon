@@ -33,22 +33,20 @@ using namespace camoto;
 // Allow a string constant to be passed around with embedded nulls
 #define makeString(x)  std::string((x), sizeof((x)) - 1)
 
-struct stream_seg_sample: public default_sample {
-
-	stream::string_sptr base;
-	stream::seg_sptr seg;
+struct stream_seg_sample: public default_sample
+{
+	std::shared_ptr<stream::string> base;
+	std::shared_ptr<stream::seg> seg;
 
 	stream_seg_sample()
-		:	base(new stream::string()),
-			seg(new stream::seg())
+		:	base(new stream::string("ABCDEFGHIJKLMNOPQRSTUVWXYZ")),
+			seg(new stream::seg(this->base))
 	{
-		this->base->write("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-
 		// Make sure the data went in correctly to begin the test
-		BOOST_REQUIRE(this->base->str()->compare("ABCDEFGHIJKLMNOPQRSTUVWXYZ") == 0);
+		BOOST_REQUIRE(this->base->data.compare("ABCDEFGHIJKLMNOPQRSTUVWXYZ") == 0);
 
-		this->seg->open(this->base);
 		BOOST_REQUIRE_EQUAL(this->seg->tellg(), 0);
+		BOOST_REQUIRE_EQUAL(this->seg->size(), 26);
 	}
 
 	boost::test_tools::predicate_result is_equal(int pos, const std::string& strExpected)
@@ -58,9 +56,8 @@ struct stream_seg_sample: public default_sample {
 		if (pos >= 0) BOOST_CHECK_EQUAL(this->seg->tellp(), pos);
 
 		// See if the stringstream now matches what we expected
-		return this->default_sample::is_equal(strExpected, *(this->base->str()));
+		return this->default_sample::is_equal(strExpected, this->base->data);
 	}
-
 };
 
 BOOST_FIXTURE_TEST_SUITE(stream_seg_suite, stream_seg_sample)
@@ -79,7 +76,7 @@ BOOST_AUTO_TEST_CASE(segstream_streamMove_back)
 {
 	BOOST_TEST_MESSAGE("Overlapping stream move backwards (segmented_stream this time)");
 
-	stream::move(this->seg, 10, 5, 10);
+	stream::move(*this->seg, 10, 5, 10);
 
 	this->seg->flush();
 
@@ -91,7 +88,7 @@ BOOST_AUTO_TEST_CASE(segstream_streamMove_forward)
 {
 	BOOST_TEST_MESSAGE("Overlapping stream move forward (segmented_stream this time)");
 
-	stream::move(this->seg, 10, 15, 10);
+	stream::move(*this->seg, 10, 15, 10);
 
 	this->seg->flush();
 
@@ -394,19 +391,22 @@ BOOST_AUTO_TEST_CASE(segstream_large_insert_gap)
 }
 
 
-bool substreamTruncate(boost::weak_ptr<stream::sub> w_sub,
-	boost::weak_ptr<stream::seg> w_parent, int len)
+bool substreamTruncate(stream::output_sub *sub, stream::pos len,
+	std::weak_ptr<stream::seg> w_parent)
 {
-	stream::sub_sptr sub = w_sub.lock();
-	if (!sub) return false;
-	stream::seg_sptr parent = w_parent.lock();
+	std::shared_ptr<stream::seg> parent = w_parent.lock();
 	if (!parent) return false;
 
-	stream::pos off = sub->get_offset();
-	stream::pos oldLen = sub->size();
+	stream::pos off = sub->start();
+	stream::pos orig = parent->tellp();
+
+	stream::pos origSub = sub->tellp();
+	sub->seekp(0, stream::end);
+	stream::pos oldLen = sub->tellp();
+	sub->seekp(origSub, stream::start);
+
 	// Enlarge the end of the substream (in the parent)
 	stream::delta delta = len - oldLen;
-	stream::pos orig = parent->tellp();
 	try {
 		if (delta < 0) {
 			// TODO: untested
@@ -433,14 +433,15 @@ BOOST_AUTO_TEST_CASE(segstream_insert_past_parent_eof)
 
 	this->seg->seekp(0, stream::start);
 
-	stream::sub_sptr sub(new stream::sub());
-	stream::fn_truncate t = boost::bind(substreamTruncate,
-		boost::weak_ptr<stream::sub>(sub),
-		boost::weak_ptr<stream::seg>(this->seg), _1);
-	sub->open(this->seg, 15, 10, t);
+	auto sub = std::make_shared<stream::sub>(
+		this->seg, 15, 10,
+		boost::bind(substreamTruncate,
+			_1, _2,
+			std::weak_ptr<stream::seg>(this->seg)
+		)
+	);
 
-	stream::seg_sptr child(new stream::seg());
-	child->open(sub);
+	auto child = std::make_shared<stream::seg>(sub);
 
 	child->seekp(8, stream::start);
 	child->insert(5);
@@ -459,14 +460,15 @@ BOOST_AUTO_TEST_CASE(segstream_insert_past_parent_eof2)
 
 	this->seg->seekp(0, stream::start);
 
-	stream::sub_sptr sub(new stream::sub());
-	stream::fn_truncate t = boost::bind(substreamTruncate,
-		boost::weak_ptr<stream::sub>(sub),
-		boost::weak_ptr<stream::seg>(this->seg), _1);
-	sub->open(this->seg, 15, 10, t);
+	auto sub = std::make_shared<stream::sub>(
+		this->seg, 15, 10,
+		boost::bind(substreamTruncate,
+			_1, _2,
+			std::weak_ptr<stream::seg>(this->seg)
+		)
+	);
 
-	stream::seg_sptr child(new stream::seg());
-	child->open(sub);
+	auto child = std::make_shared<stream::seg>(sub);
 
 	child->seekp(0, stream::start); // will seek to @15 out of 25 (15+10)
 	child->insert(5);

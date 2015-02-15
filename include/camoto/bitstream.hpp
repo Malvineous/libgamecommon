@@ -22,6 +22,7 @@
 #ifndef _CAMOTO_BITSTREAM_HPP_
 #define _CAMOTO_BITSTREAM_HPP_
 
+#include <memory>
 #include <boost/function.hpp>
 #include <camoto/stream.hpp>
 
@@ -31,15 +32,16 @@
 
 namespace camoto {
 
-typedef boost::function<int (uint8_t *)> fn_getnextchar;
+typedef boost::function<int (uint8_t*)> fn_getnextchar;
 typedef boost::function<int (uint8_t)> fn_putnextchar;
 
 /// Class for reading and writing to iostreams at the bit level rather than
 /// the byte level.
-class DLL_EXPORT bitstream {
+class DLL_EXPORT bitstream
+{
 	private:
 		/// Parent stream, where the actual data is read from and written to.
-		stream::inout_sptr parent;
+		std::shared_ptr<stream::inout> parent;
 
 		/// Current offset into parent stream.
 		/**
@@ -95,7 +97,7 @@ class DLL_EXPORT bitstream {
 		 * of each byte is read first in big-endian order, while the LSB is read
 		 * first in little-endian order.
 		 */
-		bitstream(stream::inout_sptr parent, endian endianType);
+		bitstream(std::shared_ptr<stream::inout> parent, endian endianType);
 
 		/// Stream-less constructor for using variant of read() with stream as
 		/// a parameter.
@@ -257,8 +259,6 @@ class DLL_EXPORT bitstream {
 		 */
 		void peekByte(uint8_t *buf, uint8_t *mask);
 };
-
-typedef boost::shared_ptr<bitstream> bitstream_sptr;
 
 } // namespace camoto
 

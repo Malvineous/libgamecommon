@@ -22,6 +22,7 @@
 #define _CAMOTO_STREAM_STRING_HPP_
 
 #include <string>
+#include <memory>
 #include <camoto/stream.hpp>
 
 namespace camoto {
@@ -30,29 +31,25 @@ namespace stream {
 /// String stream parts in common with read and write
 class DLL_EXPORT string_core
 {
+	public:
+		std::string data;  ///< String data
+
 	protected:
-		boost::shared_ptr<std::string> data;   ///< String data
 		stream::pos offset;  ///< Current pointer position
 
-		string_core();
+		string_core(std::string data);
 
 		/// Common seek function for reading and writing.
 		/**
 		 * @copydetails input::seekg()
 		 */
 		void seek(stream::delta off, seek_from from);
-
-		/// Get access to the underlying storage.
-		/**
-		 * @return Reference to the underlying string.
-		 */
-		boost::shared_ptr<std::string> str();
 };
 
 /// Read-only stream to access a C++ string.
 class DLL_EXPORT input_string:
 	virtual public input,
-	virtual protected string_core
+	virtual public string_core
 {
 	public:
 		/// Default constructor.
@@ -60,32 +57,18 @@ class DLL_EXPORT input_string:
 		 * @note Initialises with empty string.
 		 */
 		input_string();
+		input_string(std::string content);
 
 		virtual stream::len try_read(uint8_t *buffer, stream::len len);
 		virtual void seekg(stream::delta off, seek_from from);
 		virtual stream::pos tellg() const;
 		virtual stream::pos size() const;
-
-		/// Wrap around an existing string.
-		/**
-		 * @param src
-		 *   Reference to string.  The reference must remain valid as long
-		 *   as the input_string instance exists.
-		 *
-		 * @see str();
-		 */
-		void open(boost::shared_ptr<std::string> src);
-
-		using string_core::str;
 };
-
-/// Shared pointer to a readable string.
-typedef boost::shared_ptr<input_string> input_string_sptr;
 
 /// Write-only stream to access a C++ string.
 class DLL_EXPORT output_string:
 	virtual public output,
-	virtual protected string_core
+	virtual public string_core
 {
 	public:
 		/// Default constructor.
@@ -99,22 +82,7 @@ class DLL_EXPORT output_string:
 		virtual stream::pos tellp() const;
 		virtual void truncate(stream::pos size);
 		virtual void flush();
-
-		/// Wrap around an existing string.
-		/**
-		 * @param src
-		 *   Shared pointer to the new string.  The reference must remain valid as long
-		 *   as the input_string instance exists.
-		 *
-		 * @see str();
-		 */
-		void open(boost::shared_ptr<std::string> src);
-
-		using string_core::str;
 };
-
-/// Shared pointer to a writable string.
-typedef boost::shared_ptr<output_string> output_string_sptr;
 
 /// Read/write stream accessing a C++ string.
 class DLL_EXPORT string:
@@ -124,16 +92,8 @@ class DLL_EXPORT string:
 {
 	public:
 		string();
-
-		// Pick this version (as opposed to input_string::open) as it will
-		// "open" the string in read/write mode.
-		using output_string::open;
-
-		using string_core::str;
+		string(std::string content);
 };
-
-/// Shared pointer to a readable and writable string.
-typedef boost::shared_ptr<string> string_sptr;
 
 } // namespace stream
 } // namespace camoto

@@ -21,6 +21,7 @@
 #ifndef _CAMOTO_IFF_HPP_
 #define _CAMOTO_IFF_HPP_
 
+#include <memory>
 #include <vector>
 #include <camoto/stream.hpp>
 
@@ -53,7 +54,31 @@ class DLL_EXPORT IFF
 class DLL_EXPORT IFFReader: public IFF
 {
 	public:
-		IFFReader(stream::input_sptr iff, Filetype filetype);
+		/// Create a new IFF reader which uses the given stream.
+		/**
+		 * @param iff
+		 *   Stream to seek around in.  This is a shared pointer as it will be used
+		 *   after the constructor has returned, by the other functions in this
+		 *   class.
+		 *
+		 * @param filetype
+		 *   IFF/RIFF variant.
+		 */
+		IFFReader(std::shared_ptr<stream::input> iff_ptr, Filetype filetype);
+
+		/// Create a new IFF reader without a shared pointer.
+		/**
+		 * @param iff
+		 *   Stream to seek around in.  A reference to this is kept after the
+		 *   constructor returns, so it is the caller's responsibility to ensure
+		 *   the stream remains valid for the lifetime of the IFFReader instance.
+		 *   Wherever possible, the shared_ptr variant of the constructor should be
+		 *   used.
+		 *
+		 * @param filetype
+		 *   IFF/RIFF variant.
+		 */
+		IFFReader(stream::input& iff, Filetype filetype);
 
 		/// Return to the file root.
 		/**
@@ -130,8 +155,16 @@ class DLL_EXPORT IFFReader: public IFF
 		stream::len open(unsigned int index, fourcc *type);
 
 	protected:
-		stream::input_sptr iff;         ///< File to read
-		Filetype filetype;              ///< Type of file (RIFF, IFF, etc.)
+		/// Shared pointer to iff, if one was passed to the constructor.
+		std::shared_ptr<stream::input> iff_ptr;
+
+		/// File to seek around in as chunks are read.
+		stream::input& iff;
+
+		/// Type of file (RIFF, IFF, etc.)
+		Filetype filetype;
+
+		/// List of discovered chunks.
 		struct Chunk {
 			fourcc name;
 			stream::pos start;
@@ -139,13 +172,38 @@ class DLL_EXPORT IFFReader: public IFF
 		};
 		std::vector<Chunk> chunks;
 
+		/// Populate chunk list.
 		void loadChunks(stream::len lenChunk);
 };
 
 class DLL_EXPORT IFFWriter: public IFF
 {
 	public:
-		IFFWriter(stream::output_sptr iff, Filetype filetype);
+		/// Create a new IFF writer which uses the given stream.
+		/**
+		 * @param iff
+		 *   Stream to seek around in.  This is a shared pointer as it will be used
+		 *   after the constructor has returned, by the other functions in this
+		 *   class.
+		 *
+		 * @param filetype
+		 *   IFF/RIFF variant.
+		 */
+		IFFWriter(std::shared_ptr<stream::output> iff_ptr, Filetype filetype);
+
+		/// Create a new IFF reader without a shared pointer.
+		/**
+		 * @param iff
+		 *   Stream to seek around in.  A reference to this is kept after the
+		 *   constructor returns, so it is the caller's responsibility to ensure
+		 *   the stream remains valid for the lifetime of the IFFReader instance.
+		 *   Wherever possible, the shared_ptr variant of the constructor should be
+		 *   used.
+		 *
+		 * @param filetype
+		 *   IFF/RIFF variant.
+		 */
+		IFFWriter(stream::output& iff, Filetype filetype);
 
 		/// Open a subchunk within the current one.
 		/**
@@ -179,9 +237,17 @@ class DLL_EXPORT IFFWriter: public IFF
 		void end();
 
 	protected:
-		stream::output_sptr iff;        ///< File to write
-		Filetype filetype;              ///< Type of file (RIFF, IFF, etc.)
-		std::vector<stream::pos> chunk; ///< Offset of start of most recent chunk
+		/// Shared pointer to iff, if one was passed to the constructor.
+		std::shared_ptr<stream::output> iff_ptr;
+
+		/// File to seek around in and write offset values.
+		stream::output& iff;
+
+		/// Type of file (RIFF, IFF, etc.)
+		Filetype filetype;
+
+		/// Offset of start of most recent chunk (where to write chunk length later)
+		std::vector<stream::pos> chunk;
 };
 
 } // namespace camoto

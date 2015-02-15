@@ -28,6 +28,22 @@
 namespace camoto {
 namespace stream {
 
+seg::seg()
+{
+}
+
+seg::seg(std::shared_ptr<inout> parent)
+{
+	assert(parent);
+
+	this->parent = parent;
+	this->offset = 0;
+	this->off_parent = 0;
+	this->off_endparent = this->parent->size();
+	this->parent->seekp(0, stream::start);
+	return;
+}
+
 stream::len seg::try_read(uint8_t *buffer, stream::len len)
 {
 	// Make sure open() has been called
@@ -327,18 +343,6 @@ void seg::flush()
 	return;
 }
 
-void seg::open(inout_sptr parent)
-{
-	assert(parent);
-
-	this->parent = parent;
-	this->offset = 0;
-	this->off_parent = 0;
-	this->off_endparent = this->parent->size();
-	this->parent->seekp(0, stream::start);
-	return;
-}
-
 void seg::insert(stream::len lenInsert)
 {
 	stream::pos lenFirst = this->off_endparent - this->off_parent;
@@ -438,21 +442,22 @@ void seg::remove(stream::len lenRemove)
 			// The remove doesn't start until somewhere in the middle of the second
 			// source.
 			stream::pos offCropStart = this->offset - lenFirst;
-			std::vector<uint8_t>::iterator itCropStart =
-				this->vcSecond.begin() + offCropStart;
-			std::vector<uint8_t>::iterator itCropEnd;
-			if (offCropStart + lenRemove >= lenSecond) {
-				// It goes past the end though, so truncate some data off the end of
-				// the second source
-				// TESTED BY: segstream_remove_c07
-				itCropEnd = this->vcSecond.end();
-				lenRemove -= lenSecond - offCropStart;
-			} else {
-				// Removal is contained entirely within the second source
-				// TESTED BY: segstream_remove_c08
-				itCropEnd = itCropStart + lenRemove;
-				lenRemove = 0;
-			}
+			auto itCropStart = this->vcSecond.begin() + offCropStart;
+			auto itCropEnd = [&] {
+				if (offCropStart + lenRemove >= lenSecond) {
+					// It goes past the end though, so truncate some data off the end of
+					// the second source
+					// TESTED BY: segstream_remove_c07
+					lenRemove -= lenSecond - offCropStart;
+					return this->vcSecond.end();
+				} else {
+					// Removal is contained entirely within the second source
+					// TESTED BY: segstream_remove_c08
+					auto ret = itCropStart + lenRemove;
+					lenRemove = 0;
+					return ret;
+				}
+			}();
 			this->vcSecond.erase(itCropStart, itCropEnd);
 		}
 	}
@@ -475,7 +480,7 @@ void seg::split()
 	assert(this->offset < (this->off_endparent - this->off_parent));
 
 	// Create child segstream
-	seg_sptr psegNew(new seg());
+	std::unique_ptr<seg> psegNew(new seg);
 
 	psegNew->offset = 0;
 	// Copy parent to segstream's parent
@@ -490,9 +495,10 @@ void seg::split()
 	psegNew->vcSecond = this->vcSecond;
 	this->vcSecond.clear();
 	// Move our psegThird to child segstream's psegThird
-	psegNew->psegThird = this->psegThird; // possibly NULL
-	// Make child segstream our psegThird
-	this->psegThird = psegNew;
+	psegNew->psegThird = std::move(this->psegThird); // possibly NULL
+
+	// Make child segstream our psegThird, assuming no exceptions have been thrown
+	this->psegThird = std::move(psegNew);
 	return;
 }
 
@@ -508,7 +514,7 @@ void seg::commit(stream::pos poffWriteFirst)
 	if (this->off_parent > poffWriteFirst) {
 		// There's data off the front that needs to be trimmed, so move the
 		// first source back a bit.
-		stream::move(this->parent, this->off_parent, poffWriteFirst, lenFirst);
+		stream::move(*this->parent, this->off_parent, poffWriteFirst, lenFirst);
 
 		this->off_parent = poffWriteFirst;
 		this->off_endparent = poffWriteFirst + lenFirst;
@@ -524,7 +530,7 @@ void seg::commit(stream::pos poffWriteFirst)
 		if (this->psegThird) this->psegThird->commit(poffWriteThird);
 
 		// Then move the first source forward a bit
-		stream::move(this->parent, this->off_parent, poffWriteFirst, lenFirst);
+		stream::move(*this->parent, this->off_parent, poffWriteFirst, lenFirst);
 
 		this->off_parent = poffWriteFirst;
 		this->off_endparent = poffWriteFirst + lenFirst;

@@ -27,18 +27,47 @@
 namespace camoto {
 namespace stream {
 
+class output_filtered;
+
+/// Truncate function callback (to truncate a stream::output)
+/**
+ * This function is called with an integer parameter when a stream
+ * needs to be shrunk or enlarged to the given size.
+ *
+ * Since no other data can be passed with this function call, usually
+ * boost::bind is used to create a "wrapping" around some other function with
+ * more parameters.
+ *
+ * The function signature is:
+ * @code
+ * void fnTruncate(stream::output_filtered* output, stream::len new_length);
+ * @endcode
+ *
+ * This example uses boost::bind to package up a call to the Linux
+ * truncate() function (which requires both a filename and size) such that
+ * the filename is supplied in advance and not required when the \e fn_truncate
+ * call is made.
+ *
+ * @code
+ * fn_truncate fnTruncate = boost::bind<void>(truncate, "graphics.dat", _2);
+ * // later...
+ * fnTruncate(123);  // calls truncate("graphics.dat", 123)
+ * @endcode
+ *
+ * This callback is used in cases where both a file's compressed and
+ * decompressed size are stored.  Here the callback will be notified with the
+ * prefiltered size during the flush() call, with the postfiltered size
+ * being the amount of data that was actually written to the stream.
+ *
+ * The callback should throw stream::write_error if the operation did not
+ * succeed.
+ */
+typedef boost::function<void(stream::output_filtered*, stream::len)> fn_truncate_filter;
+
 /// Read-only stream applying a filter to another read-only stream.
 class DLL_EXPORT input_filtered: virtual public input_memory
 {
 	public:
-		virtual stream::len try_read(uint8_t *buffer, stream::len len);
-
-		virtual void seekg(stream::delta off, seek_from from);
-
-		virtual stream::pos tellg() const;
-
-		virtual stream::pos size() const;
-
 		/// Apply a filter to the given stream.
 		/**
 		 * As data is read from this stream (the input_filtered instance), data is
@@ -51,7 +80,13 @@ class DLL_EXPORT input_filtered: virtual public input_memory
 		 * @param read_filter
 		 *   Filter to process data.
 		 */
-		void open(input_sptr parent, filter_sptr read_filter);
+		input_filtered(std::shared_ptr<input> parent,
+			std::shared_ptr<filter> read_filter);
+
+		virtual stream::len try_read(uint8_t *buffer, stream::len len);
+		virtual void seekg(stream::delta off, seek_from from);
+		virtual stream::pos tellg() const;
+		virtual stream::pos size() const;
 
 		/// A partial write is about to occur, ensure the unfiltered data is present.
 		/**
@@ -68,26 +103,15 @@ class DLL_EXPORT input_filtered: virtual public input_memory
 		void realPopulate();
 
 	protected:
-		filter_sptr read_filter; ///< Filter to pass data through
-		input_sptr in_parent;   ///< Parent stream for reading
+		std::shared_ptr<input> in_parent;   ///< Parent stream for reading
+		std::shared_ptr<filter> read_filter; ///< Filter to pass data through
 		bool populated; ///< Has the input data been run through the filter yet?
 };
-
-/// Shared pointer to a readable filtered stream.
-typedef boost::shared_ptr<input_filtered> input_filtered_sptr;
 
 /// Write-only stream applying a filter to another write-only stream.
 class DLL_EXPORT output_filtered: virtual public output_memory
 {
 	public:
-		virtual stream::len try_write(const uint8_t *buffer, stream::len len);
-
-		virtual void seekp(stream::delta off, seek_from from);
-
-		virtual stream::pos tellp() const;
-
-		virtual void flush();
-
 		/// Apply a filter to the given stream.
 		/**
 		 * As data is written to this stream (the output_filtered instance), the
@@ -108,7 +132,13 @@ class DLL_EXPORT output_filtered: virtual public output_memory
 		 *   during the flush() call, while parent->truncate() will be called with
 		 *   the compressed size.
 		 */
-		void open(output_sptr parent, filter_sptr write_filter, fn_truncate resize);
+		output_filtered(std::shared_ptr<output> parent,
+			std::shared_ptr<filter> write_filter, fn_truncate_filter resize);
+
+		virtual stream::len try_write(const uint8_t *buffer, stream::len len);
+		virtual void seekp(stream::delta off, seek_from from);
+		virtual stream::pos tellp() const;
+		virtual void flush();
 
 		/// A partial write is about to occur, ensure the unfiltered data is present.
 		/**
@@ -122,25 +152,19 @@ class DLL_EXPORT output_filtered: virtual public output_memory
 		virtual void populate() const;
 
 	protected:
-		filter_sptr write_filter; ///< Filter to pass data through
-		output_sptr out_parent;   ///< Parent stream for writing
-		fn_truncate fn_resize;    ///< Size-change notification function
-		bool done_filter;         ///< Set to true once filter has been run once
+		std::shared_ptr<output> out_parent;   ///< Parent stream for writing
+		std::shared_ptr<filter> write_filter; ///< Filter to pass data through
+		fn_truncate_filter fn_resize;         ///< Size-change notification callback
+		bool done_filter;                     ///< true once filter has run once
 };
 
-/// Shared pointer to a writable filtered stream.
-typedef boost::shared_ptr<output_filtered> output_filtered_sptr;
-
 /// Read/write stream applying a filter to another read/write stream.
-class DLL_EXPORT filtered: virtual public inout,
-                virtual public input_filtered,
-                virtual public output_filtered
+class DLL_EXPORT filtered:
+	virtual public inout,
+	virtual public input_filtered,
+	virtual public output_filtered
 {
 	public:
-		filtered();
-
-		virtual void truncate(stream::pos size);
-
 		/// Apply a filter to the given stream.
 		/**
 		 * As data is read from this stream (the filtered instance), data is
@@ -170,14 +194,14 @@ class DLL_EXPORT filtered: virtual public inout,
 		 *   size.  Here the callback will be notified of the decompressed size
 		 *   during the flush() call.
 		 */
-		void open(inout_sptr parent, filter_sptr read_filter,
-			filter_sptr write_filter, fn_truncate resize);
+		filtered(std::shared_ptr<inout> parent,
+			std::shared_ptr<filter> read_filter, std::shared_ptr<filter> write_filter,
+			fn_truncate_filter resize);
+
+		virtual void truncate(stream::len size);
 
 		virtual void populate() const;
 };
-
-/// Shared pointer to a readable and writable filtered stream.
-typedef boost::shared_ptr<filtered> filtered_sptr;
 
 } // namespace stream
 } // namespace camoto

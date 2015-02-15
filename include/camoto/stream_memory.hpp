@@ -22,6 +22,7 @@
 #define _CAMOTO_STREAM_MEMORY_HPP_
 
 #include <vector>
+
 #include <camoto/stream.hpp>
 
 namespace camoto {
@@ -45,8 +46,9 @@ class DLL_EXPORT memory_core
 };
 
 /// Read-only stream to access a C++ vector.
-class DLL_EXPORT input_memory: virtual public input,
-                               virtual protected memory_core
+class DLL_EXPORT input_memory:
+	virtual public input,
+	virtual protected memory_core
 {
 	public:
 		/// Default constructor.
@@ -61,12 +63,10 @@ class DLL_EXPORT input_memory: virtual public input,
 		virtual stream::pos size() const;
 };
 
-/// Shared pointer to a readable memory.
-typedef boost::shared_ptr<input_memory> input_memory_sptr;
-
 /// Write-only stream to access a C++ vector.
-class DLL_EXPORT output_memory: virtual public expanding_output,
-                                virtual protected memory_core
+class DLL_EXPORT output_memory:
+	virtual public expanding_output,
+	virtual protected memory_core
 {
 	public:
 		/// Default constructor.
@@ -82,20 +82,15 @@ class DLL_EXPORT output_memory: virtual public expanding_output,
 		virtual void flush();
 };
 
-/// Shared pointer to a writable memory.
-typedef boost::shared_ptr<output_memory> output_memory_sptr;
-
 /// Read/write stream accessing a C++ memory.
-class DLL_EXPORT memory: virtual public expanding_inout,
-                         virtual public input_memory,
-                         virtual public output_memory
+class DLL_EXPORT memory:
+	virtual public expanding_inout,
+	virtual public input_memory,
+	virtual public output_memory
 {
 	public:
 		memory();
 };
-
-/// Shared pointer to a readable and writable memory.
-typedef boost::shared_ptr<memory> memory_sptr;
 
 } // namespace stream
 } // namespace camoto

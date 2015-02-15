@@ -24,16 +24,15 @@
 namespace camoto {
 namespace stream {
 
-void input_filtered::open(input_sptr parent, filter_sptr read_filter)
+input_filtered::input_filtered(std::shared_ptr<input> parent,
+	std::shared_ptr<filter> read_filter)
+	:	in_parent(parent),
+		read_filter(read_filter),
+		populated(false)
 {
 	assert(parent);
 	assert(read_filter);
 	assert(this->data.size() == 0);
-
-	this->in_parent = parent;
-	this->read_filter = read_filter;
-	this->populated = false;
-	return;
 }
 
 stream::len input_filtered::try_read(uint8_t *buffer, stream::len len)
@@ -108,6 +107,19 @@ void input_filtered::realPopulate()
 	// Cut off any excess from the last read
 	this->data.resize(lenTotalOut);
 
+	return;
+}
+
+
+output_filtered::output_filtered(std::shared_ptr<output> parent,
+	std::shared_ptr<filter> write_filter, fn_truncate_filter resize)
+	:	out_parent(parent),
+		write_filter(write_filter),
+		fn_resize(resize),
+		done_filter(false)
+{
+	assert(parent);
+	assert(write_filter);
 	return;
 }
 
@@ -188,23 +200,10 @@ void output_filtered::flush()
 	// truncate(), because truncate() sets both stored and real sizes in case
 	// there are no filters active.  So once that is done, we override it and
 	// set the correct real size.
-	if (this->fn_resize) this->fn_resize(lenRealSize);
+	if (this->fn_resize) this->fn_resize(this, lenRealSize);
 
 	this->out_parent->flush();
 
-	return;
-}
-
-void output_filtered::open(output_sptr parent, filter_sptr write_filter,
-	fn_truncate resize)
-{
-	assert(parent);
-	assert(write_filter);
-
-	this->out_parent = parent;
-	this->write_filter = write_filter;
-	this->fn_resize = resize;
-	this->done_filter = false;
 	return;
 }
 
@@ -214,7 +213,11 @@ void output_filtered::populate() const
 }
 
 
-filtered::filtered()
+filtered::filtered(std::shared_ptr<inout> parent,
+	std::shared_ptr<filter> read_filter, std::shared_ptr<filter> write_filter,
+	fn_truncate_filter resize)
+	:	input_filtered(parent, read_filter),
+		output_filtered(parent, write_filter, resize)
 {
 }
 
@@ -222,14 +225,6 @@ void filtered::truncate(stream::pos size)
 {
 	if (size == 0) this->populated = true;
 	this->output_filtered::truncate(size);
-	return;
-}
-
-void filtered::open(inout_sptr parent, filter_sptr read_filter,
-	filter_sptr write_filter, fn_truncate resize)
-{
-	this->input_filtered::open(parent, read_filter);
-	this->output_filtered::open(parent, write_filter, resize);
 	return;
 }
 

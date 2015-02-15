@@ -26,13 +26,16 @@
 namespace camoto {
 namespace stream {
 
-/// Substream parts in common with read and write
-class DLL_EXPORT sub_core {
+class output_sub;
 
+/// Callback function for changing the size of an output substream.
+typedef boost::function<void(output_sub*, len)> fn_truncate_sub;
+
+/// Substream parts in common with read and write
+class DLL_EXPORT sub_core
+{
 	protected:
-		stream::pos start;      ///< Offset into parent stream
-		stream::len stream_len; ///< Length of substream
-		stream::pos offset;     ///< Current pointer position
+		sub_core(pos start, len len);
 
 		/// Common seek function for reading and writing.
 		/**
@@ -40,6 +43,7 @@ class DLL_EXPORT sub_core {
 		 */
 		void seek(stream::delta off, seek_from from);
 
+	public:
 		/// Move the substream's start point within the parent stream.
 		/**
 		 * @param off
@@ -66,22 +70,19 @@ class DLL_EXPORT sub_core {
 		 * @return Current offset, relative to start of parent stream, where first
 		 *   byte in the substream sits.
 		 */
-		stream::pos get_offset();
+		stream::pos start();
+
+		stream::pos stream_start; ///< Offset into parent stream
+		stream::len stream_len;   ///< Length of substream
+		stream::pos offset;       ///< Current pointer position
 };
 
 /// Read-only stream to access a section within another stream.
-class DLL_EXPORT input_sub: virtual public input,
-                 virtual protected sub_core
+class DLL_EXPORT input_sub:
+	virtual public input,
+	virtual public sub_core
 {
 	public:
-		virtual stream::len try_read(uint8_t *buffer, stream::len len);
-
-		virtual void seekg(stream::delta off, seek_from from);
-
-		virtual stream::pos tellg() const;
-
-		virtual stream::pos size() const;
-
 		/// Map onto a subsection of another stream.
 		/**
 		 * @param parent
@@ -95,34 +96,23 @@ class DLL_EXPORT input_sub: virtual public input,
 		 *   Length of data to make available in the substream.  \e start + \e len
 		 *   must be <= parent->size().
 		 */
-		void open(input_sptr parent, stream::pos start, stream::len len);
+		input_sub(std::shared_ptr<input> parent, pos start, len len);
 
-		using sub_core::relocate;
-		using sub_core::resize;
-		using sub_core::get_offset;
+		virtual stream::len try_read(uint8_t *buffer, stream::len len);
+		virtual void seekg(stream::delta off, seek_from from);
+		virtual stream::pos tellg() const;
+		virtual stream::pos size() const;
 
 	protected:
-		input_sptr in_parent; ///< Parent stream for reading
+		std::shared_ptr<input> in_parent; ///< Parent stream for reading
 };
 
-/// Shared pointer to a readable substream.
-typedef boost::shared_ptr<input_sub> input_sub_sptr;
-
 /// Write-only stream to access a section within another stream.
-class DLL_EXPORT output_sub: virtual public output,
-                  virtual protected sub_core
+class DLL_EXPORT output_sub:
+	virtual public output,
+	virtual public sub_core
 {
 	public:
-		virtual stream::len try_write(const uint8_t *buffer, stream::len len);
-
-		virtual void seekp(stream::delta off, seek_from from);
-
-		virtual stream::pos tellp() const;
-
-		virtual void truncate(stream::pos size);
-
-		virtual void flush();
-
 		/// Map onto a subsection of another stream.
 		/**
 		 * @param parent
@@ -144,51 +134,44 @@ class DLL_EXPORT output_sub: virtual public output,
 		 *   only a partial write.)
 		 *
 		 * @note If using boost::bind to generate a function pointer for fn_resize,
-		 *   be sure to use boost::weak_ptr<> in place of any boost::shared_ptr<>
+		 *   be sure to use std::weak_ptr<> in place of any std::shared_ptr<>
 		 *   parameters containing the substream.  If this is not done, the
 		 *   substream will hold a shared_ptr<> to itself, meaning it will never be
 		 *   deleted and it will result in a memory leak.
 		 *   If in doubt, wrap whatever you want to do in a free function that only
 		 *   takes weak_ptr<> arguments.
 		 */
-		void open(output_sptr parent, stream::pos start, stream::len len,
-			fn_truncate fn_resize);
+		output_sub(std::shared_ptr<output> parent, pos start, len len,
+			fn_truncate_sub fn_resize);
 
-		using sub_core::relocate;
-		using sub_core::resize;
-		using sub_core::get_offset;
+		virtual stream::len try_write(const uint8_t *buffer, stream::len len);
+		virtual void seekp(stream::delta off, seek_from from);
+		virtual stream::pos tellp() const;
+		virtual void truncate(stream::pos size);
+		virtual void flush();
 
 	protected:
+		/// Parent stream for writing.
+		std::shared_ptr<output> out_parent;
+
 		/// Callback to alert parent stream we want to change size.
-		fn_truncate fn_resize;
-		output_sptr out_parent; ///< Parent stream for writing
+		fn_truncate_sub fn_resize;
 };
 
-/// Shared pointer to a writable substream.
-typedef boost::shared_ptr<output_sub> output_sub_sptr;
-
 /// Read/write stream accessing a section within another stream.
-class DLL_EXPORT sub: virtual public inout,
-           virtual public input_sub,
-           virtual public output_sub
+class DLL_EXPORT sub:
+	virtual public inout,
+	virtual public input_sub,
+	virtual public output_sub
 {
 	public:
-		sub();
-
 		/// Map onto a subsection of another stream.
 		/**
 		 * @copydetails output_sub::open()
 		 */
-		void open(inout_sptr parent, stream::pos start, stream::len len,
-			fn_truncate fn_resize);
-
-		using sub_core::relocate;
-		using sub_core::resize;
-		using sub_core::get_offset;
+		sub(std::shared_ptr<inout> parent, pos start, len len,
+			fn_truncate_sub fn_resize);
 };
-
-/// Shared pointer to a readable and writable substream.
-typedef boost::shared_ptr<sub> sub_sptr;
 
 } // namespace stream
 } // namespace camoto

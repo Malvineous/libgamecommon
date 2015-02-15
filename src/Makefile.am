@@ -26,6 +26,6 @@ AM_CPPFLAGS += $(WARNINGS)
 AM_CXXFLAGS  = $(DEBUG_CXXFLAGS)
 
 libgamecommon_la_LDFLAGS  = $(AM_LDFLAGS)
-libgamecommon_la_LDFLAGS += -version-info 1:0:0
+libgamecommon_la_LDFLAGS += -version-info 2:0:0
 
 libgamecommon_la_LIBADD = $(BOOST_SYSTEM_LIBS)

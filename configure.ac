@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.63])
-AC_INIT([libgamecommon], [1.2],
+AC_INIT([libgamecommon], [2.0],
 	[https://github.com/Malvineous/libgamecommon/issues],
 	[], [http://www.shikadi.net/camoto])
 AM_INIT_AUTOMAKE([foreign dist-bzip2 no-dist-gzip])
@@ -16,6 +16,8 @@ AC_SUBST(camoto_release, camoto-1.0)
 
 AC_PROG_CXX
 AC_PROG_LIBTOOL
+
+AX_CXX_COMPILE_STDCXX_11(noext, mandatory)
 
 BOOST_REQUIRE([1.46])
 BOOST_FILESYSTEM

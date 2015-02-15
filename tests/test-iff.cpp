@@ -69,14 +69,14 @@ BOOST_AUTO_TEST_CASE(riff_read)
 
 	stream::len lenDem2 = iff.seek("dem2");
 	std::string contentDem2;
-	this->in >> fixedLength(contentDem2, lenDem2);
+	*this->in >> fixedLength(contentDem2, lenDem2);
 	BOOST_REQUIRE_EQUAL(contentDem2, "bbbb");
 
 	iff.root();
 	iff.open("RIFF", &type);
 	stream::len lenTwo3 = iff.seek(3);
 	std::string contentTwo3;
-	this->in >> fixedLength(contentTwo3, lenTwo3);
+	*this->in >> fixedLength(contentTwo3, lenTwo3);
 	BOOST_REQUIRE_EQUAL(contentTwo3, "no");
 }
 
@@ -87,24 +87,24 @@ BOOST_AUTO_TEST_CASE(riff_write)
 	IFFWriter iff(this->out, IFF::Filetype_RIFF);
 	iff.begin("RIFF", "test");
 		iff.begin("one ");
-		this->out->write("abcdefg");
+		this->out.write("abcdefg");
 		iff.end();
 		iff.begin("LIST", "demo");
 			iff.begin("dem1");
-			this->out->write("aaa");
+			this->out.write("aaa");
 			iff.end();
 			iff.begin("dem2");
-			this->out->write("bbbb");
+			this->out.write("bbbb");
 			iff.end();
 		iff.end();
 		iff.begin("two ");
-		this->out->write("hijklm");
+		this->out.write("hijklm");
 		iff.end();
 		iff.begin("two ");
-		this->out->write("no");
+		this->out.write("no");
 		iff.end();
 		iff.begin("two ");
-		this->out->write("pqr");
+		this->out.write("pqr");
 		iff.end();
 	iff.end();
 
@@ -133,7 +133,7 @@ BOOST_AUTO_TEST_CASE(riff_read_missing_pad)
 
 	stream::len lenOne = iff.seek("one ");
 	std::string contentOne;
-	this->in >> fixedLength(contentOne, lenOne);
+	*this->in >> fixedLength(contentOne, lenOne);
 	BOOST_REQUIRE_EQUAL(contentOne, "aaa");
 }
 
@@ -175,7 +175,7 @@ BOOST_AUTO_TEST_CASE(iff_read)
 
 	stream::len lenDem2 = iff.seek("dem2");
 	std::string contentDem2;
-	this->in >> fixedLength(contentDem2, lenDem2);
+	*this->in >> fixedLength(contentDem2, lenDem2);
 	BOOST_REQUIRE_EQUAL(contentDem2, "bbbb");
 }
 
@@ -186,18 +186,18 @@ BOOST_AUTO_TEST_CASE(iff_write)
 	IFFWriter iff(this->out, IFF::Filetype_IFF);
 	iff.begin("FORM", "test");
 		iff.begin("one ");
-		this->out->write("abcdefg");
+		this->out.write("abcdefg");
 		iff.end();
 		iff.begin("LIST", "demo");
 			iff.begin("dem1");
-			this->out->write("aaa");
+			this->out.write("aaa");
 			iff.end();
 			iff.begin("dem2");
-			this->out->write("bbbb");
+			this->out.write("bbbb");
 			iff.end();
 		iff.end();
 		iff.begin("two ");
-		this->out->write("hijklm");
+		this->out.write("hijklm");
 		iff.end();
 	iff.end();
 
@@ -244,14 +244,14 @@ BOOST_AUTO_TEST_CASE(riff_read_unpadded)
 
 	stream::len lenDem2 = iff.seek("dem2");
 	std::string contentDem2;
-	this->in >> fixedLength(contentDem2, lenDem2);
+	*this->in >> fixedLength(contentDem2, lenDem2);
 	BOOST_REQUIRE_EQUAL(contentDem2, "bbbb");
 
 	iff.root();
 	iff.open("RIFF", &type);
 	stream::len lenTwo3 = iff.seek(3);
 	std::string contentTwo3;
-	this->in >> fixedLength(contentTwo3, lenTwo3);
+	*this->in >> fixedLength(contentTwo3, lenTwo3);
 	BOOST_REQUIRE_EQUAL(contentTwo3, "no");
 }
 
@@ -262,24 +262,24 @@ BOOST_AUTO_TEST_CASE(riff_write_unpadded)
 	IFFWriter iff(this->out, IFF::Filetype_RIFF_Unpadded);
 	iff.begin("RIFF", "test");
 		iff.begin("one ");
-		this->out->write("abcdefg");
+		this->out.write("abcdefg");
 		iff.end();
 		iff.begin("LIST", "demo");
 			iff.begin("dem1");
-			this->out->write("aaa");
+			this->out.write("aaa");
 			iff.end();
 			iff.begin("dem2");
-			this->out->write("bbbb");
+			this->out.write("bbbb");
 			iff.end();
 		iff.end();
 		iff.begin("two ");
-		this->out->write("hijklm");
+		this->out.write("hijklm");
 		iff.end();
 		iff.begin("two ");
-		this->out->write("no");
+		this->out.write("no");
 		iff.end();
 		iff.begin("two ");
-		this->out->write("pqr");
+		this->out.write("pqr");
 		iff.end();
 	iff.end();
 

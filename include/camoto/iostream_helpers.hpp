@@ -31,9 +31,9 @@
 #endif
 
 #define BYTEORDER_USE_IOSTREAMS
-#define BYTEORDER_ISTREAM camoto::stream::input_sptr
-#define BYTEORDER_OSTREAM camoto::stream::output_sptr
-#define BYTEORDER_ACCESSOR ->
+#define BYTEORDER_ISTREAM camoto::stream::input&
+#define BYTEORDER_OSTREAM camoto::stream::output&
+#define BYTEORDER_ACCESSOR .
 #define BYTEORDER_BUFFER_TYPE uint8_t *
 #define BYTEORDER_PROVIDE_TYPED_FUNCTIONS
 #include <camoto/byteorder.hpp>
@@ -47,7 +47,7 @@ namespace camoto {
 /// @sa null_padded
 struct DLL_EXPORT null_padded_read {
 	null_padded_read(std::string& r, stream::len len, bool chop);
-	void read(stream::input_sptr s) const;
+	void read(stream::input& s) const;
 
 	private:
 		std::string& r;
@@ -58,7 +58,7 @@ struct DLL_EXPORT null_padded_read {
 /// @sa null_padded
 struct DLL_EXPORT null_padded_write {
 	null_padded_write(const std::string& r, stream::len len);
-	void write(stream::output_sptr s) const;
+	void write(stream::output& s) const;
 
 	private:
 		const std::string& r;
@@ -110,12 +110,12 @@ struct DLL_EXPORT null_padded: public null_padded_read, public null_padded_write
 
 // If you get an error related to the next line (e.g. no match for operator >>)
 // it's because you're trying to read a value into a const variable.
-inline stream::input_sptr operator >> (stream::input_sptr s, const null_padded_read& n) {
+inline stream::input& operator >> (stream::input& s, const null_padded_read& n) {
 	n.read(s);
 	return s;
 }
 
-inline stream::output_sptr operator << (stream::output_sptr s, const null_padded_write& n) {
+inline stream::output& operator << (stream::output& s, const null_padded_write& n) {
 	n.write(s);
 	return s;
 }
@@ -138,7 +138,7 @@ inline null_padded fixedLength(std::string& r, int len)
 /// @sa null_terminated
 struct DLL_EXPORT null_terminated_read {
 	null_terminated_read(std::string& r, stream::len len);
-	void read(stream::input_sptr s) const;
+	void read(stream::input& s) const;
 
 	private:
 		std::string& r;
@@ -148,7 +148,7 @@ struct DLL_EXPORT null_terminated_read {
 /// @sa null_terminated
 struct DLL_EXPORT null_terminated_write {
 	null_terminated_write(const std::string& r, stream::len len);
-	void write(stream::output_sptr s) const;
+	void write(stream::output& s) const;
 
 	private:
 		const std::string& r;
@@ -190,12 +190,12 @@ struct DLL_EXPORT null_terminated: public null_terminated_read, public null_term
 
 // If you get an error related to the next line (e.g. no match for operator >>)
 // it's because you're trying to read a value into a const variable.
-inline stream::input_sptr operator >> (stream::input_sptr s, const null_terminated_read& n) {
+inline stream::input& operator >> (stream::input& s, const null_terminated_read& n) {
 	n.read(s);
 	return s;
 }
 
-inline stream::output_sptr operator << (stream::output_sptr s, const null_terminated_write& n) {
+inline stream::output& operator << (stream::output& s, const null_terminated_write& n) {
 	n.write(s);
 	return s;
 }
@@ -213,8 +213,8 @@ inline null_terminated_const nullTerminated(const std::string& r, int maxlen)
 
 struct DLL_EXPORT number_format_u8: public number_format_read, public number_format_write {
 	number_format_u8(uint8_t& r);
-	void read(stream::input_sptr s) const;
-	void write(stream::output_sptr s) const;
+	void read(stream::input& s) const;
+	void write(stream::output& s) const;
 
 	private:
 		uint8_t& r;
@@ -222,7 +222,7 @@ struct DLL_EXPORT number_format_u8: public number_format_read, public number_for
 
 struct DLL_EXPORT number_format_const_u8: public number_format_write {
 	number_format_const_u8(const uint8_t& r);
-	void write(stream::output_sptr s) const;
+	void write(stream::output& s) const;
 
 	private:
 		const uint8_t& r;

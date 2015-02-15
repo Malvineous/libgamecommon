@@ -5,6 +5,7 @@ nobase_library_include_HEADERS += debug.hpp
 nobase_library_include_HEADERS += error.hpp
 nobase_library_include_HEADERS += filter.hpp
 nobase_library_include_HEADERS += filter_dummy.hpp
+nobase_library_include_HEADERS += formatenum.hpp
 nobase_library_include_HEADERS += iff.hpp
 nobase_library_include_HEADERS += iostream_helpers.hpp
 nobase_library_include_HEADERS += lzw.hpp

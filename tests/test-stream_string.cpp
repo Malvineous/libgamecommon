@@ -31,17 +31,14 @@ BOOST_AUTO_TEST_CASE(write)
 {
 	BOOST_TEST_MESSAGE("Write string");
 
-	stream::output_string_sptr out;
+	stream::output_string out;
 
-	out.reset(new stream::output_string());
-	out->write("abcdefghijklmno");
-	out->seekp(4, stream::start);
-	out->write(" is a test");
-	out->flush();
-	std::string result = *(out->str());
-	out.reset();
+	out.write("abcdefghijklmno");
+	out.seekp(4, stream::start);
+	out.write(" is a test");
+	out.flush();
 
-	BOOST_CHECK_MESSAGE(is_equal("abcd is a testo", result),
+	BOOST_CHECK_MESSAGE(is_equal("abcd is a testo", out.data),
 		"Error writing data to new string");
 }
 
@@ -49,14 +46,11 @@ BOOST_AUTO_TEST_CASE(read_existing)
 {
 	BOOST_TEST_MESSAGE("Read existing string");
 
-	stream::input_string_sptr in;
+	stream::input_string in("123456790");
 	std::string val;
-	boost::shared_ptr<std::string> src(new std::string("123456790"));
 
-	in.reset(new stream::input_string());
-	in->open(src);
 	BOOST_REQUIRE_NO_THROW(
-		val = in->read(5);
+		val = in.read(5);
 	);
 
 	BOOST_CHECK_MESSAGE(is_equal("12345", val),
@@ -67,18 +61,14 @@ BOOST_AUTO_TEST_CASE(write_existing)
 {
 	BOOST_TEST_MESSAGE("Write existing string");
 
-	stream::output_string_sptr out;
+	stream::output_string out;
+	out.data = "1234567890";
 
-	boost::shared_ptr<std::string> src(new std::string("1234567890"));
+	out.seekp(2, stream::start);
+	out.write("abc");
+	out.flush();
 
-	out.reset(new stream::output_string());
-	out->open(src);
-	out->seekp(2, stream::start);
-	out->write("abc");
-	out->flush();
-	out.reset();
-
-	BOOST_CHECK_MESSAGE(is_equal("12abc67890", *src),
+	BOOST_CHECK_MESSAGE(is_equal("12abc67890", out.data),
 		"Error writing data to existing string");
 }
 
@@ -86,82 +76,88 @@ BOOST_AUTO_TEST_CASE(readwrite)
 {
 	BOOST_TEST_MESSAGE("Read+write new string");
 
-	stream::string_sptr f;
+	stream::string f;
 	std::string val;
 
-	f.reset(new stream::string());
-	f->write("abcdefghij");
-	f->seekp(4, stream::start);
-	f->write("12345");
-	f->seekp(2, stream::start);
+	f.write("abcdefghij");
+	f.seekp(4, stream::start);
+	f.write("12345");
+	f.seekp(2, stream::start);
 	BOOST_REQUIRE_NO_THROW(
-		val = f->read(5);
+		val = f.read(5);
 	);
 	BOOST_CHECK_MESSAGE(is_equal("cd123", val),
 		"Error reading back data just written to string");
 
-	f->flush();
+	f.flush();
 
-	BOOST_CHECK_MESSAGE(is_equal("abcd12345j", *(f->str())),
+	BOOST_CHECK_MESSAGE(is_equal("abcd12345j", f.data),
 		"Error getting underlying string data just written");
-
-	f.reset();
 }
 
 BOOST_AUTO_TEST_CASE(readwrite_existing)
 {
 	BOOST_TEST_MESSAGE("Read+write existing string");
 
-	stream::string_sptr f;
+	stream::string f("1234567890");
 	std::string val;
-	boost::shared_ptr<std::string> src(new std::string("1234567890"));
 
-	f.reset(new stream::string());
-
-	// This next call must go to output_string::open() and not
-	// input_string::open().
-	f->open(src);
-
-	// This should be an error as it will try to call input_string::open()
-	//const std::string test = src;
-	//f->open(test);
-
-	f->seekp(4, stream::start);
-	f->write("12345");
-	f->seekp(2, stream::start);
+	f.seekp(4, stream::start);
+	f.write("12345");
+	f.seekp(2, stream::start);
 	BOOST_REQUIRE_NO_THROW(
-		val = f->read(5);
+		val = f.read(5);
 	);
 	BOOST_CHECK_MESSAGE(is_equal("34123", val),
 		"Error reading back data just written to existing string");
 
-	f->flush();
+	f.flush();
 
-	BOOST_CHECK_MESSAGE(is_equal("1234123450", *(f->str())),
+	BOOST_CHECK_MESSAGE(is_equal("1234123450", f.data),
 		"Error getting underlying string data just written to existing string");
+}
 
-	f.reset();
+BOOST_AUTO_TEST_CASE(readwrite_dynamic)
+{
+	BOOST_TEST_MESSAGE("Read+write dynamic string");
+
+	auto f = std::make_shared<stream::string>();
+	std::string val;
+
+	*f << "hello";
+	f->flush();
+	f->seekg(0, stream::start);
+	BOOST_REQUIRE_NO_THROW(
+		val = f->read(5);
+	);
+	BOOST_CHECK_MESSAGE(is_equal("hello", val),
+		"Error reading back data just written to dynamic string");
+
+	BOOST_CHECK_MESSAGE(is_equal("hello", f->data),
+		"Error getting underlying string data just written to dynamic instance");
 }
 
 BOOST_AUTO_TEST_CASE(expand)
 {
 	BOOST_TEST_MESSAGE("Expand string");
 
-	stream::string_sptr f;
+	stream::string f;
 
-	f.reset(new stream::string());
-	f->write("1234567890");
-	BOOST_REQUIRE_EQUAL(f->size(), 10);
+	f.write("1234567890");
+	f.flush();
+	BOOST_REQUIRE_EQUAL(f.size(), 10);
+	BOOST_REQUIRE_EQUAL(f.data.length(), 10);
 
-	f->write("abcde");
-	BOOST_REQUIRE_EQUAL(f->size(), 15);
+	f.write("abcde");
+	f.flush();
+	BOOST_REQUIRE_EQUAL(f.size(), 15);
+	BOOST_REQUIRE_EQUAL(f.data.length(), 15);
 
-	f->truncate(8);
-	f->write("zyx");
-	BOOST_REQUIRE_EQUAL(f->size(), 11);
-
-	f->flush();
-	f.reset();
+	f.truncate(8);
+	f.write("zyx");
+	f.flush();
+	BOOST_REQUIRE_EQUAL(f.size(), 11);
+	BOOST_REQUIRE_EQUAL(f.data.length(), 11);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

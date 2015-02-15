@@ -21,12 +21,24 @@
 #ifndef _CAMOTO_UTIL_HPP_
 #define _CAMOTO_UTIL_HPP_
 
-#include <boost/shared_ptr.hpp>
 #include <iostream>
 #include <sstream>
 
 #define TOSTRING_X(x)  #x
 #define TOSTRING(x)    TOSTRING_X(x)
+
+#if (__cplusplus < 201300L)
+#include <memory>
+namespace std {
+
+template<typename T, typename... Args>
+std::unique_ptr<T> make_unique(Args&&... args)
+{
+	return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
+
+}; // namespace std
+#endif
 
 /// Main namespace
 namespace camoto {
@@ -40,26 +52,9 @@ namespace camoto {
  * @code
  * std::string str = createString("The value is " << iValue);
  * @endcode
- *
- * @see createString
- */
-inline boost::shared_ptr<std::ostringstream> _createStream(void)
-{
-	return boost::shared_ptr<std::ostringstream>(new std::ostringstream);
-}
-
-/// Wrapper around _createStream()
-/**
- * @code
- * createString std::string str = createString("The value is " << iValue);
- * @endcode
  */
 #define createString(a) \
-	(static_cast<const std::ostringstream&>(*camoto::_createStream().get() << a).str())
-// The first variable after the ostringstream constructor always gets printed
-// as a number, so we need to add some null-output value instead - ios::dec
-// does the job nicely, and allows 'a' to start off with something that isn't a
-// number (e.g. a char.)
+	(static_cast<const std::ostringstream&>(std::ostringstream() << a).str())
 
 /**
 

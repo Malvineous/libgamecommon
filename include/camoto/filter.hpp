@@ -24,7 +24,6 @@
 #include <exception>
 #include <string>
 #include <stdint.h>
-#include <boost/shared_ptr.hpp>
 #include <boost/function.hpp>
 
 #include <camoto/stream.hpp>
@@ -122,9 +121,6 @@ class DLL_EXPORT filter
 			stream::len *lenIn) = 0;
 };
 
-/// Shared pointer to a filter.
-typedef boost::shared_ptr<filter> filter_sptr;
-
 } // namespace camoto
 
-#endif // _CAMOTO_STREAM_HPP_
+#endif // _CAMOTO_FILTER_HPP_

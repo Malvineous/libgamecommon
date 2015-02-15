@@ -30,6 +30,8 @@
 #include <camoto/util.hpp>
 #include "tests.hpp"
 
+using namespace camoto;
+
 default_sample::default_sample()
 	: outputWidth(32)
 {

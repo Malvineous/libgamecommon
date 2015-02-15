@@ -22,8 +22,8 @@
 #define _CAMOTO_STREAM_HPP_
 
 #include <stdint.h>
-#include <boost/shared_ptr.hpp>
 #include <boost/function.hpp>
+
 #include <camoto/error.hpp>
 
 namespace camoto {
@@ -46,43 +46,6 @@ typedef unsigned_int_type len;
 
 /// Positive or negative amount from some other point
 typedef signed_int_type delta;
-
-/// Truncate function callback (to truncate a stream::output)
-/**
- * This function is called with a single integer parameter when a stream
- * needs to be shrunk or enlarged to the given size.
- *
- * Since no other data can be passed with this function call, usually
- * boost::bind is used to create a "wrapping" around some other function with
- * more parameters.
- *
- * The function signature is:
- * @code
- * void fnTruncate(stream::pos new_length);
- * @endcode
- *
- * This example uses boost::bind to package up a call to the Linux
- * truncate() function (which requires both a filename and size) such that
- * the filename is supplied in advance and not required when the \e fn_truncate
- * call is made.
- *
- * @code
- * fn_truncate fnTruncate = boost::bind<void>(truncate, "graphics.dat", _1);
- * // later...
- * fnTruncate(123);  // calls truncate("graphics.dat", 123)
- * @endcode
- *
- * Normally this callback function only needs to be used when specialised
- * streams are in use.  For example when creating a writable substream around
- * another stream, you will need to supply a callback to handle the substream
- * having enough data written into it that it needs to be enlarged.  In this
- * case presumably you will move the data in the parent stream to make room
- * for the now larger substream.
- *
- * The callback should throw stream::write_error if the operation did not
- * succeed.
- */
-typedef boost::function<void(stream::pos)> fn_truncate;
 
 /// Base exception for stream functions.
 class DLL_EXPORT error: public camoto::error
@@ -307,16 +270,13 @@ class DLL_EXPORT input {
 		virtual stream::pos size() const = 0;
 };
 
-/// Shared pointer to an input stream.
-typedef boost::shared_ptr<input> input_sptr;
-
 /// Base stream interface for writing data.
 /**
  * @post A newly created stream's seek pointer is always at the start (offset
  *   0).
  */
-class DLL_EXPORT output {
-
+class DLL_EXPORT output
+{
 	public:
 		/// Write as much as possible to the stream.
 		/**
@@ -459,15 +419,9 @@ class DLL_EXPORT output {
 		virtual void flush() = 0;
 };
 
-/// Shared pointer to an output stream.
-typedef boost::shared_ptr<output> output_sptr;
-
 /// Base stream interface for reading and writing data.
 class DLL_EXPORT inout: virtual public input, virtual public output {
 };
-
-/// Shared pointer to an inout stream.
-typedef boost::shared_ptr<inout> inout_sptr;
 
 /// Output stream that automatically expands as needed.
 /**
@@ -485,15 +439,9 @@ typedef boost::shared_ptr<inout> inout_sptr;
 class DLL_EXPORT expanding_output: virtual public output {
 };
 
-/// Shared pointer to an expanding_output stream.
-typedef boost::shared_ptr<expanding_output> expanding_output_sptr;
-
 /// Base stream interface for reading and writing data.
 class DLL_EXPORT expanding_inout: virtual public inout, virtual public expanding_output {
 };
-
-/// Shared pointer to an inout stream.
-typedef boost::shared_ptr<expanding_inout> expanding_inout_sptr;
 
 /// Copy one stream into another.
 /**
@@ -516,7 +464,7 @@ typedef boost::shared_ptr<expanding_inout> expanding_inout_sptr;
  *   There was an error decoding the data required to perform this
  *   operation.
  */
-void DLL_EXPORT copy(output_sptr dest, input_sptr src);
+void DLL_EXPORT copy(output& dest, input& src);
 
 /// Copy possibly overlapping data from one position in a stream to another.
 /**
@@ -549,18 +497,17 @@ void DLL_EXPORT copy(output_sptr dest, input_sptr src);
  *   this function call are now at location \e to.  They may no longer exist at
  *   location \e from, if the regions overlapped.
  */
-void DLL_EXPORT move(inout_sptr data, stream::pos from, stream::pos to,
-	stream::len len);
+void DLL_EXPORT move(inout& data, pos from, pos to, len len);
 
 /// iostream-style output function for char strings
-inline stream::output_sptr operator << (stream::output_sptr s, const char *d) {
-	s->write((const uint8_t *)d, strlen(d));
+inline output& operator << (output& s, const char *d) {
+	s.write((const uint8_t *)d, strlen(d));
 	return s;
 }
 
 /// iostream-style output function for strings
-inline stream::output_sptr operator << (stream::output_sptr s, const std::string& d) {
-	s->write(d);
+inline output& operator << (output& s, const std::string& d) {
+	s.write(d);
 	return s;
 }
 

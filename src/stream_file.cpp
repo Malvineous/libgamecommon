@@ -58,20 +58,20 @@ inline std::string strerror_str(int errno2)
 namespace camoto {
 namespace stream {
 
-input_sptr open_stdin()
+std::unique_ptr<input> open_stdin()
 {
-	input_file_sptr f(new input_file());
+	std::unique_ptr<input_file> f(new input_file());
 	f->handle = stdin;
 	f->close = false;
-	return f;
+	return std::move(f);
 }
 
-output_sptr open_stdout()
+std::unique_ptr<output> open_stdout()
 {
-	output_file_sptr f(new output_file());
+	std::unique_ptr<output_file> f(new output_file());
 	f->handle = stdout;
 	f->close = false;
-	return f;
+	return std::move(f);
 }
 
 file_core::file_core()

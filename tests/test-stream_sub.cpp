@@ -18,10 +18,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <memory>
 #include <errno.h>
 #include <boost/test/unit_test.hpp>
 #include <boost/bind.hpp>
-#include <boost/weak_ptr.hpp>
 #include <camoto/stream_sub.hpp>
 #include <camoto/stream_string.hpp>
 #include "tests.hpp"
@@ -36,42 +36,43 @@ using namespace camoto;
  * the truncate function) causing the shared_ptr to never get deleted and leak
  * memory.
  */
-void ss_resize(boost::weak_ptr<stream::output> w_base,
-	boost::weak_ptr<stream::output_sub> w_sub, stream::len len)
+void ss_resize(std::weak_ptr<stream::output> w_base,
+	stream::output_sub *sub, stream::len len)
 {
-	stream::output_sptr base = w_base.lock();
+	std::shared_ptr<stream::output> base = w_base.lock();
 	if (!base) return;
-	stream::output_sub_sptr sub = w_sub.lock();
-	if (!sub) return;
-	base->truncate(sub->get_offset() + len);
+	base->truncate(sub->start() + len);
 	sub->resize(len);
+	return;
 }
 
 struct stream_sub_sample: public default_sample {
 
-	stream::string_sptr base;
-	stream::sub_sptr sub;
+	std::shared_ptr<stream::string> base;
+	std::shared_ptr<stream::sub> sub;
 
 	stream_sub_sample()
 		:	base(new stream::string()),
-			sub(new stream::sub())
+			sub()
 	{
 		this->base->write("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 
 		// Make sure the data went in correctly to begin the test
 		//BOOST_CHECK_MESSAGE(is_equal("ABCDEFGHIJKLMNOPQRSTUVWXYZ"),
 		//	"Error creating fresh string for testing");
-		BOOST_REQUIRE(this->base->str()->compare("ABCDEFGHIJKLMNOPQRSTUVWXYZ") == 0);
+		BOOST_REQUIRE(this->base->data.compare("ABCDEFGHIJKLMNOPQRSTUVWXYZ") == 0);
 	}
 
 	boost::test_tools::predicate_result is_equal(const char *cExpected)
 	{
+		assert(this->sub);
+
 		// See if the stringstream now matches what we expected
 		std::string strExpected = cExpected;
-		stream::string_sptr got(new stream::string());
 		this->sub->seekg(0, stream::start);
-		stream::copy(got, this->sub);
-		return this->default_sample::is_equal(strExpected, *(got->str()));
+		stream::string got;
+		stream::copy(got, *this->sub);
+		return this->default_sample::is_equal(strExpected, got.data);
 	}
 
 };
@@ -82,7 +83,12 @@ BOOST_AUTO_TEST_CASE(read)
 {
 	BOOST_TEST_MESSAGE("Create substream with size and offset");
 
-	this->sub->open(this->base, 5, 6, NULL);
+	this->sub = std::make_shared<stream::sub>(
+		std::dynamic_pointer_cast<stream::inout>(this->base),
+		5, 6, stream::fn_truncate_sub());
+
+	BOOST_CHECK_MESSAGE(this->sub->start(), 5);
+	BOOST_CHECK_MESSAGE(this->sub->size(), 6);
 
 	BOOST_CHECK_MESSAGE(is_equal("FGHIJK"),
 		"Substream creation with size and offset failed");
@@ -92,9 +98,11 @@ BOOST_AUTO_TEST_CASE(read_write)
 {
 	BOOST_TEST_MESSAGE("Create substream and read what was written");
 
-	this->sub->open(this->base, 2, 10, boost::bind(ss_resize,
-		boost::weak_ptr<stream::output>(this->base),
-		boost::weak_ptr<stream::output_sub>(this->sub), _1));
+	this->sub = std::make_shared<stream::sub>(
+		std::dynamic_pointer_cast<stream::inout>(this->base),
+		2, 10, boost::bind(ss_resize,
+		std::weak_ptr<stream::output>(this->base),
+		_1, _2));
 	this->sub->seekp(4, stream::cur); // initial offset must always be 0
 	this->sub->write("123");
 	this->sub->seekg(2, stream::start);
@@ -109,9 +117,11 @@ BOOST_AUTO_TEST_CASE(change_offset)
 {
 	BOOST_TEST_MESSAGE("Move substream's offset");
 
-	this->sub->open(this->base, 2, 4, boost::bind(ss_resize,
-		boost::weak_ptr<stream::output>(this->base),
-		boost::weak_ptr<stream::output_sub>(this->sub), _1));
+	this->sub = std::make_shared<stream::sub>(
+		std::dynamic_pointer_cast<stream::inout>(this->base),
+		2, 4, boost::bind(ss_resize,
+		std::weak_ptr<stream::output>(this->base),
+		_1, _2));
 
 	this->sub->relocate(8);
 	this->sub->resize(16); // can't read past end of stream!
@@ -124,9 +134,11 @@ BOOST_AUTO_TEST_CASE(relocate_to_start)
 {
 	BOOST_TEST_MESSAGE("Move substream's offset to start of parent");
 
-	this->sub->open(this->base, 2, 4, boost::bind(ss_resize,
-		boost::weak_ptr<stream::output>(this->base),
-		boost::weak_ptr<stream::output_sub>(this->sub), _1));
+	this->sub = std::make_shared<stream::sub>(
+		std::dynamic_pointer_cast<stream::inout>(this->base),
+		2, 4, boost::bind(ss_resize,
+		std::weak_ptr<stream::output>(this->base),
+		_1, _2));
 
 	BOOST_CHECK_MESSAGE(is_equal("CDEF"),
 		"Open substream failed");
@@ -140,9 +152,11 @@ BOOST_AUTO_TEST_CASE(relocate_to_start)
 BOOST_AUTO_TEST_CASE(write_then_move)
 {
 	BOOST_TEST_MESSAGE("Move substream's offset after writing");
-	this->sub->open(this->base, 0, 16, boost::bind(ss_resize,
-		boost::weak_ptr<stream::output>(this->base),
-		boost::weak_ptr<stream::output_sub>(this->sub), _1));
+	this->sub = std::make_shared<stream::sub>(
+		std::dynamic_pointer_cast<stream::inout>(this->base),
+		0, 16, boost::bind(ss_resize,
+		std::weak_ptr<stream::output>(this->base),
+		_1, _2));
 
 	this->sub->seekp(10, stream::start);
 	this->sub->write("12345");
@@ -166,16 +180,18 @@ BOOST_AUTO_TEST_CASE(write_then_move)
 		"Move substream's offset after write failed");
 }
 
-void noResize(stream::len len)
+void noResize(stream::output_sub *sub, stream::len len)
 {
 	throw stream::write_error("Resize refused for testing purposes");
 }
 
 BOOST_AUTO_TEST_CASE(write_past_eof_fixed)
 {
-	BOOST_TEST_MESSAGE("Write past substream's EOF");
+	BOOST_TEST_MESSAGE("Write past substream's fixed EOF");
 
-	this->sub->open(this->base, 0, 26, noResize);
+	this->sub = std::make_shared<stream::sub>(
+		std::dynamic_pointer_cast<stream::inout>(this->base),
+		0, 26, noResize);
 	this->sub->seekp(20, stream::start);
 	stream::len w = sub->try_write((const uint8_t *)"1234567890", 10);
 
@@ -189,28 +205,29 @@ BOOST_AUTO_TEST_CASE(write_past_eof_fixed)
 		"Write past fixed-size substream's EOF");
 }
 
-void doResize(boost::weak_ptr<stream::output_sub> w_sub, stream::len len)
+void doResize(stream::output_sub& sub, stream::len len)
 {
-	stream::output_sub_sptr sub = w_sub.lock();
-	if (!sub) return;
 	// Since we're writing to a string stream we don't have to bother resizing the
 	// underlying stream - just notify the substream the resize has been done.  As
 	// long as we're not seeking into the new space in the test, the string stream
 	// will enlarge automatically.
-	sub->resize(len);
+	sub.resize(len);
 	return;
 }
 
 BOOST_AUTO_TEST_CASE(write_past_eof_expand)
 {
-	BOOST_TEST_MESSAGE("Write past substream's EOF");
+	BOOST_TEST_MESSAGE("Write past substream's expandable EOF");
 
-	stream::fn_truncate yesResize = boost::bind(doResize,
-		boost::weak_ptr<stream::output_sub>(this->sub), _1);
-
-	this->sub->open(this->base, 0, 26, yesResize);
+	this->sub = std::make_shared<stream::sub>(
+		std::dynamic_pointer_cast<stream::inout>(this->base),
+		0, 26, boost::bind(&stream::sub::resize, _1, _2));
 	this->sub->seekp(20, stream::start);
-	stream::len w = sub->try_write((const uint8_t *)"1234567890", 10);
+
+	stream::len w;
+	BOOST_REQUIRE_NO_THROW(
+		w = sub->try_write((const uint8_t *)"1234567890", 10)
+	);
 
 	BOOST_CHECK_MESSAGE(w == 10,
 		"Write past expanding substream's EOF failed (too many/few bytes written)");

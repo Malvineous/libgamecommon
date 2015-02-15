@@ -21,6 +21,7 @@
 #ifndef _CAMOTO_STREAM_FILE_HPP_
 #define _CAMOTO_STREAM_FILE_HPP_
 
+#include <memory>
 #include <stdio.h>
 #include <camoto/stream.hpp>
 
@@ -28,10 +29,10 @@ namespace camoto {
 namespace stream {
 
 /// Get an input stream reading from standard input.
-input_sptr DLL_EXPORT open_stdin();
+std::unique_ptr<stream::input> DLL_EXPORT open_stdin();
 
 /// Get an output stream writing to standard output.
-output_sptr DLL_EXPORT open_stdout();
+std::unique_ptr<stream::output> DLL_EXPORT open_stdout();
 
 /// Exception thrown when a file could not be opened or created.
 class DLL_EXPORT open_error: public error
@@ -97,11 +98,8 @@ class DLL_EXPORT input_file: virtual public input,
 		/// @copydoc open(const char *)
 		void open(const std::string& filename);
 
-		friend input_sptr open_stdin();
+		friend std::unique_ptr<stream::input> open_stdin();
 };
-
-/// Shared pointer to a readable file.
-typedef boost::shared_ptr<input_file> input_file_sptr;
 
 /// Write-only stream to access a local file.
 class DLL_EXPORT output_file: virtual public output,
@@ -150,7 +148,7 @@ class DLL_EXPORT output_file: virtual public output,
 		/// Delete the file upon close.
 		void remove();
 
-		friend output_sptr open_stdout();
+		friend std::unique_ptr<stream::output> open_stdout();
 
 	protected:
 		bool do_remove;        ///< Delete file on close?
@@ -159,9 +157,6 @@ class DLL_EXPORT output_file: virtual public output,
 		void open();
 		void create();
 };
-
-/// Shared pointer to a writable file.
-typedef boost::shared_ptr<output_file> output_file_sptr;
 
 /// Read/write stream accessing a local file.
 class DLL_EXPORT file: virtual public inout,
@@ -199,9 +194,6 @@ class DLL_EXPORT file: virtual public inout,
 
 		void open_readonly();
 };
-
-/// Shared pointer to a readable and writable file.
-typedef boost::shared_ptr<file> file_sptr;
 
 } // namespace stream
 } // namespace camoto

@@ -113,15 +113,15 @@ void output::truncate_here()
 	return;
 }
 
-void copy(output_sptr dest, input_sptr src)
+void copy(output& dest, input& src)
 {
 	uint8_t buffer[BUFFER_SIZE];
 	stream::len total_written = 0;
 	stream::len r;
 	do {
-		r = src->try_read(buffer, sizeof(buffer));
+		r = src.try_read(buffer, sizeof(buffer));
 		if (r == 0) break;
-		stream::len w = dest->try_write(buffer, r);
+		stream::len w = dest.try_write(buffer, r);
 		total_written += w;
 		if (w < r) {
 			// Did not write the full buffer
@@ -131,8 +131,7 @@ void copy(output_sptr dest, input_sptr src)
 	return;
 }
 
-void move(inout_sptr data, stream::pos from, stream::pos to,
-	stream::len len)
+void move(inout& data, pos from, pos to, len len)
 {
 	if (from == to) return; // job done, that was easy
 
@@ -143,7 +142,7 @@ void move(inout_sptr data, stream::pos from, stream::pos to,
 	stream::pos fromEnd = from + len;
 	stream::pos toEnd = to + len;
 
-	stream::pos size = data->size();
+	stream::pos size = data.size();
 
 	// Make sure the caller isn't trying to read or write past the end of the
 	// stream (as it needs to be resized first if this is to happen.)
@@ -168,15 +167,15 @@ void move(inout_sptr data, stream::pos from, stream::pos to,
 			// Despite having separate read and write pointers, moving one affects
 			// the other so we have to keep seeking all the time.
 			try {
-				data->seekg(from, stream::start);
-				r = data->try_read(buffer, szNext);
+				data.seekg(from, stream::start);
+				r = data.try_read(buffer, szNext);
 			} catch (seek_error& e) {
 				throw read_error(e.get_message());
 			}
 
 			try {
-				data->seekp(to, stream::start);
-				w = data->try_write(buffer, r);
+				data.seekp(to, stream::start);
+				w = data.try_write(buffer, r);
 			} catch (seek_error& e) {
 				throw read_error(e.get_message());
 			}
@@ -224,15 +223,15 @@ void move(inout_sptr data, stream::pos from, stream::pos to,
 			}
 
 			try {
-				data->seekg(fromEnd, stream::start);
-				r = data->try_read(buffer, szNext);
+				data.seekg(fromEnd, stream::start);
+				r = data.try_read(buffer, szNext);
 			} catch (seek_error& e) {
 				throw read_error(e.get_message());
 			}
 
 			try {
-				data->seekp(toEnd, stream::start);
-				w = data->try_write(buffer, r);
+				data.seekp(toEnd, stream::start);
+				w = data.try_write(buffer, r);
 			} catch (seek_error& e) {
 				throw write_error(e.get_message());
 			}

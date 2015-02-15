@@ -29,8 +29,9 @@
 
 namespace camoto {
 
-bitstream::bitstream(stream::inout_sptr parent, bitstream::endian endianType)
-	:	parent(parent),
+bitstream::bitstream(std::shared_ptr<stream::inout> parent,
+	bitstream::endian endianType)
+	:	parent(std::move(parent)),
 		offset(0),
 		curBitPos(8), // 8 means update bufByte on next operation
 		bufByte(0),

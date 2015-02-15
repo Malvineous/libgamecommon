@@ -35,14 +35,15 @@ BOOST_AUTO_TEST_CASE(stream_filtered_read)
 {
 	BOOST_TEST_MESSAGE("Read from stream_filtered");
 
-	this->in << "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	*this->in << "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-	filter_sptr algo(new filter_dummy());
-	stream::filtered_sptr f(new stream::filtered());
-	f->open(this->in, algo, algo, NULL);
+	auto algo = std::make_shared<filter_dummy>();
+	auto f = std::make_shared<stream::filtered>(
+		this->in, algo, algo, stream::fn_truncate_filter()
+	);
 
 	f->seekg(10, stream::start);
-	stream::copy(this->out, f);
+	stream::copy(this->out, *f);
 	BOOST_REQUIRE_EQUAL(f->tellg(), 26);
 
 	BOOST_CHECK_MESSAGE(is_equal("KLMNOPQRSTUVWXYZ"),
@@ -53,15 +54,20 @@ BOOST_AUTO_TEST_CASE(stream_filtered_write)
 {
 	BOOST_TEST_MESSAGE("Write to stream_filtered");
 
-	this->out << "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	*this->in << "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-	filter_sptr algo(new filter_dummy());
-	stream::filtered_sptr f(new stream::filtered());
-	f->open(this->out, algo, algo, NULL);
+	auto algo = std::make_shared<filter_dummy>();
+	auto f = std::make_shared<stream::filtered>(
+		this->in, algo, algo, stream::fn_truncate_filter()
+	);
 
 	f->seekp(10, stream::start);
 	f->write("1234567890", 10);
 	f->flush();
+
+	this->in->seekg(0, stream::start);
+	stream::copy(this->out, *this->in);
+	BOOST_REQUIRE_EQUAL(this->in->tellg(), 26);
 
 	BOOST_CHECK_MESSAGE(is_equal("ABCDEFGHIJ1234567890UVWXYZ"),
 		"Write to stream_filtered failed");
@@ -71,11 +77,12 @@ BOOST_AUTO_TEST_CASE(stream_filtered_postflush_write)
 {
 	BOOST_TEST_MESSAGE("Write, flush, write to stream_filtered");
 
-	this->out << "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	*this->in << "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-	filter_sptr algo(new filter_dummy());
-	stream::filtered_sptr f(new stream::filtered());
-	f->open(this->out, algo, algo, NULL);
+	auto algo = std::make_shared<filter_dummy>();
+	auto f = std::make_shared<stream::filtered>(
+		this->in, algo, algo, stream::fn_truncate_filter()
+	);
 
 	f->seekp(10, stream::start);
 	f->write("1234567890", 10);
@@ -83,6 +90,10 @@ BOOST_AUTO_TEST_CASE(stream_filtered_postflush_write)
 	f->seekp(5, stream::start);
 	f->write("!@#$%^&*()", 10);
 	f->flush();
+
+	this->in->seekg(0, stream::start);
+	stream::copy(this->out, *this->in);
+	BOOST_REQUIRE_EQUAL(this->in->tellg(), 26);
 
 	BOOST_CHECK_MESSAGE(is_equal("ABCDE!@#$%^&*()67890UVWXYZ"),
 		"Write, flush, write to stream_filtered failed");
@@ -92,15 +103,20 @@ BOOST_AUTO_TEST_CASE(stream_filtered_read_write)
 {
 	BOOST_TEST_MESSAGE("Write to stream_filtered");
 
-	this->out << "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	*this->in << "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-	filter_sptr algo(new filter_dummy());
-	stream::filtered_sptr f(new stream::filtered());
-	f->open(this->out, algo, algo, NULL);
+	auto algo = std::make_shared<filter_dummy>();
+	auto f = std::make_shared<stream::filtered>(
+		this->in, algo, algo, stream::fn_truncate_filter()
+	);
 
 	f->seekp(10, stream::start);
 	f->write("1234567890", 10);
 	f->flush();
+
+	this->in->seekg(0, stream::start);
+	stream::copy(this->out, *this->in);
+	BOOST_REQUIRE_EQUAL(this->in->tellg(), 26);
 
 	BOOST_CHECK_MESSAGE(is_equal("ABCDEFGHIJ1234567890UVWXYZ"),
 		"Write to stream_filtered failed");
@@ -115,7 +131,7 @@ BOOST_AUTO_TEST_CASE(stream_filtered_read_write)
 		"Read from stream_filtered failed");
 }
 
-void setVar(stream::len *var, stream::len val)
+void setVar(stream::len *var, stream::output_filtered* output, stream::len val)
 {
 	*var = val;
 	return;
@@ -125,17 +141,18 @@ BOOST_AUTO_TEST_CASE(double_stream_filtered_write)
 {
 	BOOST_TEST_MESSAGE("Write to double stream_filtered");
 
-	this->out << "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-	this->out->seekg(0, stream::start);
+	*this->in << "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	this->in->seekg(0, stream::start);
 
 	stream::len lenF = 0, lenH = 0;
 
-	stream::fn_truncate fnF = boost::bind<void>(setVar, &lenF, _1);
-	stream::fn_truncate fnH = boost::bind<void>(setVar, &lenH, _1);
+	stream::fn_truncate_filter fnF = boost::bind<void>(setVar, &lenF, _1, _2);
+	stream::fn_truncate_filter fnH = boost::bind<void>(setVar, &lenH, _1, _2);
 
-	filter_sptr algo(new filter_dummy());
-	stream::filtered_sptr f(new stream::filtered());
-	f->open(this->out, algo, algo, fnF);
+	auto algo = std::make_shared<filter_dummy>();
+	auto f = std::make_shared<stream::filtered>(
+		this->in, algo, algo, fnF
+	);
 
 	f->seekp(10, stream::start);
 	f->write("1234567890", 10);
@@ -144,9 +161,10 @@ BOOST_AUTO_TEST_CASE(double_stream_filtered_write)
 	BOOST_REQUIRE_EQUAL(lenF, 25);
 	BOOST_REQUIRE_EQUAL(f->size(), 25);
 
-	filter_sptr algoH(new filter_dummy());
-	stream::filtered_sptr h(new stream::filtered());
-	h->open(f, algoH, algoH, fnH);
+	auto algoH = std::make_shared<filter_dummy>();
+	auto h = std::make_shared<stream::filtered>(
+		f, algoH, algoH, fnH
+	);
 
 	h->seekp(11, stream::start);
 	h->write("!@#$%", 5);
@@ -157,6 +175,10 @@ BOOST_AUTO_TEST_CASE(double_stream_filtered_write)
 
 	// Make sure it's updated the parent stream
 	BOOST_REQUIRE_EQUAL(lenF, 24);
+
+	this->in->seekg(0, stream::start);
+	stream::copy(this->out, *this->in);
+	BOOST_REQUIRE_EQUAL(this->in->tellg(), 24);
 
 	BOOST_CHECK_MESSAGE(is_equal("ABCDEFGHIJ1!@#$%7890UVWX"),
 		"Write to double stream_filtered failed");

@@ -30,10 +30,6 @@
 
 namespace camoto {
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
 #define CLR_NORM   "\033[22;39m"
 #define CLR_GREY   "\033[1;30m"
 #define CLR_RED    "\033[1;31m"
@@ -65,26 +61,26 @@ namespace camoto {
  * @post Stream is unchanged - read pointer is restored to where it
  *   was when this function was called.
  */
-inline void hexdumpStream(stream::input_sptr data, stream::len start = 0,
+inline void hexdumpStream(stream::input& data, stream::len start = 0,
 	stream::len end = 0, unsigned int width = 16, bool hexOnly = false)
 {
-	stream::pos orig = data->tellg();
+	stream::pos orig = data.tellg();
 	stream::len lenData;
-	if (end > 0) lenData = std::min(end, data->size());
-	else lenData = data->size();
+	if (end > 0) lenData = std::min(end, data.size());
+	else lenData = data.size();
 	if (lenData < start) {
 		std::cout << "hexdumpStream(): Cannot dump stream, end pos " << end
 			<< " is before start pos " << start << std::endl;
 		return;
 	}
 	lenData -= start;
-	data->seekg(start, stream::start);
+	data.seekg(start, stream::start);
 	std::string buf;
 	try {
-		buf = data->read(lenData);
+		buf = data.read(lenData);
 	} catch (const stream::read_error&) {
 		std::cout << "hexdumpStream(): read error" << std::endl;
-		data->seekg(orig, stream::start);
+		data.seekg(orig, stream::start);
 		return;
 	}
 	for (stream::len i = 0; i < lenData; i++) {
@@ -109,7 +105,7 @@ inline void hexdumpStream(stream::input_sptr data, stream::len start = 0,
 		}
 	}
 	std::cout << CLR_NORM << std::endl;
-	data->seekg(orig, stream::start);
+	data.seekg(orig, stream::start);
 	return;
 }
 

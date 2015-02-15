@@ -18,6 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <memory>
 #include <iostream>
 #include <errno.h>
 #include <boost/test/unit_test.hpp>
@@ -51,8 +52,8 @@ BOOST_AUTO_TEST_CASE(create)
 {
 	BOOST_TEST_MESSAGE("Create file");
 
-	stream::output_file_sptr out;
-	stream::input_file_sptr in;
+	std::shared_ptr<stream::output_file> out;
+	std::shared_ptr<stream::input_file> in;
 	std::string val;
 
 	out.reset(new stream::output_file());
@@ -110,7 +111,7 @@ BOOST_AUTO_TEST_CASE(readwrite)
 {
 	BOOST_TEST_MESSAGE("Read+write file");
 
-	stream::file_sptr f;
+	std::shared_ptr<stream::file> f;
 	std::string val;
 
 	f.reset(new stream::file());
@@ -133,7 +134,7 @@ BOOST_AUTO_TEST_CASE(expand)
 {
 	BOOST_TEST_MESSAGE("Expand file");
 
-	stream::file_sptr f;
+	std::shared_ptr<stream::file> f;
 
 	f.reset(new stream::file());
 	f->create(TEST_FILE);

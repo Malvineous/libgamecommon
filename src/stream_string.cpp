@@ -26,8 +26,8 @@
 namespace camoto {
 namespace stream {
 
-string_core::string_core()
-	:	data(new std::string()),
+string_core::string_core(std::string data)
+	:	data(data),
 		offset(0)
 {
 }
@@ -35,7 +35,7 @@ string_core::string_core()
 void string_core::seek(stream::delta off, seek_from from)
 {
 	stream::pos baseOffset;
-	std::string::size_type stringSize = this->data->length();
+	std::string::size_type stringSize = this->data.length();
 	switch (from) {
 		case cur:
 			baseOffset = this->offset;
@@ -59,26 +59,25 @@ void string_core::seek(stream::delta off, seek_from from)
 	return;
 }
 
-boost::shared_ptr<std::string> string_core::str()
-{
-	return this->data;
-}
-
 
 input_string::input_string()
+	: string_core(std::string())
+{
+}
+
+input_string::input_string(std::string content)
+	:	string_core(content)
 {
 }
 
 stream::len input_string::try_read(uint8_t *buffer, stream::len len)
 {
-	assert(this->data);
-
 	stream::pos done = this->offset + len;
-	stream::pos size = this->data->length();
+	stream::pos size = this->data.length();
 	stream::len amt;
 	if (done > size) amt = size - this->offset;
 	else amt = len;
-	memcpy(buffer, this->data->data() + this->offset, amt);
+	memcpy(buffer, this->data.data() + this->offset, amt);
 	this->offset += amt;
 	return amt;
 }
@@ -96,38 +95,30 @@ stream::pos input_string::tellg() const
 
 stream::pos input_string::size() const
 {
-	return this->data->length();
-}
-
-void input_string::open(boost::shared_ptr<std::string> src)
-{
-	this->data = src;
-	this->offset = 0;
-	return;
+	return this->data.length();
 }
 
 
 output_string::output_string()
+	: string_core(std::string())
 {
 }
 
 stream::len output_string::try_write(const uint8_t *buffer, stream::len len)
 {
-	assert(this->data);
-
 	stream::pos done = this->offset + len;
-	stream::pos size = this->data->length();
+	stream::pos size = this->data.length();
 	if (done > size) {
-		this->data->resize(done);
+		this->data.resize(done);
 	} else if (size == 0) {
 		// Empty write to an empty string
 		return 0;
 	}
 
 	// Make sure our final assumed memory at least matches the real one.
-	//assert(this->data->data() + done - 1 == &this->data->at(done - 1));
+	//assert(this->data.data() + done - 1 == &this->data.at(done - 1));
 
-	memcpy(&this->data->at(0) + this->offset, buffer, len);
+	memcpy(&this->data.at(0) + this->offset, buffer, len);
 	this->offset += len;
 	return len;
 }
@@ -147,7 +138,7 @@ void output_string::truncate(stream::pos size)
 {
 	this->flush();
 	try {
-		this->data->resize(size);
+		this->data.resize(size);
 		this->seek(size, stream::start);
 	} catch (const seek_error& e) {
 		throw write_error("Unable to seek to EOF after truncate: " + e.get_message());
@@ -160,15 +151,14 @@ void output_string::flush()
 	return;
 }
 
-void output_string::open(boost::shared_ptr<std::string> src)
-{
-	this->data = src;
-	this->offset = 0;
-	return;
-}
-
 
 string::string()
+	: string_core(std::string())
+{
+}
+
+string::string(std::string content)
+	:	string_core(content)
 {
 }
 

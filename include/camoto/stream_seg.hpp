@@ -23,6 +23,7 @@
 #ifndef _CAMOTO_STREAM_SEG_HPP_
 #define _CAMOTO_STREAM_SEG_HPP_
 
+#include <memory>
 #include <vector>
 #include <camoto/stream.hpp>
 
@@ -30,9 +31,6 @@ namespace camoto {
 namespace stream {
 
 class seg;
-
-/// Shared pointer to a readable and writable segstream.
-typedef boost::shared_ptr<seg> seg_sptr;
 
 /// Read/write segmented stream
 /**
@@ -46,6 +44,13 @@ typedef boost::shared_ptr<seg> seg_sptr;
 class DLL_EXPORT seg: virtual public inout
 {
 	public:
+		/// Create a segmented stream backed onto another stream.
+		/**
+		 * @param parent
+		 *   Parent stream supplying the data.
+		 */
+		seg(std::shared_ptr<inout> parent);
+
 		virtual stream::len try_read(uint8_t *buffer, stream::len len);
 		virtual void seekg(stream::delta off, seek_from from);
 		virtual stream::pos tellg() const;
@@ -55,13 +60,6 @@ class DLL_EXPORT seg: virtual public inout
 		virtual stream::pos tellp() const;
 		virtual void truncate(stream::pos size);
 		virtual void flush();
-
-		/// Create a segmented stream backed onto another stream.
-		/**
-		 * @param parent
-		 *   Parent stream supplying the data.
-		 */
-		void open(inout_sptr parent);
 
 		/// Insert a block of data at the pointer.
 		/**
@@ -108,11 +106,13 @@ class DLL_EXPORT seg: virtual public inout
 		void remove(stream::len lenRemove);
 
 	protected:
-		inout_sptr parent;                  ///< Parent stream
+		seg();
+
+		std::shared_ptr<inout> parent;      ///< Parent stream
 		stream::pos off_parent;             ///< Offset into parent stream
 		stream::pos off_endparent;          ///< Offset of vcSecond
 		std::vector<uint8_t> vcSecond;      ///< Data to place after parent stream
-		seg_sptr psegThird;                 ///< Data to place after vcSecond
+		std::unique_ptr<seg> psegThird;     ///< Data to place after vcSecond
 
 		/// Offset into self (starts at 0)
 		/**
@@ -145,7 +145,6 @@ class DLL_EXPORT seg: virtual public inout
 		 * overwritten before it has been moved out of the way.
 		 */
 		void commit(stream::pos poffWriteFirst);
-
 };
 
 } // namespace stream
