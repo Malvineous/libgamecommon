@@ -22,10 +22,10 @@
 #include <errno.h>
 #include <boost/test/unit_test.hpp>
 #include <boost/bind.hpp>
-#include <boost/weak_ptr.hpp>
 #include <camoto/stream_seg.hpp>
 #include <camoto/stream_string.hpp>
 #include <camoto/stream_sub.hpp>
+#include <camoto/util.hpp> // std::make_unique
 #include "tests.hpp"
 
 using namespace camoto;
@@ -35,15 +35,17 @@ using namespace camoto;
 
 struct stream_seg_sample: public default_sample
 {
-	std::shared_ptr<stream::string> base;
+	std::string* baseContent; // Only valid while seg is
 	std::shared_ptr<stream::seg> seg;
 
 	stream_seg_sample()
-		:	base(new stream::string("ABCDEFGHIJKLMNOPQRSTUVWXYZ")),
-			seg(new stream::seg(this->base))
 	{
+		auto base = std::make_unique<stream::string>("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+		this->baseContent = &base->data;
+		this->seg = std::make_shared<stream::seg>(std::move(base));
+
 		// Make sure the data went in correctly to begin the test
-		BOOST_REQUIRE(this->base->data.compare("ABCDEFGHIJKLMNOPQRSTUVWXYZ") == 0);
+		BOOST_REQUIRE(this->baseContent->compare("ABCDEFGHIJKLMNOPQRSTUVWXYZ") == 0);
 
 		BOOST_REQUIRE_EQUAL(this->seg->tellg(), 0);
 		BOOST_REQUIRE_EQUAL(this->seg->size(), 26);
@@ -56,7 +58,7 @@ struct stream_seg_sample: public default_sample
 		if (pos >= 0) BOOST_CHECK_EQUAL(this->seg->tellp(), pos);
 
 		// See if the stringstream now matches what we expected
-		return this->default_sample::is_equal(strExpected, this->base->data);
+		return this->default_sample::is_equal(strExpected, *this->baseContent);
 	}
 };
 
@@ -433,7 +435,7 @@ BOOST_AUTO_TEST_CASE(segstream_insert_past_parent_eof)
 
 	this->seg->seekp(0, stream::start);
 
-	auto sub = std::make_shared<stream::sub>(
+	auto sub = std::make_unique<stream::sub>(
 		this->seg, 15, 10,
 		boost::bind(substreamTruncate,
 			_1, _2,
@@ -441,7 +443,7 @@ BOOST_AUTO_TEST_CASE(segstream_insert_past_parent_eof)
 		)
 	);
 
-	auto child = std::make_shared<stream::seg>(sub);
+	auto child = std::make_shared<stream::seg>(std::move(sub));
 
 	child->seekp(8, stream::start);
 	child->insert(5);
@@ -460,7 +462,7 @@ BOOST_AUTO_TEST_CASE(segstream_insert_past_parent_eof2)
 
 	this->seg->seekp(0, stream::start);
 
-	auto sub = std::make_shared<stream::sub>(
+	auto sub = std::make_unique<stream::sub>(
 		this->seg, 15, 10,
 		boost::bind(substreamTruncate,
 			_1, _2,
@@ -468,7 +470,7 @@ BOOST_AUTO_TEST_CASE(segstream_insert_past_parent_eof2)
 		)
 	);
 
-	auto child = std::make_shared<stream::seg>(sub);
+	auto child = std::make_shared<stream::seg>(std::move(sub));
 
 	child->seekp(0, stream::start); // will seek to @15 out of 25 (15+10)
 	child->insert(5);

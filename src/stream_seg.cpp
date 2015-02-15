@@ -32,16 +32,14 @@ seg::seg()
 {
 }
 
-seg::seg(std::shared_ptr<inout> parent)
+seg::seg(std::unique_ptr<inout> parent)
+	:	parent(std::move(parent)),
+		off_parent(0),
+		off_endparent(this->parent->size()),
+		offset(0)
 {
-	assert(parent);
-
-	this->parent = parent;
-	this->offset = 0;
-	this->off_parent = 0;
-	this->off_endparent = this->parent->size();
+	assert(this->parent);
 	this->parent->seekp(0, stream::start);
-	return;
 }
 
 stream::len seg::try_read(uint8_t *buffer, stream::len len)
