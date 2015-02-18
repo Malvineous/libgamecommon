@@ -41,10 +41,9 @@ namespace camoto {
  * The metadata functions all have no-op defaults, they only need to be
  * overridden for file formats that have metadata.
  */
-class DLL_EXPORT Metadata {
-
+class DLL_EXPORT Metadata
+{
 	public:
-
 		/// Metadata item types.
 		enum MetadataType {
 			Description,     ///< File description, remarks, etc.
@@ -112,7 +111,6 @@ class DLL_EXPORT Metadata {
 		 *         a blank.
 		 */
 		virtual void setMetadata(MetadataType item, const std::string& value);
-
 };
 
 /// Convert a metadata item into text.
