@@ -58,6 +58,8 @@ class DLL_EXPORT filter_error: public stream::error
 class DLL_EXPORT filter
 {
 	public:
+		virtual ~filter() { };
+
 		/// Reset this filter back to its initial state.
 		/**
 		 * Often a filter will need to be called multiple times, such as saving some
