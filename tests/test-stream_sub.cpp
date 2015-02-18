@@ -41,7 +41,7 @@ void ss_resize(std::weak_ptr<stream::output> w_base,
 {
 	std::shared_ptr<stream::output> base = w_base.lock();
 	if (!base) return;
-	base->truncate(sub->start() + len);
+	base->truncate(sub->sub_start() + len);
 	sub->resize(len);
 	return;
 }
@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE(read)
 		std::dynamic_pointer_cast<stream::inout>(this->base),
 		5, 6, stream::fn_truncate_sub());
 
-	BOOST_CHECK_MESSAGE(this->sub->start(), 5);
+	BOOST_CHECK_MESSAGE(this->sub->sub_start(), 5);
 	BOOST_CHECK_MESSAGE(this->sub->size(), 6);
 
 	BOOST_CHECK_MESSAGE(is_equal("FGHIJK"),

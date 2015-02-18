@@ -34,15 +34,6 @@ typedef boost::function<void(output_sub*, len)> fn_truncate_sub;
 /// Substream parts in common with read and write
 class DLL_EXPORT sub_core
 {
-	protected:
-		sub_core(pos start, len len);
-
-		/// Common seek function for reading and writing.
-		/**
-		 * @copydetails input::seekg()
-		 */
-		void seek(stream::delta off, seek_from from);
-
 	public:
 		/// Move the substream's start point within the parent stream.
 		/**
@@ -70,11 +61,29 @@ class DLL_EXPORT sub_core
 		 * @return Current offset, relative to start of parent stream, where first
 		 *   byte in the substream sits.
 		 */
-		stream::pos start();
+		virtual stream::pos sub_start() const;
 
+		/// Get the current size of the window into the parent stream.
+		/**
+		 * @return Current size of substream, in bytes.  The last byte in the
+		 *   parent stream that can be read is at offset start() + size() - 1.
+		 */
+		virtual stream::len sub_size() const;
+
+	protected:
+		sub_core(pos start, len len);
+
+		/// Common seek function for reading and writing.
+		/**
+		 * @copydetails input::seekg()
+		 */
+		void seek(stream::delta off, seek_from from);
+
+		stream::pos offset;       ///< Current pointer position
+
+	private:
 		stream::pos stream_start; ///< Offset into parent stream
 		stream::len stream_len;   ///< Length of substream
-		stream::pos offset;       ///< Current pointer position
 };
 
 /// Read-only stream to access a section within another stream.
@@ -167,7 +176,7 @@ class DLL_EXPORT sub:
 	public:
 		/// Map onto a subsection of another stream.
 		/**
-		 * @copydetails output_sub::open()
+		 * @copydetails output_sub::output_sub()
 		 */
 		sub(std::shared_ptr<inout> parent, pos start, len len,
 			fn_truncate_sub fn_resize);

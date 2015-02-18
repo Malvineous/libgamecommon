@@ -399,7 +399,7 @@ bool substreamTruncate(stream::output_sub *sub, stream::pos len,
 	std::shared_ptr<stream::seg> parent = w_parent.lock();
 	if (!parent) return false;
 
-	stream::pos off = sub->start();
+	stream::pos off = sub->sub_start();
 	stream::pos orig = parent->tellp();
 
 	stream::pos origSub = sub->tellp();

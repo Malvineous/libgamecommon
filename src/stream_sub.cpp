@@ -27,9 +27,13 @@ namespace camoto {
 namespace stream {
 
 sub_core::sub_core(pos start, len len)
-	:	stream_start(start),
-		stream_len(len),
-		offset(0)
+	:	offset(0),
+		stream_start(start),
+		stream_len(len)
+{
+}
+
+sub_core::~sub_core()
 {
 }
 
@@ -41,7 +45,7 @@ void sub_core::seek(stream::delta off, seek_from from)
 			baseOffset = this->offset;
 			break;
 		case end:
-			baseOffset = this->stream_len;
+			baseOffset = this->sub_size();
 			break;
 		default:
 			baseOffset = 0;
@@ -51,9 +55,9 @@ void sub_core::seek(stream::delta off, seek_from from)
 		throw seek_error("Cannot seek back past start of substream");
 	}
 	baseOffset += off;
-	if (baseOffset > this->stream_len) {
+	if (baseOffset > this->sub_size()) {
 		throw seek_error(createString("Cannot seek beyond end of substream (offset "
-			<< baseOffset << " > length " << this->stream_len << ")"));
+			<< baseOffset << " > length " << this->sub_size() << ")"));
 	}
 	this->offset = baseOffset;
 	return;
@@ -81,9 +85,14 @@ void sub_core::resize(stream::len len)
 	return;
 }
 
-stream::pos sub_core::start()
+stream::pos sub_core::sub_start() const
 {
 	return this->stream_start;
+}
+
+stream::len sub_core::sub_size() const
+{
+	return this->stream_len;
 }
 
 
@@ -96,23 +105,23 @@ input_sub::input_sub(std::shared_ptr<input> parent, pos start, len len)
 stream::len input_sub::try_read(uint8_t *buffer, stream::len len)
 {
 	// Make sure we didn't somehow end up past the end of the stream
-	assert(this->offset <= this->stream_len);
+	assert(this->offset <= this->sub_size());
 
-	if (this->offset >= this->stream_len) return 0; // EOF
+	if (this->offset >= this->sub_size()) return 0; // EOF
 
 	// Make sure we can't read past the end of the file
-	if ((this->offset + len) > this->stream_len) {
-		len = this->stream_len - this->offset;
+	if ((this->offset + len) > this->sub_size()) {
+		len = this->sub_size() - this->offset;
 	}
 
-	this->in_parent->seekg(this->stream_start + this->offset, stream::start);
+	this->in_parent->seekg(this->sub_start() + this->offset, stream::start);
 
 	stream::len r = this->in_parent->try_read(buffer, len);
 	assert(r <= len);
 	this->offset += r;
 
 	// Make sure we didn't somehow end up past the end of the stream
-	assert(this->offset <= this->stream_len);
+	assert(this->offset <= this->sub_size());
 
 	return r;
 }
@@ -120,12 +129,12 @@ stream::len input_sub::try_read(uint8_t *buffer, stream::len len)
 void input_sub::seekg(stream::delta off, seek_from from)
 {
 	// Make sure we didn't somehow end up past the end of the stream
-	assert(this->offset <= this->stream_len);
+	assert(this->offset <= this->sub_size());
 
 	this->seek(off, from);
 
 	// Make sure we didn't somehow end up past the end of the stream
-	assert(this->offset <= this->stream_len);
+	assert(this->offset <= this->sub_size());
 	return;
 }
 
@@ -136,7 +145,7 @@ stream::pos input_sub::tellg() const
 
 stream::len input_sub::size() const
 {
-	return this->stream_len;
+	return this->sub_size();
 }
 
 
@@ -151,17 +160,17 @@ output_sub::output_sub(std::shared_ptr<output> parent, pos start, len len,
 stream::len output_sub::try_write(const uint8_t *buffer, stream::len len)
 {
 	// Make sure we didn't somehow end up past the end of the stream
-	assert(this->offset <= this->stream_len);
+	assert(this->offset <= this->sub_size());
 
-	if ((this->offset + len) > this->stream_len) {
+	if ((this->offset + len) > this->sub_size()) {
 		// Stream is too small to accommodate entire write, attempt to enlarge
 		// Don't call truncate() because we don't want the pointer moved
 		try {
 			if (this->fn_resize) {
 				this->fn_resize(this, this->offset + len);
-				if ((this->offset + len) > this->stream_len) {
+				if ((this->offset + len) > this->sub_size()) {
 					// Truncate failed, reduce write to available space
-					len = this->stream_len - this->offset;
+					len = this->sub_size() - this->offset;
 				}
 			} else {
 				std::cerr << "[stream::sub::try_write] No truncate function, cannot "
@@ -169,12 +178,12 @@ stream::len output_sub::try_write(const uint8_t *buffer, stream::len len)
 			}
 		} catch (const write_error&) {
 			// Truncate failed, reduce write to available space
-			len = this->stream_len - this->offset;
+			len = this->sub_size() - this->offset;
 		}
 	}
 
 	try {
-		this->out_parent->seekp(this->stream_start + this->offset, stream::start);
+		this->out_parent->seekp(this->sub_start() + this->offset, stream::start);
 	} catch (const seek_error&) {
 		return 0;
 	}
@@ -182,7 +191,7 @@ stream::len output_sub::try_write(const uint8_t *buffer, stream::len len)
 	this->offset += w;
 
 	// Make sure we didn't somehow end up past the end of the stream
-	assert(this->offset <= this->stream_len);
+	assert(this->offset <= this->sub_size());
 
 	return w;
 }
@@ -190,12 +199,12 @@ stream::len output_sub::try_write(const uint8_t *buffer, stream::len len)
 void output_sub::seekp(stream::delta off, seek_from from)
 {
 	// Make sure we didn't somehow end up past the end of the stream
-	assert(this->offset <= this->stream_len);
+	assert(this->offset <= this->sub_size());
 
 	this->seek(off, from);
 
 	// Make sure we didn't somehow end up past the end of the stream
-	assert(this->offset <= this->stream_len);
+	assert(this->offset <= this->sub_size());
 	return;
 }
 
@@ -206,7 +215,7 @@ stream::pos output_sub::tellp() const
 
 void output_sub::truncate(stream::pos size)
 {
-	if (this->stream_len == size) return; // nothing to do
+	if (this->sub_size() == size) return; // nothing to do
 	if (!this->fn_resize) {
 		throw write_error("Cannot truncate substream, no callback function was "
 			"provided to notify the substream owner.");
