@@ -17,7 +17,7 @@ libgamecommon_la_SOURCES += stream_string.cpp
 libgamecommon_la_SOURCES += stream_sub.cpp
 libgamecommon_la_SOURCES += suppitem.cpp
 
-WARNINGS = -Wall -Wextra -Wno-unused-parameter
+WARNINGS = -Wall -Wextra -Wpedantic -Wno-unused-parameter
 
 AM_CPPFLAGS  = -I $(top_srcdir)/include
 AM_CPPFLAGS += $(WARNINGS)

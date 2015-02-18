@@ -291,12 +291,12 @@ inline BYTEORDER_OSTREAM operator << (BYTEORDER_OSTREAM s, const number_format_w
 		return number_format_const<TYPE, big_endian, I>(r); \
 	}
 
-DEFINE_TYPE(uint16_t, u16);
-DEFINE_TYPE(uint32_t, u32);
-DEFINE_TYPE(uint64_t, u64);
-DEFINE_TYPE(int16_t, s16);
-DEFINE_TYPE(int32_t, s32);
-DEFINE_TYPE(int64_t, s64);
+DEFINE_TYPE(uint16_t, u16)
+DEFINE_TYPE(uint32_t, u32)
+DEFINE_TYPE(uint64_t, u64)
+DEFINE_TYPE(int16_t, s16)
+DEFINE_TYPE(int32_t, s32)
+DEFINE_TYPE(int64_t, s64)
 
 #endif // BYTEORDER_USE_IOSTREAMS
 
