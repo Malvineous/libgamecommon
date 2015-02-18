@@ -29,10 +29,19 @@ namespace stream {
 
 class output_filtered;
 
-/// Truncate function callback (to truncate a stream::output)
+/// Set real-size function callback (to set the prefiltered/native size)
 /**
- * This function is called with an integer parameter when a stream
- * needs to be shrunk or enlarged to the given size.
+ * This function is called with an integer parameter when a stream::filtered
+ * is flushed, to notify the callee of how much data was passed to the filter.
+ * This can be different to the amount of data that was written out to the
+ * underlying stream, such as in the case of a filter which performs
+ * compression.  In this case, the number of bytes that end up in the
+ * destination stream will be the compressed size of the data, and this callback
+ * will be supplied with the number of bytes passed to the filter (effectively
+ * the decompressed size of the data, in this case.)
+ *
+ * This is useful mainly for game archives, which often store both the
+ * compressed and decompressed sizes of the files they contain.
  *
  * Since no other data can be passed with this function call, usually
  * boost::bind is used to create a "wrapping" around some other function with
@@ -40,8 +49,12 @@ class output_filtered;
  *
  * The function signature is:
  * @code
- * void fnTruncate(stream::output_filtered* output, stream::len new_length);
+ * void fnTruncate(stream::output_filtered* filt, stream::len new_length);
  * @endcode
+ *
+ * The filt parameter is the stream::filtered itself.  new_length is the new
+ * "real" size, as opposed to the stored size which is obviously the number of
+ * bytes actually written to the stream.
  *
  * This example uses boost::bind to package up a call to the Linux
  * truncate() function (which requires both a filename and size) such that
@@ -51,7 +64,7 @@ class output_filtered;
  * @code
  * fn_truncate fnTruncate = boost::bind<void>(truncate, "graphics.dat", _2);
  * // later...
- * fnTruncate(123);  // calls truncate("graphics.dat", 123)
+ * fnTruncate(out, 123);  // calls truncate("graphics.dat", 123)
  * @endcode
  *
  * This callback is used in cases where both a file's compressed and
@@ -62,7 +75,8 @@ class output_filtered;
  * The callback should throw stream::write_error if the operation did not
  * succeed.
  */
-typedef boost::function<void(stream::output_filtered*, stream::len)> fn_truncate_filter;
+typedef boost::function<void(stream::output_filtered*, stream::len)>
+	fn_notify_prefiltered_size;
 
 /// Read-only stream applying a filter to another read-only stream.
 class DLL_EXPORT input_filtered: virtual public input_memory
@@ -102,10 +116,18 @@ class DLL_EXPORT input_filtered: virtual public input_memory
 		/// Non-const version of populate() that actually does the work.
 		void realPopulate();
 
+		/// Get the parent stream.
+		std::shared_ptr<input> get_stream();
+
 	protected:
-		std::shared_ptr<input> in_parent;   ///< Parent stream for reading
-		std::shared_ptr<filter> read_filter; ///< Filter to pass data through
-		bool populated; ///< Has the input data been run through the filter yet?
+		/// Parent stream for reading
+		std::shared_ptr<input> in_parent;
+
+		/// Filter to pass data through
+		std::shared_ptr<filter> read_filter;
+
+		/// Has the input data been run through the filter yet?
+		bool populated;
 };
 
 /// Write-only stream applying a filter to another write-only stream.
@@ -133,7 +155,7 @@ class DLL_EXPORT output_filtered: virtual public output_memory
 		 *   the compressed size.
 		 */
 		output_filtered(std::shared_ptr<output> parent,
-			std::shared_ptr<filter> write_filter, fn_truncate_filter resize);
+			std::shared_ptr<filter> write_filter, fn_notify_prefiltered_size resize);
 
 		virtual stream::len try_write(const uint8_t *buffer, stream::len len);
 		virtual void seekp(stream::delta off, seek_from from);
@@ -151,11 +173,21 @@ class DLL_EXPORT output_filtered: virtual public output_memory
 		 */
 		virtual void populate() const;
 
+		/// Get the parent stream.
+		std::shared_ptr<output> get_stream();
+
 	protected:
-		std::shared_ptr<output> out_parent;   ///< Parent stream for writing
-		std::shared_ptr<filter> write_filter; ///< Filter to pass data through
-		fn_truncate_filter fn_resize;         ///< Size-change notification callback
-		bool done_filter;                     ///< true once filter has run once
+		/// Parent stream for writing
+		std::shared_ptr<output> out_parent;
+
+		/// Filter to pass data through
+		std::shared_ptr<filter> write_filter;
+
+		/// Size-change notification callback
+		fn_notify_prefiltered_size fn_set_orig_size;
+
+		/// true once filter has run once
+		bool done_filter;
 };
 
 /// Read/write stream applying a filter to another read/write stream.
@@ -187,20 +219,25 @@ class DLL_EXPORT filtered:
 		 * @param write_filter
 		 *   Filter to process data.
 		 *
-		 * @param resize
-		 *   Notification function called when the stream is resized.  This function
+		 * @param set_orig_size
+		 *   Notification function called when the stream is flushed.  This function
 		 *   doesn't have to do anything (and can be NULL) but it is used in cases
 		 *   where a game archive stores both a file's compressed and decompressed
 		 *   size.  Here the callback will be notified of the decompressed size
-		 *   during the flush() call.
+		 *   during the flush() call (i.e. the number of bytes written in to the
+		 *   filter, as opposed to the number of bytes which came out of it, which
+		 *   will be fewer in the case of a filter that performs compression.)
 		 */
 		filtered(std::shared_ptr<inout> parent,
 			std::shared_ptr<filter> read_filter, std::shared_ptr<filter> write_filter,
-			fn_truncate_filter resize);
+			fn_notify_prefiltered_size set_orig_size);
 
 		virtual void truncate(stream::len size);
 
 		virtual void populate() const;
+
+		/// Get the parent stream.
+		std::shared_ptr<inout> get_stream();
 };
 
 } // namespace stream

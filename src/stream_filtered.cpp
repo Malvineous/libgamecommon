@@ -110,12 +110,17 @@ void input_filtered::realPopulate()
 	return;
 }
 
+std::shared_ptr<input> input_filtered::get_stream()
+{
+	return this->in_parent;
+}
+
 
 output_filtered::output_filtered(std::shared_ptr<output> parent,
-	std::shared_ptr<filter> write_filter, fn_truncate_filter resize)
+	std::shared_ptr<filter> write_filter, fn_notify_prefiltered_size set_orig_size)
 	:	out_parent(parent),
 		write_filter(write_filter),
-		fn_resize(resize),
+		fn_set_orig_size(set_orig_size),
 		done_filter(false)
 {
 	assert(parent);
@@ -200,8 +205,7 @@ void output_filtered::flush()
 	// truncate(), because truncate() sets both stored and real sizes in case
 	// there are no filters active.  So once that is done, we override it and
 	// set the correct real size.
-	if (this->fn_resize) this->fn_resize(this, lenRealSize);
-
+	if (this->fn_set_orig_size) this->fn_set_orig_size(this, lenRealSize);
 	this->out_parent->flush();
 
 	return;
@@ -212,12 +216,17 @@ void output_filtered::populate() const
 	return;
 }
 
+std::shared_ptr<output> output_filtered::get_stream()
+{
+	return this->out_parent;
+}
+
 
 filtered::filtered(std::shared_ptr<inout> parent,
 	std::shared_ptr<filter> read_filter, std::shared_ptr<filter> write_filter,
-	fn_truncate_filter resize)
+	fn_notify_prefiltered_size set_orig_size)
 	:	input_filtered(parent, read_filter),
-		output_filtered(parent, write_filter, resize)
+		output_filtered(parent, write_filter, set_orig_size)
 {
 }
 
@@ -232,6 +241,11 @@ void filtered::populate() const
 {
 	this->input_filtered::populate();
 	return;
+}
+
+std::shared_ptr<inout> filtered::get_stream()
+{
+	return std::dynamic_pointer_cast<inout>(this->out_parent);
 }
 
 } // namespace stream

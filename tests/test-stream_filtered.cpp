@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(stream_filtered_read)
 
 	auto algo = std::make_shared<filter_dummy>();
 	auto f = std::make_shared<stream::filtered>(
-		this->in, algo, algo, stream::fn_truncate_filter()
+		this->in, algo, algo, stream::fn_notify_prefiltered_size()
 	);
 
 	f->seekg(10, stream::start);
@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(stream_filtered_write)
 
 	auto algo = std::make_shared<filter_dummy>();
 	auto f = std::make_shared<stream::filtered>(
-		this->in, algo, algo, stream::fn_truncate_filter()
+		this->in, algo, algo, stream::fn_notify_prefiltered_size()
 	);
 
 	f->seekp(10, stream::start);
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE(stream_filtered_postflush_write)
 
 	auto algo = std::make_shared<filter_dummy>();
 	auto f = std::make_shared<stream::filtered>(
-		this->in, algo, algo, stream::fn_truncate_filter()
+		this->in, algo, algo, stream::fn_notify_prefiltered_size()
 	);
 
 	f->seekp(10, stream::start);
@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE(stream_filtered_read_write)
 
 	auto algo = std::make_shared<filter_dummy>();
 	auto f = std::make_shared<stream::filtered>(
-		this->in, algo, algo, stream::fn_truncate_filter()
+		this->in, algo, algo, stream::fn_notify_prefiltered_size()
 	);
 
 	f->seekp(10, stream::start);
@@ -146,8 +146,8 @@ BOOST_AUTO_TEST_CASE(double_stream_filtered_write)
 
 	stream::len lenF = 0, lenH = 0;
 
-	stream::fn_truncate_filter fnF = boost::bind<void>(setVar, &lenF, _1, _2);
-	stream::fn_truncate_filter fnH = boost::bind<void>(setVar, &lenH, _1, _2);
+	stream::fn_notify_prefiltered_size fnF = boost::bind<void>(setVar, &lenF, _1, _2);
+	stream::fn_notify_prefiltered_size fnH = boost::bind<void>(setVar, &lenH, _1, _2);
 
 	auto algo = std::make_shared<filter_dummy>();
 	auto f = std::make_shared<stream::filtered>(
