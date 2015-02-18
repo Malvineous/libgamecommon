@@ -132,7 +132,7 @@ stream::pos input_file::tellg() const
 	return this->tell();
 }
 
-stream::pos input_file::size() const
+stream::len input_file::size() const
 {
 	long start = ftell(this->handle);
 

@@ -134,7 +134,7 @@ stream::pos input_sub::tellg() const
 	return this->offset;
 }
 
-stream::pos input_sub::size() const
+stream::len input_sub::size() const
 {
 	return this->stream_len;
 }

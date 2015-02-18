@@ -69,7 +69,7 @@ input_memory::input_memory()
 stream::len input_memory::try_read(uint8_t *buffer, stream::len len)
 {
 	stream::pos done = this->offset + len;
-	stream::pos size = this->data.size();
+	stream::len size = this->data.size();
 	stream::len amt;
 	if (done > size) amt = size - this->offset;
 	else amt = len;
@@ -93,7 +93,7 @@ stream::pos input_memory::tellg() const
 	return this->offset;
 }
 
-stream::pos input_memory::size() const
+stream::len input_memory::size() const
 {
 	return this->data.size();
 }
@@ -106,7 +106,7 @@ output_memory::output_memory()
 stream::len output_memory::try_write(const uint8_t *buffer, stream::len len)
 {
 	stream::pos done = this->offset + len;
-	stream::pos size = this->data.size();
+	stream::len size = this->data.size();
 	if (done > size) {
 		this->data.resize(done);
 	} else if (size == 0) {

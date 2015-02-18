@@ -81,7 +81,7 @@ stream::len seg::try_read(uint8_t *buffer, stream::len len)
 
 	// Read the second stream (the vector)
 	stream::pos lenReadSecond;
-	stream::pos offSecondEnd = lenEntireFirst + this->vcSecond.size();
+	stream::len offSecondEnd = lenEntireFirst + this->vcSecond.size();
 	if ((lenRemaining > 0) && (this->offset < offSecondEnd)) {
 		// Some of the read will happen in the second stream
 		stream::pos lenSecond;
@@ -168,7 +168,7 @@ stream::pos seg::tellg() const
 	return this->offset;
 }
 
-stream::pos seg::size() const
+stream::len seg::size() const
 {
 	// Make sure open() has been called
 	assert(this->parent);
@@ -213,7 +213,7 @@ stream::len seg::try_write(const uint8_t *buffer, stream::len len)
 
 	// Write to the second stream (the vector)
 	stream::pos lenWroteSecond;
-	stream::pos offSecondEnd = lenEntireFirst + this->vcSecond.size();
+	stream::len offSecondEnd = lenEntireFirst + this->vcSecond.size();
 	if ((lenRemaining > 0) && (this->offset < offSecondEnd)) {
 		// Some of the write will happen in the second source
 		stream::pos lenSecond;
@@ -287,8 +287,8 @@ void seg::flush()
 	// Make sure open() has been called
 	assert(this->parent);
 
-	stream::pos plenStream = this->parent->size();
-	stream::pos lenTotal = this->size();
+	stream::len plenStream = this->parent->size();
+	stream::len lenTotal = this->size();
 	if (plenStream < lenTotal) {
 		// When we're finished the underlying stream will be larger, so make sure
 		// it's big enough to hold the extra data.
@@ -354,7 +354,7 @@ void seg::insert(stream::len lenInsert)
 		this->vcSecond.resize(lenInsert);
 		assert(this->vcSecond.size() == lenInsert);
 	} else {
-		stream::pos offSecondEnd = lenFirst + this->vcSecond.size();
+		stream::len offSecondEnd = lenFirst + this->vcSecond.size();
 		if (this->offset <= offSecondEnd) {
 			// Extra data is to be inserted in the middle of the second source
 			// TESTED BY: segstream_insert_c02
@@ -415,7 +415,7 @@ void seg::remove(stream::len lenRemove)
 	// source when we should have.
 	assert(this->offset >= lenFirst);
 
-	stream::pos lenSecond = this->vcSecond.size();
+	stream::len lenSecond = this->vcSecond.size();
 	stream::pos offSecondEnd = lenFirst + lenSecond;
 	if (this->offset < offSecondEnd) {
 		// There is some data to remove from the second source
@@ -505,7 +505,7 @@ void seg::commit(stream::pos poffWriteFirst)
 	assert(this->off_parent <= this->off_endparent);
 
 	stream::pos lenFirst = this->off_endparent - this->off_parent;
-	stream::pos lenSecond = this->vcSecond.size();
+	stream::len lenSecond = this->vcSecond.size();
 	stream::pos poffWriteSecond = poffWriteFirst + lenFirst;
 	stream::pos poffWriteThird = poffWriteSecond + lenSecond;
 

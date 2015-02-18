@@ -53,7 +53,7 @@ stream::pos input_filtered::tellg() const
 	return this->input_memory::tellg();
 }
 
-stream::pos input_filtered::size() const
+stream::len input_filtered::size() const
 {
 	this->populate();
 	return this->input_memory::size();

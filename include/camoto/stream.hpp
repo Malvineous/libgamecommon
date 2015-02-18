@@ -267,7 +267,7 @@ class DLL_EXPORT input {
 		 *   There was an error decoding the data required to perform this
 		 *   operation.
 		 */
-		virtual stream::pos size() const = 0;
+		virtual stream::len size() const = 0;
 };
 
 /// Base stream interface for writing data.

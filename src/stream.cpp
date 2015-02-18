@@ -142,7 +142,7 @@ void move(inout& data, pos from, pos to, len len)
 	stream::pos fromEnd = from + len;
 	stream::pos toEnd = to + len;
 
-	stream::pos size = data.size();
+	stream::len size = data.size();
 
 	// Make sure the caller isn't trying to read or write past the end of the
 	// stream (as it needs to be resized first if this is to happen.)

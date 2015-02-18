@@ -62,7 +62,7 @@ class DLL_EXPORT input_string:
 		virtual stream::len try_read(uint8_t *buffer, stream::len len);
 		virtual void seekg(stream::delta off, seek_from from);
 		virtual stream::pos tellg() const;
-		virtual stream::pos size() const;
+		virtual stream::len size() const;
 };
 
 /// Write-only stream to access a C++ string.

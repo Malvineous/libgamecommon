@@ -93,7 +93,7 @@ stream::pos input_string::tellg() const
 	return this->offset;
 }
 
-stream::pos input_string::size() const
+stream::len input_string::size() const
 {
 	return this->data.length();
 }

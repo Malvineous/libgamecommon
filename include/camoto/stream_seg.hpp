@@ -54,7 +54,7 @@ class DLL_EXPORT seg: virtual public inout
 		virtual stream::len try_read(uint8_t *buffer, stream::len len);
 		virtual void seekg(stream::delta off, seek_from from);
 		virtual stream::pos tellg() const;
-		virtual stream::pos size() const;
+		virtual stream::len size() const;
 		virtual stream::len try_write(const uint8_t *buffer, stream::len len);
 		virtual void seekp(stream::delta off, seek_from from);
 		virtual stream::pos tellp() const;

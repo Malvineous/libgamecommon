@@ -86,7 +86,7 @@ class DLL_EXPORT input_filtered: virtual public input_memory
 		virtual stream::len try_read(uint8_t *buffer, stream::len len);
 		virtual void seekg(stream::delta off, seek_from from);
 		virtual stream::pos tellg() const;
-		virtual stream::pos size() const;
+		virtual stream::len size() const;
 
 		/// A partial write is about to occur, ensure the unfiltered data is present.
 		/**
