@@ -35,6 +35,8 @@ typedef boost::function<void(output_sub*, len)> fn_truncate_sub;
 class DLL_EXPORT sub_core
 {
 	public:
+		virtual ~sub_core();
+
 		/// Move the substream's start point within the parent stream.
 		/**
 		 * @param off

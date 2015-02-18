@@ -136,9 +136,11 @@ enum seek_from {
 /**
  * @post A newly created stream's seek pointer is always at the start (offset 0).
  */
-class DLL_EXPORT input {
-
+class DLL_EXPORT input
+{
 	public:
+		virtual ~input() { };
+
 		/// Read some bytes from the stream if possible.
 		/**
 		 * If not all of the requested bytes could be read then whatever could
@@ -278,6 +280,8 @@ class DLL_EXPORT input {
 class DLL_EXPORT output
 {
 	public:
+		virtual ~output() { };
+
 		/// Write as much as possible to the stream.
 		/**
 		 * @param buffer
