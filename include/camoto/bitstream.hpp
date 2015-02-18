@@ -23,7 +23,7 @@
 #define _CAMOTO_BITSTREAM_HPP_
 
 #include <memory>
-#include <boost/function.hpp>
+#include <functional>
 #include <camoto/stream.hpp>
 
 #ifndef DLL_EXPORT
@@ -32,8 +32,8 @@
 
 namespace camoto {
 
-typedef boost::function<int (uint8_t*)> fn_getnextchar;
-typedef boost::function<int (uint8_t)> fn_putnextchar;
+typedef std::function<int (uint8_t*)> fn_getnextchar;
+typedef std::function<int (uint8_t)> fn_putnextchar;
 
 /// Class for reading and writing to iostreams at the bit level rather than
 /// the byte level.
@@ -125,7 +125,7 @@ class DLL_EXPORT bitstream
 
 		/// Read some bits from a particular stream.
 		/**
-		 * This function is only intended to be used in Boost iostream filters,
+		 * This function is only intended to be used in custom iostream filters,
 		 * which supply the source stream as a parameter to the read() function
 		 * rather than at object construction time.
 		 *
@@ -164,7 +164,7 @@ class DLL_EXPORT bitstream
 
 		/// Write some bits to a particular stream.
 		/**
-		 * This function is only intended to be used in Boost iostream filters,
+		 * This function is only intended to be used in custom iostream filters,
 		 * which supply the source stream as a parameter to the write() function
 		 * rather than at object construction time.
 		 *

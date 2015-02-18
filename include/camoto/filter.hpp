@@ -24,8 +24,6 @@
 #include <exception>
 #include <string>
 #include <stdint.h>
-#include <boost/function.hpp>
-
 #include <camoto/stream.hpp>
 
 #ifndef DLL_EXPORT

@@ -21,6 +21,8 @@
 #ifndef _CAMOTO_STREAM_SUB_HPP_
 #define _CAMOTO_STREAM_SUB_HPP_
 
+#include <functional>
+#include <memory>
 #include <camoto/stream.hpp>
 
 namespace camoto {
@@ -29,7 +31,7 @@ namespace stream {
 class output_sub;
 
 /// Callback function for changing the size of an output substream.
-typedef boost::function<void(output_sub*, len)> fn_truncate_sub;
+typedef std::function<void(output_sub*, len)> fn_truncate_sub;
 
 /// Substream parts in common with read and write
 class DLL_EXPORT sub_core
@@ -144,7 +146,7 @@ class DLL_EXPORT output_sub:
 		 *   write function will throw incomplete_write (or try_write() will return
 		 *   only a partial write.)
 		 *
-		 * @note If using boost::bind to generate a function pointer for fn_resize,
+		 * @note If using std::bind to generate a function pointer for fn_resize,
 		 *   be sure to use std::weak_ptr<> in place of any std::shared_ptr<>
 		 *   parameters containing the substream.  If this is not done, the
 		 *   substream will hold a shared_ptr<> to itself, meaning it will never be

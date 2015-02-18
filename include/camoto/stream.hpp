@@ -21,9 +21,8 @@
 #ifndef _CAMOTO_STREAM_HPP_
 #define _CAMOTO_STREAM_HPP_
 
+#include <cstring>
 #include <stdint.h>
-#include <boost/function.hpp>
-
 #include <camoto/error.hpp>
 
 namespace camoto {

@@ -18,10 +18,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <functional>
 #include <memory>
 #include <errno.h>
 #include <boost/test/unit_test.hpp>
-#include <boost/bind.hpp>
 #include <camoto/stream_sub.hpp>
 #include <camoto/stream_string.hpp>
 #include "tests.hpp"
@@ -31,7 +31,7 @@ using namespace camoto;
 /// Truncate function to adjust a stream::string so it can hold an enlarging stream::sub
 /**
  * We use weak_ptr<> here instead of the usual shared_ptr<> because if
- * boost::bind is used to pass this function as the truncate function, then the
+ * std::bind is used to pass this function as the truncate function, then the
  * substream will end up holding a reference to itself (in the bound pointer to
  * the truncate function) causing the shared_ptr to never get deleted and leak
  * memory.
@@ -85,7 +85,8 @@ BOOST_AUTO_TEST_CASE(read)
 
 	this->sub = std::make_shared<stream::sub>(
 		std::dynamic_pointer_cast<stream::inout>(this->base),
-		5, 6, stream::fn_truncate_sub());
+		5, 6, stream::fn_truncate_sub()
+	);
 
 	BOOST_CHECK_MESSAGE(this->sub->sub_start(), 5);
 	BOOST_CHECK_MESSAGE(this->sub->size(), 6);
@@ -100,9 +101,12 @@ BOOST_AUTO_TEST_CASE(read_write)
 
 	this->sub = std::make_shared<stream::sub>(
 		std::dynamic_pointer_cast<stream::inout>(this->base),
-		2, 10, boost::bind(ss_resize,
-		std::weak_ptr<stream::output>(this->base),
-		_1, _2));
+		2, 10,
+		std::bind(ss_resize,
+			std::weak_ptr<stream::output>(this->base),
+			std::placeholders::_1, std::placeholders::_2
+		)
+	);
 	this->sub->seekp(4, stream::cur); // initial offset must always be 0
 	this->sub->write("123");
 	this->sub->seekg(2, stream::start);
@@ -119,9 +123,12 @@ BOOST_AUTO_TEST_CASE(change_offset)
 
 	this->sub = std::make_shared<stream::sub>(
 		std::dynamic_pointer_cast<stream::inout>(this->base),
-		2, 4, boost::bind(ss_resize,
-		std::weak_ptr<stream::output>(this->base),
-		_1, _2));
+		2, 4,
+		std::bind(ss_resize,
+			std::weak_ptr<stream::output>(this->base),
+			std::placeholders::_1, std::placeholders::_2
+		)
+	);
 
 	this->sub->relocate(8);
 	this->sub->resize(16); // can't read past end of stream!
@@ -136,9 +143,12 @@ BOOST_AUTO_TEST_CASE(relocate_to_start)
 
 	this->sub = std::make_shared<stream::sub>(
 		std::dynamic_pointer_cast<stream::inout>(this->base),
-		2, 4, boost::bind(ss_resize,
-		std::weak_ptr<stream::output>(this->base),
-		_1, _2));
+		2, 4,
+		std::bind(ss_resize,
+			std::weak_ptr<stream::output>(this->base),
+			std::placeholders::_1, std::placeholders::_2
+		)
+	);
 
 	BOOST_CHECK_MESSAGE(is_equal("CDEF"),
 		"Open substream failed");
@@ -154,9 +164,12 @@ BOOST_AUTO_TEST_CASE(write_then_move)
 	BOOST_TEST_MESSAGE("Move substream's offset after writing");
 	this->sub = std::make_shared<stream::sub>(
 		std::dynamic_pointer_cast<stream::inout>(this->base),
-		0, 16, boost::bind(ss_resize,
-		std::weak_ptr<stream::output>(this->base),
-		_1, _2));
+		0, 16,
+		std::bind(ss_resize,
+			std::weak_ptr<stream::output>(this->base),
+			std::placeholders::_1, std::placeholders::_2
+		)
+	);
 
 	this->sub->seekp(10, stream::start);
 	this->sub->write("12345");
@@ -221,7 +234,13 @@ BOOST_AUTO_TEST_CASE(write_past_eof_expand)
 
 	this->sub = std::make_shared<stream::sub>(
 		std::dynamic_pointer_cast<stream::inout>(this->base),
-		0, 26, boost::bind(&stream::sub::resize, _1, _2));
+		0, 26,
+		std::bind(
+			&stream::sub::resize,
+			std::placeholders::_1,
+			std::placeholders::_2
+		)
+	);
 	this->sub->seekp(20, stream::start);
 
 	stream::len w;

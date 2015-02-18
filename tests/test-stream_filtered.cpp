@@ -18,9 +18,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <functional>
 #include <boost/test/unit_test.hpp>
 #include <boost/algorithm/string.hpp> // for case-insensitive string compare
-#include <boost/bind.hpp>
 #include <camoto/stream.hpp>
 #include <camoto/stream_string.hpp>
 #include <camoto/stream_filtered.hpp>
@@ -146,8 +146,12 @@ BOOST_AUTO_TEST_CASE(double_stream_filtered_write)
 
 	stream::len lenF = 0, lenH = 0;
 
-	stream::fn_notify_prefiltered_size fnF = boost::bind<void>(setVar, &lenF, _1, _2);
-	stream::fn_notify_prefiltered_size fnH = boost::bind<void>(setVar, &lenH, _1, _2);
+	stream::fn_notify_prefiltered_size fnF = std::bind<void>(
+		setVar, &lenF, std::placeholders::_1, std::placeholders::_2
+	);
+	stream::fn_notify_prefiltered_size fnH = std::bind<void>(
+		setVar, &lenH, std::placeholders::_1, std::placeholders::_2
+	);
 
 	auto algo = std::make_shared<filter_dummy>();
 	auto f = std::make_shared<stream::filtered>(

@@ -22,8 +22,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <cassert>
+#include <functional>
 #include <iostream>
-#include <boost/bind.hpp>
 #include <camoto/lzw.hpp>
 
 /// How many bytes should be left in reserve
@@ -153,7 +154,8 @@ void filter_lzw_decompress::transform(uint8_t *out, stream::len *lenOut,
 	const uint8_t *in, stream::len *lenIn)
 {
 	stream::len r = 0, w = 0;
-	fn_getnextchar cbNext = boost::bind(nextChar, &in, lenIn, &r, _1);
+	fn_getnextchar cbNext = std::bind(nextChar, &in, lenIn, &r,
+		std::placeholders::_1);
 	while (
 		(w < *lenOut) && (
 			(
@@ -314,7 +316,8 @@ void filter_lzw_compress::transform(uint8_t *out, stream::len *lenOut,
 	const uint8_t *in, stream::len *lenIn)
 {
 	stream::len r = 0, w = 0;
-	fn_putnextchar cbNext = boost::bind(putChar, &out, lenOut, &w, _1);
+	fn_putnextchar cbNext = std::bind(putChar, &out, lenOut, &w,
+		std::placeholders::_1);
 	while (
 		(w + LZW_LEFTOVER_BYTES < *lenOut) && ( // leave some leftover bytes to guarantee the codeword will be written
 			(

@@ -21,6 +21,8 @@
 #ifndef _CAMOTO_STREAM_FILTERED_HPP_
 #define _CAMOTO_STREAM_FILTERED_HPP_
 
+#include <functional>
+#include <memory>
 #include <camoto/filter.hpp>
 #include <camoto/stream_memory.hpp>
 
@@ -44,7 +46,7 @@ class output_filtered;
  * compressed and decompressed sizes of the files they contain.
  *
  * Since no other data can be passed with this function call, usually
- * boost::bind is used to create a "wrapping" around some other function with
+ * std::bind is used to create a "wrapping" around some other function with
  * more parameters.
  *
  * The function signature is:
@@ -56,13 +58,13 @@ class output_filtered;
  * "real" size, as opposed to the stored size which is obviously the number of
  * bytes actually written to the stream.
  *
- * This example uses boost::bind to package up a call to the Linux
+ * This example uses std::bind to package up a call to the Linux
  * truncate() function (which requires both a filename and size) such that
  * the filename is supplied in advance and not required when the \e fn_truncate
  * call is made.
  *
  * @code
- * fn_truncate fnTruncate = boost::bind<void>(truncate, "graphics.dat", _2);
+ * fn_truncate fnTruncate = std::bind<void>(truncate, "graphics.dat", _2);
  * // later...
  * fnTruncate(out, 123);  // calls truncate("graphics.dat", 123)
  * @endcode
@@ -75,7 +77,7 @@ class output_filtered;
  * The callback should throw stream::write_error if the operation did not
  * succeed.
  */
-typedef boost::function<void(stream::output_filtered*, stream::len)>
+typedef std::function<void(stream::output_filtered*, stream::len)>
 	fn_notify_prefiltered_size;
 
 /// Read-only stream applying a filter to another read-only stream.

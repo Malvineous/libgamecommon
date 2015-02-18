@@ -17,5 +17,9 @@ EXTRA_tests_SOURCES = tests.hpp
 
 TESTS = tests
 
-AM_CPPFLAGS = $(BOOST_CPPFLAGS) -I $(top_srcdir)/include
-AM_LDFLAGS = $(BOOST_SYSTEM_LIBS) $(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_UNIT_TEST_FRAMEWORK_LIBS) $(top_builddir)/src/libgamecommon.la
+AM_CPPFLAGS  = -I $(top_srcdir)/include
+AM_CPPFLAGS += $(BOOST_CPPFLAGS)
+
+AM_LDFLAGS  = $(top_builddir)/src/libgamecommon.la
+AM_LDFLAGS += $(BOOST_SYSTEM_LIBS)
+AM_LDFLAGS += $(BOOST_UNIT_TEST_FRAMEWORK_LIBS)

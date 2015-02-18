@@ -18,10 +18,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <functional>
 #include <iostream>
 #include <errno.h>
 #include <boost/test/unit_test.hpp>
-#include <boost/bind.hpp>
 #include <camoto/stream_seg.hpp>
 #include <camoto/stream_string.hpp>
 #include <camoto/stream_sub.hpp>
@@ -437,8 +437,8 @@ BOOST_AUTO_TEST_CASE(segstream_insert_past_parent_eof)
 
 	auto sub = std::make_unique<stream::sub>(
 		this->seg, 15, 10,
-		boost::bind(substreamTruncate,
-			_1, _2,
+		std::bind(substreamTruncate,
+			std::placeholders::_1, std::placeholders::_2,
 			std::weak_ptr<stream::seg>(this->seg)
 		)
 	);
@@ -464,8 +464,8 @@ BOOST_AUTO_TEST_CASE(segstream_insert_past_parent_eof2)
 
 	auto sub = std::make_unique<stream::sub>(
 		this->seg, 15, 10,
-		boost::bind(substreamTruncate,
-			_1, _2,
+		std::bind(substreamTruncate,
+			std::placeholders::_1, std::placeholders::_2,
 			std::weak_ptr<stream::seg>(this->seg)
 		)
 	);

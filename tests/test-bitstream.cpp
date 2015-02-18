@@ -19,9 +19,8 @@
  */
 
 #include <boost/test/unit_test.hpp>
-
 #include <boost/algorithm/string.hpp> // for case-insensitive string compare
-#include <boost/bind.hpp>
+#include <functional>
 #include <iostream>
 #include <iomanip>
 #include <vector>
@@ -763,7 +762,7 @@ BOOST_AUTO_TEST_CASE(bitstream_writeonly)
 
 	this->bit = bitstream(bitstream::bigEndian);
 
-	fn_putnextchar cbNext = boost::bind(putNextChar, this->base, _1);
+	fn_putnextchar cbNext = std::bind(putNextChar, this->base, std::placeholders::_1);
 
 	this->bit.write(cbNext, 1, 0);
 	this->bit.write(cbNext, 1, 0);
@@ -796,7 +795,7 @@ BOOST_AUTO_TEST_CASE(bitstream_write_partial)
 
 	this->bit = bitstream(bitstream::bigEndian);
 
-	fn_putnextchar cbNext = boost::bind(putNextChar, this->base, _1);
+	fn_putnextchar cbNext = std::bind(putNextChar, this->base, std::placeholders::_1);
 
 	this->bit.write(cbNext, 1, 0);
 	this->bit.write(cbNext, 1, 0);

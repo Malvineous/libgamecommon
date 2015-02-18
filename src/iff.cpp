@@ -109,6 +109,7 @@ void IFFReader::loadChunks(stream::len lenChunk)
 				break;
 			case Filetype_IFF_Unpadded:
 			case Filetype_IFF:
+			default:
 				this->iff >> u32be(c.len);
 				break;
 		}
@@ -121,6 +122,7 @@ void IFFReader::loadChunks(stream::len lenChunk)
 				break;
 			case Filetype_RIFF_Unpadded:
 			case Filetype_IFF_Unpadded:
+			default:
 				pad = 0;
 				break;
 		}

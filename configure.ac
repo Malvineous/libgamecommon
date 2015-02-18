@@ -20,8 +20,6 @@ AC_PROG_LIBTOOL
 AX_CXX_COMPILE_STDCXX_11(noext, mandatory)
 
 BOOST_REQUIRE([1.46])
-BOOST_FILESYSTEM
-BOOST_PROGRAM_OPTIONS
 BOOST_TEST
 
 AC_ARG_ENABLE(debug, AC_HELP_STRING([--enable-debug],[enable extra debugging output]))

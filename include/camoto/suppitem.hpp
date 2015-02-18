@@ -22,6 +22,7 @@
 #define _CAMOTO_SUPPITEM_HPP_
 
 #include <map>
+#include <memory>
 #include <camoto/stream.hpp>
 
 /// Main namespace
