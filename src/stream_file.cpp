@@ -60,7 +60,7 @@ namespace stream {
 
 std::unique_ptr<input> open_stdin()
 {
-	std::unique_ptr<input_file> f(new input_file());
+	auto f = std::unique_ptr<input_file>(new input_file());
 	f->handle = stdin;
 	f->close = false;
 	return std::move(f);
@@ -68,7 +68,7 @@ std::unique_ptr<input> open_stdin()
 
 std::unique_ptr<output> open_stdout()
 {
-	std::unique_ptr<output_file> f(new output_file());
+	auto f = std::unique_ptr<output_file>(new output_file());
 	f->handle = stdout;
 	f->close = false;
 	return std::move(f);
@@ -108,6 +108,15 @@ input_file::input_file()
 {
 }
 
+input_file::input_file(const std::string& filename)
+{
+	this->handle = fopen(filename.c_str(), "rb");
+	if (this->handle == NULL) throw open_error(strerror_str(errno));
+	// no need to seek, fopen("rb") positions file pointer at start
+	this->close = true;
+	return;
+}
+
 input_file::~input_file()
 {
 	if (this->close) {
@@ -143,25 +152,31 @@ stream::len input_file::size() const
 	return len;
 }
 
-void input_file::open(const char *filename)
-{
-	this->handle = fopen(filename, "rb");
-	if (this->handle == NULL) throw open_error(strerror_str(errno));
-	this->close = true;
-	// no need to seek, fopen("rb") positions file pointer at start
-	return;
-}
-
-void input_file::open(const std::string& filename)
-{
-	this->open(filename.c_str());
-	return;
-}
-
 
 output_file::output_file()
 	:	do_remove(false)
 {
+}
+
+output_file::output_file(const std::string& filename, bool create)
+	:	do_remove(false),
+		filename(filename)
+{
+	// We have to open the file in read/write even though we aren't reading,
+	// because none of the other options allow us to seek around and overwrite
+	// arbitrary points in the file.
+	//
+	// We also use this function as file::open() which *must* open in
+	// for read+write.
+	this->handle = fopen(this->filename.c_str(), create ? "w+b" : "r+b");
+	if ((!this->handle) && (errno == EACCES)) {
+		// Access denied, try read-only
+		this->handle = fopen(this->filename.c_str(), "rb");
+	}
+	if (!this->handle) throw open_error(strerror_str(errno));
+	this->close = true;
+	this->seek(0, stream::start);
+	return;
 }
 
 output_file::~output_file()
@@ -222,64 +237,6 @@ void output_file::flush()
 	return;
 }
 
-void output_file::open(const char *filename)
-{
-	this->filename = std::string(filename);
-	this->open();
-	return;
-}
-
-void output_file::open(const std::string& filename)
-{
-	this->filename = filename;
-	this->open();
-	return;
-}
-
-void output_file::open()
-{
-	// We have to open the file in read/write even though we aren't reading,
-	// because none of the other options allow us to seek around and overwrite
-	// arbitrary points in the file.
-	//
-	// We also use this function as file::open() which *must* open in
-	// for read+write.
-	this->handle = fopen(this->filename.c_str(), "r+b");
-	if (this->handle == NULL) throw open_error(strerror_str(errno));
-	this->close = true;
-	this->seek(0, start);
-	return;
-}
-
-void output_file::create(const char *filename)
-{
-	this->filename = std::string(filename);
-	this->create();
-	return;
-}
-
-void output_file::create(const std::string& filename)
-{
-	this->filename = filename;
-	this->create();
-	return;
-}
-
-void output_file::create()
-{
-	// We have to open the file in read/write even though we aren't reading,
-	// because none of the other options allow us to seek around and overwrite
-	// arbitrary points in the file.
-	//
-	// We also use this function as file::create() which *must* open in
-	// for read+write.
-	this->handle = fopen(this->filename.c_str(), "w+b");
-	if (this->handle == NULL) throw open_error(strerror_str(errno));
-	this->close = true;
-	this->seek(0, start);
-	return;
-}
-
 void output_file::remove()
 {
 	this->do_remove = true;
@@ -287,38 +244,10 @@ void output_file::remove()
 }
 
 
-file::file()
-	: isReadonly(false)
+file::file(const std::string& filename, bool create)
+	: input_file(),
+		output_file(filename, create)
 {
-}
-
-void file::open_readonly(const char *filename)
-{
-	this->filename = std::string(filename);
-	this->open_readonly();
-	return;
-}
-
-void file::open_readonly(const std::string& filename)
-{
-	this->filename = filename;
-	this->open_readonly();
-	return;
-}
-
-bool file::readonly()
-{
-	return this->isReadonly;
-}
-
-void file::open_readonly()
-{
-	this->handle = fopen(this->filename.c_str(), "rb");
-	if (this->handle == NULL) throw open_error(strerror_str(errno));
-	this->close = true;
-	// no need to seek, fopen("rb") positions file pointer at start
-	this->isReadonly = true;
-	return;
 }
 
 } // namespace stream

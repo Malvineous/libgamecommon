@@ -31,14 +31,14 @@
 
 using namespace camoto;
 
-#define TEST_FILE "_test.$"
+constexpr auto TEST_FILE = "_test.$";
 
 struct AtExit {
 	~AtExit()
 	{
 		// Remove the test file when the tests are done
 		if (unlink(TEST_FILE) < 0) {
-			std::cerr << "Could not remove test file \"" TEST_FILE << "\": "
+			std::cerr << "Could not remove test file \"" << TEST_FILE << "\": "
 				<< strerror(errno) << std::endl;
 		}
 	}
@@ -56,16 +56,14 @@ BOOST_AUTO_TEST_CASE(create)
 	std::shared_ptr<stream::input_file> in;
 	std::string val;
 
-	out.reset(new stream::output_file());
-	out->create(TEST_FILE);
+	out.reset(new stream::output_file(TEST_FILE, true));
 	out->write("abcdefghijklmno");
 	out->seekp(4, stream::start);
 	out->write(" is a test");
 	out->flush();
 	out.reset();
 
-	in.reset(new stream::input_file());
-	in->open(TEST_FILE);
+	in.reset(new stream::input_file(TEST_FILE));
 	BOOST_REQUIRE_NO_THROW(
 		val = in->read(15);
 	);
@@ -73,15 +71,13 @@ BOOST_AUTO_TEST_CASE(create)
 	BOOST_CHECK_MESSAGE(is_equal("abcd is a testo", val),
 		"Error reading back data from new file");
 
-	out.reset(new stream::output_file());
-	out->open(TEST_FILE);
+	out.reset(new stream::output_file(TEST_FILE, false));
 	out->seekp(8, stream::start);
 	out->write("12345");
 	out->flush();
 	out.reset();
 
-	in.reset(new stream::input_file());
-	in->open(TEST_FILE);
+	in.reset(new stream::input_file(TEST_FILE));
 	BOOST_REQUIRE_NO_THROW(
 		val = in->read(15);
 	);
@@ -89,15 +85,13 @@ BOOST_AUTO_TEST_CASE(create)
 	BOOST_CHECK_MESSAGE(is_equal("abcd is 12345to", val),
 		"Error reading back data from new file");
 
-	out.reset(new stream::output_file());
-	out->open(TEST_FILE);
+	out.reset(new stream::output_file(TEST_FILE, false));
 	out->seekp(2, stream::start);
 	out->write("xy");
 	out->truncate_here();
 	out.reset();
 
-	in.reset(new stream::input_file());
-	in->open(TEST_FILE);
+	in.reset(new stream::input_file(TEST_FILE));
 	BOOST_REQUIRE_EQUAL(in->size(), 4);
 	BOOST_REQUIRE_NO_THROW(
 		val = in->read(4);
@@ -112,14 +106,14 @@ BOOST_AUTO_TEST_CASE(readwrite)
 	BOOST_TEST_MESSAGE("Read+write file");
 
 	std::shared_ptr<stream::file> f;
-	std::string val;
 
-	f.reset(new stream::file());
-	f->create(TEST_FILE); // should blank out existing file
+	f.reset(new stream::file(TEST_FILE, true)); // should blank out existing file
 	f->write("zyxwvu");
 	f->seekp(4, stream::start);
 	f->write("12345");
 	f->seekp(2, stream::start);
+
+	std::string val;
 	BOOST_REQUIRE_NO_THROW(
 		val = f->read(5);
 	);
@@ -136,8 +130,7 @@ BOOST_AUTO_TEST_CASE(expand)
 
 	std::shared_ptr<stream::file> f;
 
-	f.reset(new stream::file());
-	f->create(TEST_FILE);
+	f.reset(new stream::file(TEST_FILE, true));
 	f->write("1234567890");
 	BOOST_REQUIRE_EQUAL(f->size(), 10);
 

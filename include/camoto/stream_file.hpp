@@ -73,11 +73,15 @@ class DLL_EXPORT input_file: virtual public input,
 	virtual protected file_core
 {
 	public:
-		/// Default constructor.
+		/// Open an existing file.
 		/**
-		 * @note Must call open() before any other functions.
+		 * @param filename
+		 *   Name of file to open.
+		 *
+		 * @throw open_error
+		 *   The file could not be read or does not exist.
 		 */
-		input_file();
+		input_file(const std::string& filename);
 		virtual ~input_file();
 
 		virtual stream::len try_read(uint8_t *buffer, stream::len len);
@@ -85,20 +89,10 @@ class DLL_EXPORT input_file: virtual public input,
 		virtual stream::pos tellg() const;
 		virtual stream::len size() const;
 
-		/// Open an existing file.
-		/**
-		 * @param filename
-		 *   Name of file to open.
-		 *
-		 * @throw open_error
-		 *   The file could not be read or does not exist.
-		 */
-		void open(const char *filename);
-
-		/// @copydoc open(const char *)
-		void open(const std::string& filename);
-
 		friend std::unique_ptr<stream::input> open_stdin();
+
+	protected:
+		input_file();
 };
 
 /// Write-only stream to access a local file.
@@ -106,11 +100,21 @@ class DLL_EXPORT output_file: virtual public output,
 	virtual protected file_core
 {
 	public:
-		/// Default constructor.
+		/// Open an existing file, create a new file, or overwrite (blank out) an
+		/// existing one.
 		/**
-		 * @note Must call open() or create() before any other functions.
+		 * @param filename
+		 *   Name of file to open.
+		 *
+		 * @param create
+		 *   false to open an existing file for read/write, true to create the file
+		 *   (create it if it doesn't exist, or truncate/blank out the file if it
+		 *   does exist.)
+		 *
+		 * @throw open_error
+		 *   The file could not be read or does not exist.
 		 */
-		output_file();
+		output_file(const std::string& filename, bool create);
 		virtual ~output_file();
 
 		virtual stream::len try_write(const uint8_t *buffer, stream::len len);
@@ -118,32 +122,6 @@ class DLL_EXPORT output_file: virtual public output,
 		virtual stream::pos tellp() const;
 		virtual void truncate(stream::pos size);
 		virtual void flush();
-
-		/// Open an existing file.
-		/**
-		 * @param filename
-		 *   Name of file to open.
-		 *
-		 * @throw open_error
-		 *   The file could not be read or does not exist.
-		 */
-		void open(const char *filename);
-
-		/// @copydoc open(const char *)
-		void open(const std::string& filename);
-
-		/// Create a new file, or overwrite (blank out) an existing one.
-		/**
-		 * @param filename
-		 *   Name of file to open.
-		 *
-		 * @throw open_error
-		 *   The file could not be created (e.g. no permission).
-		 */
-		void create(const char *filename);
-
-		/// @copydoc create(const char *)
-		void create(const std::string& filename);
 
 		/// Delete the file upon close.
 		void remove();
@@ -154,6 +132,7 @@ class DLL_EXPORT output_file: virtual public output,
 		bool do_remove;        ///< Delete file on close?
 		std::string filename;  ///< Copy of filename for deletion
 
+		output_file(); // used by open_stdout()
 		void open();
 		void create();
 };
@@ -164,35 +143,8 @@ class DLL_EXPORT file: virtual public inout,
 	virtual public output_file
 {
 	public:
-		file();
-
-		// Pick this version (as opposed to input_file::open) as it happens to
-		// open the file in read/write mode.
-		using output_file::open;
-
-		/// Open an existing file in read-only mode.
-		/**
-		 * @param filename
-		 *   Name of file to open.
-		 *
-		 * @throw open_error
-		 *   The file could not be read or does not exist.
-		 */
-		void open_readonly(const char *filename);
-
-		/// @copydoc open_readonly(const char *)
-		void open_readonly(const std::string& filename);
-
-		/// Is the file open in read-only mode?
-		/**
-		 * @return true if read-only, false if read-write.
-		 */
-		bool readonly();
-
-	protected:
-		bool isReadonly; ///< Is the file read-only?
-
-		void open_readonly();
+		file() = delete;
+		file(const std::string& filename, bool create);
 };
 
 } // namespace stream
