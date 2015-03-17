@@ -29,6 +29,28 @@
 
 namespace camoto {
 
+int bitstreamFilterNextChar(const uint8_t **in, stream::len *lenIn, stream::len *r, uint8_t *out)
+{
+	if (*r < *lenIn) {
+		*out = **in; // "read" byte
+		(*in)++;     // increment read buffer
+		(*r)++;      // increment read count
+		return 1;    // return number of bytes read
+	}
+	return 0; // EOF
+}
+
+int bitstreamFilterPutChar(uint8_t **out, const stream::len *lenOut, stream::len *w, uint8_t in)
+{
+	if (*w < *lenOut) {
+		**out = in;  // "write" byte
+		(*out)++;    // increment write buffer
+		(*w)++;      // increment write count
+		return 1;    // return number of bytes written
+	}
+	return 0; // EOF
+}
+
 bitstream::bitstream(std::shared_ptr<stream::inout> parent,
 	bitstream::endian endianType)
 	:	parent(std::move(parent)),
