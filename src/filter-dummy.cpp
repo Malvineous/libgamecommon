@@ -1,5 +1,5 @@
 /**
- * @file   filter_dummy.cpp
+ * @file   filter-dummy.cpp
  * @brief  Filter object that doesn't alter the data.
  *
  * Copyright (C) 2010-2015 Adam Nielsen <malvineous@shikadi.net>
@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <camoto/filter_dummy.hpp>
+#include <camoto/filter-dummy.hpp>
 
 namespace camoto {
 

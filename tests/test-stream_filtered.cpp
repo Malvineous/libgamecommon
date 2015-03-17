@@ -24,7 +24,7 @@
 #include <camoto/stream.hpp>
 #include <camoto/stream_string.hpp>
 #include <camoto/stream_filtered.hpp>
-#include <camoto/filter_dummy.hpp>
+#include <camoto/filter-dummy.hpp>
 #include "tests.hpp"
 
 using namespace camoto;

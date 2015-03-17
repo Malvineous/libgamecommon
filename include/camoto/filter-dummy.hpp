@@ -1,5 +1,5 @@
 /**
- * @file  camoto/filter_dummy.hpp
+ * @file  camoto/filter-dummy.hpp
  * @brief Filter object that doesn't alter the data.
  *
  * Copyright (C) 2010-2015 Adam Nielsen <malvineous@shikadi.net>
