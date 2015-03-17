@@ -22,6 +22,7 @@
 #define _CAMOTO_FORMATENUM_HPP_
 
 #include <memory>
+#include <vector>
 
 namespace camoto {
 
