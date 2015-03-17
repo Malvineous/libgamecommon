@@ -20,7 +20,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <camoto/lzw.hpp>
+#include <camoto/filter-lzw.hpp>
 #include <camoto/bitstream.hpp>
 #include <camoto/stream_filtered.hpp>
 #include <camoto/util.hpp>

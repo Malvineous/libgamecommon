@@ -1,7 +1,6 @@
 /**
- * @file   lzw.cpp
- * @brief  Boost iostream filter for compressing and decompressing data using
- *         a few variants of the LZW algorithm.
+ * @file  filter-lzw.cpp
+ * @brief Filter for compressing and decompressing data using LZW.
  *
  * Copyright (C) 2010-2015 Adam Nielsen <malvineous@shikadi.net>
  *
@@ -25,7 +24,7 @@
 #include <cassert>
 #include <functional>
 #include <iostream>
-#include <camoto/lzw.hpp>
+#include <camoto/filter-lzw.hpp>
 
 /// How many bytes should be left in reserve
 /**

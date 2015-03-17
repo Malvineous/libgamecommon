@@ -1,7 +1,6 @@
 /**
- * @file  camoto/lzw.hpp
- * @brief Boost iostream filter for compressing and decompressing data using
- *        a few variants of the LZW algorithm.
+ * @file  camoto/filter-lzw.hpp
+ * @brief Filter for compressing and decompressing data using LZW.
  *
  * Copyright (C) 2010-2015 Adam Nielsen <malvineous@shikadi.net>
  *
@@ -19,8 +18,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _CAMOTO_LZW_HPP_
-#define _CAMOTO_LZW_HPP_
+#ifndef _CAMOTO_FILTER_LZW_HPP_
+#define _CAMOTO_FILTER_LZW_HPP_
 
 #include <vector>
 #include <deque>
@@ -247,4 +246,4 @@ class DLL_EXPORT filter_lzw_compress: public filter
 
 } // namespace camoto
 
-#endif // _CAMOTO_LZW_HPP_
+#endif // _CAMOTO_FILTER_LZW_HPP_
