@@ -27,6 +27,19 @@
 
 #include <camoto/byteorder.hpp>
 
+/* IMPORTANT NOTE
+ *
+ * These tests must be in a different executable than the other tests.
+ *
+ * This is because they redeclare all the byteorder functions to work with
+ * standard C++ streams as opposed to Camoto streams.
+ *
+ * If this gets compiled into the same binary as the versions with the Camoto
+ * streams, then the compiler gets confused and will randomly call the wrong
+ * function, converting a camoto::stream into an std::iostream and causing a
+ * crash.
+ */
+
 BOOST_AUTO_TEST_SUITE(byteorder)
 
 BOOST_AUTO_TEST_CASE(functions)

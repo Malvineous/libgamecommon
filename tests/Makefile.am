@@ -1,7 +1,6 @@
-check_PROGRAMS = tests
+check_PROGRAMS = tests stdtests
 
 tests_SOURCES = tests.cpp
-tests_SOURCES += test-byteorder.cpp
 tests_SOURCES += test-bitstream.cpp
 tests_SOURCES += test-filter-crop.cpp
 tests_SOURCES += test-filter-lzss.cpp
@@ -18,7 +17,11 @@ tests_SOURCES += test-lzw.cpp
 
 EXTRA_tests_SOURCES = tests.hpp
 
-TESTS = tests
+stdtests_SOURCES = tests.cpp
+stdtests_SOURCES += test-byteorder.cpp
+EXTRA_stdtests_SOURCES = tests.hpp
+
+TESTS = tests stdtests
 
 AM_CPPFLAGS  = -I $(top_srcdir)/include
 AM_CPPFLAGS += $(BOOST_CPPFLAGS)

@@ -26,6 +26,8 @@ test-driver
 tests/test-suite.log
 tests/tests.log
 tests/tests.trs
+tests/stdtests.log
+tests/stdtests.trs
 
 # Compilation fluff
 *.o
@@ -38,3 +40,4 @@ doc/*.tag
 
 # Compiled binaries
 tests/tests
+tests/stdtests
