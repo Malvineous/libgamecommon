@@ -50,6 +50,7 @@ BOOST_AUTO_TEST_CASE(lzw_decomp_read)
 	bit_in.write(9, 'o');
 	bit_in.write(9, '.');
 	bit_in.write(9, 0x100);
+	bit_in.flush();
 
 	auto processed = std::make_shared<stream::input_filtered>(
 		this->in,

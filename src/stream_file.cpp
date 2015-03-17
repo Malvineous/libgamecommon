@@ -210,7 +210,6 @@ stream::pos output_file::tellp() const
 
 void output_file::truncate(stream::pos size)
 {
-	this->flush();
 	int fd = fileno(this->handle);
 #ifndef WIN32
 	if (ftruncate(fd, size) < 0) {

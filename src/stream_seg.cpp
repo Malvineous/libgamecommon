@@ -276,7 +276,6 @@ void seg::truncate(stream::pos size)
 			this->seekp(total, stream::start);
 			this->insert(size - total);
 		}
-		this->flush();
 	} catch (const seek_error& e) {
 		throw write_error("Unable to seek during truncate: " + e.get_message());
 	}

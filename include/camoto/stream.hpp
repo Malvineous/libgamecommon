@@ -376,10 +376,10 @@ class DLL_EXPORT output
 		 *   New stream size.  This value will become the position the seek pointer
 		 *   is moved to when seeking to the end of the stream.
 		 *
-		 * @note There is no need to call flush() first.  Anything written to this
-		 *   stream will be processed before the truncate occurs.  If you have
-		 *   substreams open within this stream, you must flush them yourself
-		 *   first.
+		 * @note You should call flush() immediately after this function to fill up
+		 *   the allocated data.  In very rare cases (mostly involving filters) you
+		 *   may need to flush() before truncate() however as best-practice, always
+		 *   call flush() after every truncate() or truncate_here() call.
 		 *
 		 * @throw write_error
 		 *   The truncate could not be performed.

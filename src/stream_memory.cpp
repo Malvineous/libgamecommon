@@ -132,10 +132,6 @@ stream::pos output_memory::tellp() const
 
 void output_memory::truncate(stream::pos size)
 {
-	// Nothing is cached by try_write(), so there's nothing we need to flush
-	// before the truncate.
-	//this->flush();
-
 	try {
 		this->data.resize(size);
 		this->seek(size, stream::start);

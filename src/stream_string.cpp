@@ -136,7 +136,6 @@ stream::pos output_string::tellp() const
 
 void output_string::truncate(stream::pos size)
 {
-	this->flush();
 	try {
 		this->data.resize(size);
 		this->seek(size, stream::start);
