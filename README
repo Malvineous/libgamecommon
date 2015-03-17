@@ -27,8 +27,11 @@ The library currently contains the following elements:
   * stream_filtered: Transparently filter data read from and written to the
     stream.  Filters can compress/decompress, encrypt/decrypt, etc.
 
-  * lzw: Generic implementation of the LZW compression algorithm, implemented
+  * lzss: Generic implementation of the LZSS compression algorithm, implemented
     in the form of a filter (suitable for use with stream_filtered.)
+
+  * lzw: Generic implementation of the LZW compression algorithm, again
+    implemented as a stream filter.
 
   * bitstream: Stream-like interface allowing reading and writing of individual
     bits.  Used by the LZW algorithm which initially reads data in units of

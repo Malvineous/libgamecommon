@@ -6,6 +6,7 @@ libgamecommon_la_SOURCES += error.cpp
 libgamecommon_la_SOURCES += lzw.cpp
 libgamecommon_la_SOURCES += filter.cpp
 libgamecommon_la_SOURCES += filter_dummy.cpp
+libgamecommon_la_SOURCES += filter-lzss.cpp
 libgamecommon_la_SOURCES += iff.cpp
 libgamecommon_la_SOURCES += metadata.cpp
 libgamecommon_la_SOURCES += stream.cpp
