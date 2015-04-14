@@ -14,6 +14,7 @@ tests_SOURCES += test-stream_filtered.cpp
 tests_SOURCES += test-stream_seg.cpp
 tests_SOURCES += test-stream_string.cpp
 tests_SOURCES += test-stream_sub.cpp
+tests_SOURCES += test-util.cpp
 
 EXTRA_tests_SOURCES = tests.hpp
 

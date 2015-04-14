@@ -56,6 +56,18 @@ namespace camoto {
 #define createString(a) \
 	(static_cast<const std::ostringstream&>(std::ostringstream() << a).str())
 
+/// Return the given value increased to the nearest given multiple.
+/**
+ * e.g. toNearestMultiple(3, 4) == 4
+ * e.g. toNearestMultiple(4, 4) == 4
+ * e.g. toNearestMultiple(5, 4) == 8
+ */
+constexpr unsigned long toNearestMultiple(unsigned long value,
+	unsigned long multiple)
+{
+	return value + ((multiple - (value % multiple)) % multiple);
+}
+
 /**
 
 \mainpage libgamecommon
