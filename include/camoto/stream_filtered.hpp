@@ -24,7 +24,7 @@
 #include <functional>
 #include <memory>
 #include <camoto/filter.hpp>
-#include <camoto/stream_memory.hpp>
+#include <camoto/stream_string.hpp>
 
 namespace camoto {
 namespace stream {
@@ -81,7 +81,7 @@ typedef std::function<void(stream::output_filtered*, stream::len)>
 	fn_notify_prefiltered_size;
 
 /// Read-only stream applying a filter to another read-only stream.
-class DLL_EXPORT input_filtered: virtual public input_memory
+class DLL_EXPORT input_filtered: virtual public input_string
 {
 	public:
 		/// Apply a filter to the given stream.
@@ -133,7 +133,7 @@ class DLL_EXPORT input_filtered: virtual public input_memory
 };
 
 /// Write-only stream applying a filter to another write-only stream.
-class DLL_EXPORT output_filtered: virtual public output_memory
+class DLL_EXPORT output_filtered: virtual public output_string
 {
 	public:
 		/// Apply a filter to the given stream.

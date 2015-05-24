@@ -20,6 +20,7 @@
 
 #include <cassert>
 #include <iostream>
+#include <vector>
 #include <camoto/stream_filtered.hpp>
 
 namespace camoto {
@@ -27,7 +28,8 @@ namespace stream {
 
 input_filtered::input_filtered(std::shared_ptr<input> parent,
 	std::shared_ptr<filter> read_filter)
-	:	in_parent(parent),
+	:	string_core(std::string()),
+		in_parent(parent),
 		read_filter(read_filter),
 		populated(false)
 {
@@ -39,25 +41,25 @@ input_filtered::input_filtered(std::shared_ptr<input> parent,
 stream::len input_filtered::try_read(uint8_t *buffer, stream::len len)
 {
 	this->populate();
-	return this->input_memory::try_read(buffer, len);
+	return this->input_string::try_read(buffer, len);
 }
 
 void input_filtered::seekg(stream::delta off, seek_from from)
 {
 	this->populate();
-	return this->input_memory::seekg(off, from);
+	return this->input_string::seekg(off, from);
 }
 
 stream::pos input_filtered::tellg() const
 {
 	this->populate();
-	return this->input_memory::tellg();
+	return this->input_string::tellg();
 }
 
 stream::len input_filtered::size() const
 {
 	this->populate();
-	return this->input_memory::size();
+	return this->input_string::size();
 }
 
 void input_filtered::populate() const
@@ -119,7 +121,8 @@ std::shared_ptr<input> input_filtered::get_stream()
 
 output_filtered::output_filtered(std::shared_ptr<output> parent,
 	std::shared_ptr<filter> write_filter, fn_notify_prefiltered_size set_orig_size)
-	:	out_parent(parent),
+	:	string_core(std::string()),
+		out_parent(parent),
 		write_filter(write_filter),
 		fn_set_orig_size(set_orig_size),
 		done_filter(false)
@@ -136,19 +139,19 @@ stream::len output_filtered::try_write(const uint8_t *buffer, stream::len len)
 	// Data has changed, make sure we flush it
 	this->done_filter = false;
 
-	return this->output_memory::try_write(buffer, len);
+	return this->output_string::try_write(buffer, len);
 }
 
 void output_filtered::seekp(stream::delta off, seek_from from)
 {
 	this->populate();
-	return this->output_memory::seekp(off, from);
+	return this->output_string::seekp(off, from);
 }
 
 stream::pos output_filtered::tellp() const
 {
 	this->populate();
-	return this->output_memory::tellp();
+	return this->output_string::tellp();
 }
 
 void output_filtered::flush()
@@ -163,7 +166,7 @@ void output_filtered::flush()
 	std::vector<uint8_t> bufOut; // data is filtered to here first
 	unsigned long lenFinal = 0;
 
-	const uint8_t *bufIn = this->data.data();
+	auto bufIn = reinterpret_cast<const uint8_t *>(this->data.data());
 	stream::len lenRealSize = this->data.size();
 	stream::len lenRemaining = lenRealSize;
 	stream::len lenIn, lenOut;
@@ -226,7 +229,8 @@ std::shared_ptr<output> output_filtered::get_stream()
 filtered::filtered(std::shared_ptr<inout> parent,
 	std::shared_ptr<filter> read_filter, std::shared_ptr<filter> write_filter,
 	fn_notify_prefiltered_size set_orig_size)
-	:	input_filtered(parent, read_filter),
+	:	string_core(std::string()),
+		input_filtered(parent, read_filter),
 		output_filtered(parent, write_filter, set_orig_size)
 {
 }

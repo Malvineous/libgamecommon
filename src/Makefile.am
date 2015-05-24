@@ -14,7 +14,6 @@ libgamecommon_la_SOURCES += metadata.cpp
 libgamecommon_la_SOURCES += stream.cpp
 libgamecommon_la_SOURCES += stream_file.cpp
 libgamecommon_la_SOURCES += stream_filtered.cpp
-libgamecommon_la_SOURCES += stream_memory.cpp
 libgamecommon_la_SOURCES += stream_seg.cpp
 libgamecommon_la_SOURCES += stream_string.cpp
 libgamecommon_la_SOURCES += stream_sub.cpp
