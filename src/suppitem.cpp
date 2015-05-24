@@ -22,24 +22,24 @@
 
 namespace camoto {
 
-std::string suppToString(SuppItem::Type s)
+std::string suppToString(SuppItem s)
 {
 	switch (s) {
-		case SuppItem::Dictionary: return "Dictionary";
-		case SuppItem::FAT: return "FAT";
-		case SuppItem::Palette: return "Palette";
+		case SuppItem::Dictionary:  return "Dictionary";
+		case SuppItem::FAT:         return "FAT";
+		case SuppItem::Palette:     return "Palette";
 		case SuppItem::Instruments: return "Instruments";
-		case SuppItem::Layer1: return "Layer1";
-		case SuppItem::Layer2: return "Layer2";
-		case SuppItem::Layer3: return "Layer3";
-		case SuppItem::Extra1: return "Extra1";
-		case SuppItem::Extra2: return "Extra2";
-		case SuppItem::Extra3: return "Extra3";
-		case SuppItem::Extra4: return "Extra4";
-		case SuppItem::Extra5: return "Extra5";
-		case SuppItem::MaxValue: return "MaxValue";
+		case SuppItem::Layer1:      return "Layer1";
+		case SuppItem::Layer2:      return "Layer2";
+		case SuppItem::Layer3:      return "Layer3";
+		case SuppItem::Extra1:      return "Extra1";
+		case SuppItem::Extra2:      return "Extra2";
+		case SuppItem::Extra3:      return "Extra3";
+		case SuppItem::Extra4:      return "Extra4";
+		case SuppItem::Extra5:      return "Extra5";
+		case SuppItem::MaxValue:    return "<SuppItem out of range: MaxValue>";
 	}
-	return "<SuppItem::Type out of range>";
+	return "<SuppItem out of range>";
 }
 
 } // namespace camoto

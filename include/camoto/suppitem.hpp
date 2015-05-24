@@ -35,48 +35,44 @@ namespace camoto {
  *
  * @see TilesetType::getRequiredSupps(), ImageType::getRequiredSupps()
  */
-struct SuppItem {
+enum class SuppItem {
 
-	/// Type of supplemental file.
-	enum Type {
+	// Common
+	Dictionary,  ///< Compression dictionary is external
 
-		// Common
-		Dictionary,  ///< Compression dictionary is external
+	// Archives
+	FAT,         ///< FAT is stored externally
 
-		// Archives
-		FAT,         ///< FAT is stored externally
+	// Images
+	Palette,     ///< Palette data
 
-		// Images
-		Palette,     ///< Palette data
+	// Music
+	Instruments, ///< Instrument patches/settings
 
-		// Music
-		Instruments, ///< Instrument patches/settings
+	// Maps
+	Layer1,      ///< A map layer
+	Layer2,      ///< A second map layer
+	Layer3,      ///< A third map layer
 
-		// Maps
-		Layer1,      ///< A map layer
-		Layer2,      ///< A second map layer
-		Layer3,      ///< A third map layer
+	// Generic
+	Extra1,      ///< Additional file
+	Extra2,      ///< Additional file
+	Extra3,      ///< Additional file
+	Extra4,      ///< Additional file
+	Extra5,      ///< Additional file
 
-		// Generic
-		Extra1,      ///< Additional file
-		Extra2,      ///< Additional file
-		Extra3,      ///< Additional file
-		Extra4,      ///< Additional file
-		Extra5,      ///< Additional file
-
-		MaxValue ///< Count to use with loops
-	};
+	MaxValue ///< Count to use with loops
 
 };
 
 /// Convert a supp item into its name as a string.
-std::string DLL_EXPORT suppToString(SuppItem::Type s);
+std::string DLL_EXPORT suppToString(SuppItem s);
 
 /// A list of required supplemental files and their filenames.
-typedef std::map<SuppItem::Type, std::string> SuppFilenames;
+typedef std::map<SuppItem, std::string> SuppFilenames;
 
 /// A list of the supplemental file types mapped to open file streams.
-typedef std::map<SuppItem::Type, std::unique_ptr<stream::inout> > SuppData;
+typedef std::map<SuppItem, std::unique_ptr<stream::inout> > SuppData;
 
 } // namespace camoto
 
