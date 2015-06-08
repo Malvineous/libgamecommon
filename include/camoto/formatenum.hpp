@@ -29,6 +29,9 @@ namespace camoto {
 template <class T>
 class FormatEnumerator {
 	public:
+		/// Type that is ultimately opened by this FormatEnumerator
+		typedef typename T::obj_t obj_t;
+
 		// This is a shared_ptr because the class is polymorphic and we don't want
 		// it to be sliced if it's copied.
 		typedef typename std::shared_ptr<const T> handler_t;
