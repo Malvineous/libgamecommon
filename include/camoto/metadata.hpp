@@ -45,7 +45,7 @@ class DLL_EXPORT Metadata
 {
 	public:
 		/// Metadata item types.
-		enum MetadataType {
+		enum class MetadataType {
 			Description,     ///< File description, remarks, etc.
 			PaletteFilename, ///< Palette filename
 			Version,         ///< Version/revision number
@@ -58,7 +58,7 @@ class DLL_EXPORT Metadata
 		typedef std::vector<MetadataType> MetadataTypes;
 
 		/// Map for associating strings with metadata item types.
-		typedef std::map<MetadataType, std::string> TypeMap;
+		typedef std::map<MetadataType, std::string> MetadataTypeMap;
 
 		/// Get a list of supported metadata elements that can be set.
 		/**
@@ -113,10 +113,10 @@ class DLL_EXPORT Metadata
 		virtual void setMetadata(MetadataType item, const std::string& value);
 };
 
+} // namespace camoto
+
 /// Convert a metadata item into text.
 DLL_EXPORT std::ostream& operator << (std::ostream& s,
 	const camoto::Metadata::MetadataType& m);
-
-} // namespace camoto
 
 #endif // _CAMOTO_METADATA_HPP_

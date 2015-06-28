@@ -26,7 +26,7 @@ namespace camoto {
 
 Metadata::MetadataTypes Metadata::getMetadataList() const
 {
-	return MetadataTypes();
+	return {};
 }
 
 std::string Metadata::getMetadata(MetadataType item) const
@@ -46,16 +46,16 @@ void Metadata::setMetadata(MetadataType item, const std::string& value)
 	throw stream::error("unsupported metadata item");
 }
 
+} // namespace camoto
+
 std::ostream& operator << (std::ostream& s, const camoto::Metadata::MetadataType& m)
 {
 	switch (m) {
-		case camoto::Metadata::Description: s << "Description"; break;
-		case camoto::Metadata::PaletteFilename: s << "Palette Filename"; break;
-		case camoto::Metadata::Version: s << "Version"; break;
-		case camoto::Metadata::Title: s << "Title"; break;
-		case camoto::Metadata::Author: s << "Author"; break;
+		case camoto::Metadata::MetadataType::Description: s << "Description"; break;
+		case camoto::Metadata::MetadataType::PaletteFilename: s << "Palette Filename"; break;
+		case camoto::Metadata::MetadataType::Version: s << "Version"; break;
+		case camoto::Metadata::MetadataType::Title: s << "Title"; break;
+		case camoto::Metadata::MetadataType::Author: s << "Author"; break;
 	}
 	return s;
 }
-
-} // namespace camoto
