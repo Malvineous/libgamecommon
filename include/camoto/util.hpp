@@ -79,10 +79,39 @@ files.
 
 <ul>
 	<li>
-		stream_seg - transparently add and remove chunks of data in the
-		middle of a stream
+		stream - data stream (such as a file), which can also be truncated
 	</li><li>
-		stream_sub - make a C++ iostream appear as a subsection of a larger stream
+		stream::file - stream implementation where data is stored in a file
+	</li><li>
+		stream::filtered - appears as a normal stream, but applies a filter to data
+		before reading/writing to the underlying stream
+	</li><li>
+		stream::seg - transparently add and remove chunks of data in the middle of
+		a stream
+	</li><li>
+		stream::string - stream implementation where data is stored in a string
+	</li><li>
+		stream::sub - create a new stream that works on a section of data within
+		another larger stream
+	</li><li>
+		bitstream - read/write/seek within a stream, but at the bit level
+	</li><li>
+		IFFReader/IFFWriter - standard interfaces to read/write/walk data chunks
+		in IFF and RIFF files
+	</li><li>
+		filter - standard interface to a stream filter, which changes data
+		on-the-fly, by compressing, decompressing, encrypting or changing the data
+		in another manner
+	</li><li>
+		filter-crop - filter that drops/ignores a number of bytes from the start of
+		the stream
+	</li><li>
+		filter-lzw - filter providing a number of various LZW compression and
+		decompression schemes
+	</li><li>
+		filter-lzss - filter providing LZSS compression/decompression
+	</li><li>
+		filter-pad - filter that transparently inserts/removes padding bytes in data
 	</li>
 </ul>
 
@@ -93,8 +122,7 @@ files.
 @code
 using namespace camoto;
 
-stream::file_sptr myfile(new stream::file());
-myfile->open("test.dat");
+stream::file myfile("test.dat", false);
 
 uint16_t value;
 
@@ -115,12 +143,13 @@ myfile >> u32le(value) >> u8(byte);
 @code
 using namespace camoto;
 
-stream::file_sptr myfile(new stream::file());
-myfile->open("test.dat");
+auto myfile = std::make_unique<stream::file>("test.dat", false);
 
 // Create a stream starting 10 bytes into test.dat and 15 bytes long.
-stream::sub_sptr sub(new stream::sub());
-sub->open(myfile, 10, 15, NULL);
+auto sub = std::make_shared<stream::sub>(
+	myfile,
+	10, 15, nullptr
+);
 
 sub->seekp(0, stream::start);
 sub->write(...); // data is written at offset 10 in test.dat
