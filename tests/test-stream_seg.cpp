@@ -487,11 +487,11 @@ BOOST_AUTO_TEST_CASE(segstream_insert_c01)
 {
 	BOOST_TEST_MESSAGE("Insert into first source");
 
-	BOOST_CHECKPOINT("01 About to seek");
+	BOOST_TEST_CHECKPOINT("01 About to seek");
 	this->seg->seekp(4, stream::start);
-	BOOST_CHECKPOINT("02 About to insert");
+	BOOST_TEST_CHECKPOINT("02 About to insert");
 	this->seg->insert(5);
-	BOOST_CHECKPOINT("03 About to write");
+	BOOST_TEST_CHECKPOINT("03 About to write");
 	this->seg->write("12345");
 
 	this->seg->flush();
@@ -504,11 +504,11 @@ BOOST_AUTO_TEST_CASE(segstream_insert_c02)
 {
 	BOOST_TEST_MESSAGE("Insert into second source");
 
-	BOOST_CHECKPOINT("01 About to seek");
+	BOOST_TEST_CHECKPOINT("01 About to seek");
 	this->seg->seekp(4, stream::start);
-	BOOST_CHECKPOINT("02 About to insert");
+	BOOST_TEST_CHECKPOINT("02 About to insert");
 	this->seg->insert(5);
-	BOOST_CHECKPOINT("03 About to write");
+	BOOST_TEST_CHECKPOINT("03 About to write");
 	this->seg->write("12345");
 
 	// Can't check here or the commit flattens the data and the third source
@@ -516,11 +516,11 @@ BOOST_AUTO_TEST_CASE(segstream_insert_c02)
 	/*BOOST_REQUIRE_MESSAGE(is_equal(9, "ABCD12345EFGHIJKLMNOPQRSTUVWXYZ"),
 		"Insert into second source failed");*/
 
-	BOOST_CHECKPOINT("04 About to seek");
+	BOOST_TEST_CHECKPOINT("04 About to seek");
 	this->seg->seekp(6, stream::start);
-	BOOST_CHECKPOINT("05 About to insert");
+	BOOST_TEST_CHECKPOINT("05 About to insert");
 	this->seg->insert(3);
-	BOOST_CHECKPOINT("06 About to write");
+	BOOST_TEST_CHECKPOINT("06 About to write");
 	this->seg->write("!@#");
 
 	this->seg->flush();
@@ -533,11 +533,11 @@ BOOST_AUTO_TEST_CASE(segstream_insert_c03)
 {
 	BOOST_TEST_MESSAGE("Insert into third source");
 
-	BOOST_CHECKPOINT("01 About to seek");
+	BOOST_TEST_CHECKPOINT("01 About to seek");
 	this->seg->seekp(4, stream::start);
-	BOOST_CHECKPOINT("02 About to insert");
+	BOOST_TEST_CHECKPOINT("02 About to insert");
 	this->seg->insert(5);
-	BOOST_CHECKPOINT("03 About to write");
+	BOOST_TEST_CHECKPOINT("03 About to write");
 	this->seg->write("12345");
 
 	// Can't check here or the commit flattens the data and the third source
@@ -545,19 +545,19 @@ BOOST_AUTO_TEST_CASE(segstream_insert_c03)
 	/*BOOST_REQUIRE_MESSAGE(is_equal(9, "ABCD12345EFGHIJKLMNOPQRSTUVWXYZ"),
 		"Insert into second source failed");*/
 
-	BOOST_CHECKPOINT("04 About to seek");
+	BOOST_TEST_CHECKPOINT("04 About to seek");
 	this->seg->seekp(15, stream::start);
-	BOOST_CHECKPOINT("05 About to insert");
+	BOOST_TEST_CHECKPOINT("05 About to insert");
 	this->seg->insert(3);
-	BOOST_CHECKPOINT("06 About to write");
+	BOOST_TEST_CHECKPOINT("06 About to write");
 	this->seg->write("!@#");
 
 	// Do it again (this time it'll be the third source's third source.)
-	BOOST_CHECKPOINT("07 About to seek");
+	BOOST_TEST_CHECKPOINT("07 About to seek");
 	this->seg->seekp(20, stream::start);
-	BOOST_CHECKPOINT("08 About to insert");
+	BOOST_TEST_CHECKPOINT("08 About to insert");
 	this->seg->insert(3);
-	BOOST_CHECKPOINT("09 About to write");
+	BOOST_TEST_CHECKPOINT("09 About to write");
 	this->seg->write("$%^");
 
 	this->seg->flush();
@@ -570,9 +570,9 @@ BOOST_AUTO_TEST_CASE(segstream_remove_c01)
 {
 	BOOST_TEST_MESSAGE("Remove from start of first source");
 
-	BOOST_CHECKPOINT("01 About to seek");
+	BOOST_TEST_CHECKPOINT("01 About to seek");
 	this->seg->seekp(0, stream::start);
-	BOOST_CHECKPOINT("02 About to remove");
+	BOOST_TEST_CHECKPOINT("02 About to remove");
 	this->seg->remove(5);
 
 	this->seg->flush();
@@ -583,7 +583,7 @@ BOOST_AUTO_TEST_CASE(segstream_remove_c01)
 		)),
 		"Remove from start of first source failed");
 
-	BOOST_CHECKPOINT("03 About to remove");
+	BOOST_TEST_CHECKPOINT("03 About to remove");
 	this->seg->remove(5);
 
 	this->seg->flush();
@@ -599,9 +599,9 @@ BOOST_AUTO_TEST_CASE(segstream_remove_c02)
 {
 	BOOST_TEST_MESSAGE("Remove data from middle of stream");
 
-	BOOST_CHECKPOINT("01 About to seek");
+	BOOST_TEST_CHECKPOINT("01 About to seek");
 	this->seg->seekp(20, stream::start);
-	BOOST_CHECKPOINT("02 About to remove");
+	BOOST_TEST_CHECKPOINT("02 About to remove");
 	this->seg->remove(5);
 
 	this->seg->flush();
@@ -609,9 +609,9 @@ BOOST_AUTO_TEST_CASE(segstream_remove_c02)
 	BOOST_REQUIRE_MESSAGE(is_equal(20, "ABCDEFGHIJKLMNOPQRSTZ"),
 		"Remove data from middle of stream failed");
 
-	BOOST_CHECKPOINT("03 About to seek");
+	BOOST_TEST_CHECKPOINT("03 About to seek");
 	this->seg->seekp(5, stream::start);
-	BOOST_CHECKPOINT("04 About to remove");
+	BOOST_TEST_CHECKPOINT("04 About to remove");
 	this->seg->remove(6);
 
 	this->seg->flush();
@@ -624,9 +624,9 @@ BOOST_AUTO_TEST_CASE(segstream_remove_c03)
 {
 	BOOST_TEST_MESSAGE("Remove data within third source");
 
-	BOOST_CHECKPOINT("01 About to seek");
+	BOOST_TEST_CHECKPOINT("01 About to seek");
 	this->seg->seekp(10, stream::start);
-	BOOST_CHECKPOINT("02 About to remove");
+	BOOST_TEST_CHECKPOINT("02 About to remove");
 	this->seg->remove(5);
 
 	// Can't check here or the commit flattens the data and the third source
@@ -634,9 +634,9 @@ BOOST_AUTO_TEST_CASE(segstream_remove_c03)
 	/*BOOST_REQUIRE_MESSAGE(is_equal(10, "ABCDEFGHIJPQRSTUVWXYZ"),
 		"Remove data from middle of first source failed");*/
 
-	BOOST_CHECKPOINT("03 About to seek");
+	BOOST_TEST_CHECKPOINT("03 About to seek");
 	this->seg->seekp(15, stream::start);
-	BOOST_CHECKPOINT("04 About to remove");
+	BOOST_TEST_CHECKPOINT("04 About to remove");
 	this->seg->remove(5);
 
 	this->seg->flush();
@@ -649,9 +649,9 @@ BOOST_AUTO_TEST_CASE(segstream_remove_c04)
 {
 	BOOST_TEST_MESSAGE("Remove data up to end of first source");
 
-	BOOST_CHECKPOINT("01 About to seek");
+	BOOST_TEST_CHECKPOINT("01 About to seek");
 	this->seg->seekp(20, stream::start);
-	BOOST_CHECKPOINT("02 About to remove");
+	BOOST_TEST_CHECKPOINT("02 About to remove");
 	this->seg->remove(6);
 
 	this->seg->flush();
@@ -659,9 +659,9 @@ BOOST_AUTO_TEST_CASE(segstream_remove_c04)
 	BOOST_REQUIRE_MESSAGE(is_equal(20, "ABCDEFGHIJKLMNOPQRST"),
 		"Remove data up to end of first source failed");
 
-	BOOST_CHECKPOINT("03 About to seek");
+	BOOST_TEST_CHECKPOINT("03 About to seek");
 	this->seg->seekp(15, stream::start);
-	BOOST_CHECKPOINT("04 About to remove");
+	BOOST_TEST_CHECKPOINT("04 About to remove");
 	this->seg->remove(5);
 
 	this->seg->flush();
@@ -674,11 +674,11 @@ BOOST_AUTO_TEST_CASE(segstream_remove_c05)
 {
 	BOOST_TEST_MESSAGE("Remove entire second source");
 
-	BOOST_CHECKPOINT("01 About to seek");
+	BOOST_TEST_CHECKPOINT("01 About to seek");
 	this->seg->seekp(10, stream::start);
-	BOOST_CHECKPOINT("02 About to insert");
+	BOOST_TEST_CHECKPOINT("02 About to insert");
 	this->seg->insert(5);
-	BOOST_CHECKPOINT("03 About to write into inserted space");
+	BOOST_TEST_CHECKPOINT("03 About to write into inserted space");
 	this->seg->write("12345");
 
 	// Can't check here or the commit flattens the data and the third source
@@ -686,9 +686,9 @@ BOOST_AUTO_TEST_CASE(segstream_remove_c05)
 	/*BOOST_REQUIRE_MESSAGE(is_equal(15, "ABCDEFGHIJ12345KLMNOPQRSTUVWXYZ"),
 		"Removing entire second source failed during set up phase");*/
 
-	BOOST_CHECKPOINT("04 About to seek");
+	BOOST_TEST_CHECKPOINT("04 About to seek");
 	this->seg->seekp(10, stream::start);
-	BOOST_CHECKPOINT("05 About to remove");
+	BOOST_TEST_CHECKPOINT("05 About to remove");
 	this->seg->remove(5);
 
 	this->seg->flush();
@@ -701,11 +701,11 @@ BOOST_AUTO_TEST_CASE(segstream_remove_c06)
 {
 	BOOST_TEST_MESSAGE("Remove start of second source");
 
-	BOOST_CHECKPOINT("01 About to seek");
+	BOOST_TEST_CHECKPOINT("01 About to seek");
 	this->seg->seekp(10, stream::start);
-	BOOST_CHECKPOINT("02 About to insert");
+	BOOST_TEST_CHECKPOINT("02 About to insert");
 	this->seg->insert(5);
-	BOOST_CHECKPOINT("03 About to write into inserted space");
+	BOOST_TEST_CHECKPOINT("03 About to write into inserted space");
 	this->seg->write("12345");
 
 	// Can't check here or the commit flattens the data and the third source
@@ -713,9 +713,9 @@ BOOST_AUTO_TEST_CASE(segstream_remove_c06)
 	/*BOOST_REQUIRE_MESSAGE(is_equal(15, "ABCDEFGHIJ12345KLMNOPQRSTUVWXYZ"),
 		"Removing entire second source failed during set up phase");*/
 
-	BOOST_CHECKPOINT("04 About to seek");
+	BOOST_TEST_CHECKPOINT("04 About to seek");
 	this->seg->seekp(10, stream::start);
-	BOOST_CHECKPOINT("05 About to remove");
+	BOOST_TEST_CHECKPOINT("05 About to remove");
 	this->seg->remove(3);
 
 	this->seg->flush();
@@ -728,11 +728,11 @@ BOOST_AUTO_TEST_CASE(segstream_remove_c07)
 {
 	BOOST_TEST_MESSAGE("Remove end of second source");
 
-	BOOST_CHECKPOINT("01 About to seek");
+	BOOST_TEST_CHECKPOINT("01 About to seek");
 	this->seg->seekp(10, stream::start);
-	BOOST_CHECKPOINT("02 About to insert");
+	BOOST_TEST_CHECKPOINT("02 About to insert");
 	this->seg->insert(5);
-	BOOST_CHECKPOINT("03 About to write into inserted space");
+	BOOST_TEST_CHECKPOINT("03 About to write into inserted space");
 	this->seg->write("12345");
 
 	// Can't check here or the commit flattens the data and the third source
@@ -740,15 +740,15 @@ BOOST_AUTO_TEST_CASE(segstream_remove_c07)
 	/*BOOST_REQUIRE_MESSAGE(is_equal(15, "ABCDEFGHIJ12345KLMNOPQRSTUVWXYZ"),
 		"Removing entire second source failed during set up phase");*/
 
-	BOOST_CHECKPOINT("04 About to seek");
+	BOOST_TEST_CHECKPOINT("04 About to seek");
 	this->seg->seekp(12, stream::start);
-	BOOST_CHECKPOINT("05 About to remove");
+	BOOST_TEST_CHECKPOINT("05 About to remove");
 	this->seg->remove(3);
 
 	// Do it again
-	BOOST_CHECKPOINT("04 About to seek");
+	BOOST_TEST_CHECKPOINT("04 About to seek");
 	this->seg->seekp(11, stream::start);
-	BOOST_CHECKPOINT("05 About to remove");
+	BOOST_TEST_CHECKPOINT("05 About to remove");
 	this->seg->remove(1);
 
 	this->seg->flush();
@@ -761,11 +761,11 @@ BOOST_AUTO_TEST_CASE(segstream_remove_c08)
 {
 	BOOST_TEST_MESSAGE("Remove middle of second source");
 
-	BOOST_CHECKPOINT("01 About to seek");
+	BOOST_TEST_CHECKPOINT("01 About to seek");
 	this->seg->seekp(10, stream::start);
-	BOOST_CHECKPOINT("02 About to insert");
+	BOOST_TEST_CHECKPOINT("02 About to insert");
 	this->seg->insert(5);
-	BOOST_CHECKPOINT("03 About to write into inserted space");
+	BOOST_TEST_CHECKPOINT("03 About to write into inserted space");
 	this->seg->write("12345");
 
 	// Can't check here or the commit flattens the data and the third source
@@ -773,12 +773,12 @@ BOOST_AUTO_TEST_CASE(segstream_remove_c08)
 	/*BOOST_REQUIRE_MESSAGE(is_equal(15, "ABCDEFGHIJ12345KLMNOPQRSTUVWXYZ"),
 		"Removing entire second source failed during set up phase");*/
 
-	BOOST_CHECKPOINT("04 About to seek");
+	BOOST_TEST_CHECKPOINT("04 About to seek");
 	this->seg->seekp(11, stream::start);
-	BOOST_CHECKPOINT("05 About to remove");
+	BOOST_TEST_CHECKPOINT("05 About to remove");
 	this->seg->remove(2);
 	// Do it again
-	BOOST_CHECKPOINT("06 About to remove");
+	BOOST_TEST_CHECKPOINT("06 About to remove");
 	this->seg->remove(1);
 
 	this->seg->flush();
