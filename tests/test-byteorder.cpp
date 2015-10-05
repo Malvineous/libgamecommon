@@ -25,6 +25,10 @@
 #define BYTEORDER_USE_IOSTREAMS
 #define BYTEORDER_PROVIDE_TYPED_FUNCTIONS
 
+// Put the byte order tests in a separate namespace, to work around an MSVC
+// bug where it picks the wrong overloaded function, because both versions
+// are defined in the same .hpp file.
+namespace test_std_stream {
 #include <camoto/byteorder.hpp>
 
 /* IMPORTANT NOTE
@@ -196,3 +200,5 @@ BOOST_AUTO_TEST_CASE(stream_read)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+} // namespace test_std_stream
