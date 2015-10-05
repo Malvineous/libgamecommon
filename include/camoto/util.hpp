@@ -27,7 +27,7 @@
 #define TOSTRING_X(x)  #x
 #define TOSTRING(x)    TOSTRING_X(x)
 
-#if (__cplusplus < 201300L)
+#if (((__cplusplus < 201300L) && (!defined(_MSC_VER))) || (defined(_MSC_VER) && (_MSC_VER < 1900)))
 #include <memory>
 namespace std {
 
