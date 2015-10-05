@@ -79,7 +79,7 @@ bitstream::~bitstream()
 int bitstream::read(unsigned int bits, unsigned int *out)
 {
 	assert(this->parent);
-	return this->read(NULL, bits, out);
+	return this->read(nullptr, bits, out);
 }
 
 int bitstream::read(fn_getnextchar fnNextChar, unsigned int bits, unsigned int *out)
@@ -97,7 +97,7 @@ int bitstream::read(fn_getnextchar fnNextChar, unsigned int bits, unsigned int *
 		// far, so that we don't lose any data previously written.
 		stream::pos r;
 		uint8_t b;
-		if (fnNextChar == NULL) {
+		if (fnNextChar == nullptr) {
 			this->parent->seekg(this->offset, stream::start);
 			r = this->parent->try_read(&b, 1);
 		} else {
@@ -193,7 +193,7 @@ int bitstream::read(fn_getnextchar fnNextChar, unsigned int bits, unsigned int *
 int bitstream::write(unsigned int bits, unsigned int in)
 {
 	assert(this->parent);
-	return this->write(NULL, bits, in);
+	return this->write(nullptr, bits, in);
 }
 
 int bitstream::write(fn_putnextchar fnNextChar, unsigned int bits, unsigned int in)
@@ -356,7 +356,7 @@ bitstream::endian bitstream::getEndian()
 
 void bitstream::flushByte()
 {
-	this->flushByte(NULL);
+	this->flushByte(nullptr);
 	return;
 }
 
