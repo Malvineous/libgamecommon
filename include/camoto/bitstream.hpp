@@ -36,10 +36,10 @@ typedef std::function<int (uint8_t*)> fn_getnextchar;
 typedef std::function<int (uint8_t)> fn_putnextchar;
 
 /// fn_getnextchar implementation for use in filters.
-int bitstreamFilterNextChar(const uint8_t **in, stream::len *lenIn, stream::len *r, uint8_t *out);
+int DLL_EXPORT bitstreamFilterNextChar(const uint8_t **in, stream::len *lenIn, stream::len *r, uint8_t *out);
 
 /// fn_putnextchar implementation for use in filters.
-int bitstreamFilterPutChar(uint8_t **out, const stream::len *lenOut, stream::len *w, uint8_t in);
+int DLL_EXPORT bitstreamFilterPutChar(uint8_t **out, const stream::len *lenOut, stream::len *w, uint8_t in);
 
 /// Class for reading and writing to iostreams at the bit level rather than
 /// the byte level.
