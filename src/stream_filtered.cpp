@@ -199,7 +199,7 @@ void output_filtered::flush()
 
 		bufIn += lenIn;
 		lenRemaining -= lenIn;
-	} while ((lenIn != 0) && (lenOut != 0));
+	} while ((lenIn != 0) || (lenOut != 0));
 
 	this->out_parent->truncate(lenFinal);
 	this->out_parent->seekp(0, stream::start);
