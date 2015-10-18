@@ -47,7 +47,7 @@ inline std::string strerror_str(int errno2)
 		return createString("[empty string returned with no failure code when "
 			"getting message for error code " << errno2 << "]");
 	}
-	return std::string(pbuf);
+	return std::string(pbuf) + ".";
 }
 
 #ifdef WIN32
