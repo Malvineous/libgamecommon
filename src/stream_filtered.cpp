@@ -125,11 +125,20 @@ output_filtered::output_filtered(std::shared_ptr<output> parent,
 		out_parent(parent),
 		write_filter(write_filter),
 		fn_set_orig_size(set_orig_size),
-		done_filter(false)
+		done_filter(false),
+		need_flush(false)
 {
 	assert(parent);
 	assert(write_filter);
 	return;
+}
+
+output_filtered::~output_filtered()
+{
+	if (this->need_flush) {
+		std::cerr << "Warning: stream::filtered destroyed with unflushed data."
+			<< std::endl;
+	}
 }
 
 stream::len output_filtered::try_write(const uint8_t *buffer, stream::len len)
@@ -138,6 +147,7 @@ stream::len output_filtered::try_write(const uint8_t *buffer, stream::len len)
 
 	// Data has changed, make sure we flush it
 	this->done_filter = false;
+	this->need_flush = true;
 
 	return this->output_string::try_write(buffer, len);
 }
@@ -156,12 +166,15 @@ stream::pos output_filtered::tellp() const
 
 void output_filtered::flush()
 {
+	if (!this->need_flush) return; // nothing to flush, nothing has changed
+
 	if (this->done_filter) {
 		std::cout << "WARNING: Tried to flush a filtered stream twice, ignoring "
 			"second flush to avoid additional call to filter." << std::endl;
 		return;
 	}
 	this->done_filter = true;
+	this->need_flush = false;
 
 	std::vector<uint8_t> bufOut; // data is filtered to here first
 	unsigned long lenFinal = 0;

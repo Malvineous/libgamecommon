@@ -56,9 +56,6 @@ seg::~seg()
 
 stream::len seg::try_read(uint8_t *buffer, stream::len len)
 {
-	// Make sure open() has been called
-	assert(this->parent);
-
 	// Read the first stream
 	stream::pos lenReadFirst; // How much we read from the first stream
 	stream::pos lenRemaining = len; // How much left to read from second/third streams
@@ -182,9 +179,6 @@ stream::pos seg::tellg() const
 
 stream::len seg::size() const
 {
-	// Make sure open() has been called
-	assert(this->parent);
-
 	std::streamsize lenTotal = this->off_endparent - this->off_parent
 		+ this->vcSecond.size();
 	if (this->psegThird) lenTotal += this->psegThird->size();
@@ -193,9 +187,6 @@ stream::len seg::size() const
 
 stream::len seg::try_write(const uint8_t *buffer, stream::len len)
 {
-	// Make sure open() has been called
-	assert(this->parent);
-
 	// Write to the first stream
 	stream::pos lenWroteFirst; // How much we wrote to the first source
 	stream::pos lenRemaining = len; // How much left to write to the second/third sources
@@ -295,9 +286,6 @@ void seg::truncate(stream::pos size)
 
 void seg::flush()
 {
-	// Make sure open() has been called
-	assert(this->parent);
-
 	stream::len plenStream = this->parent->size();
 	stream::len lenTotal = this->size();
 	if (plenStream < lenTotal) {

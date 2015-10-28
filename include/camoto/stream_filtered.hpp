@@ -158,6 +158,7 @@ class DLL_EXPORT output_filtered: virtual public output_string
 		 */
 		output_filtered(std::shared_ptr<output> parent,
 			std::shared_ptr<filter> write_filter, fn_notify_prefiltered_size resize);
+		virtual ~output_filtered();
 
 		virtual stream::len try_write(const uint8_t *buffer, stream::len len);
 		virtual void seekp(stream::delta off, seek_from from);
@@ -188,8 +189,11 @@ class DLL_EXPORT output_filtered: virtual public output_string
 		/// Size-change notification callback
 		fn_notify_prefiltered_size fn_set_orig_size;
 
-		/// true once filter has run once
+		/// true once filter has run once (set to false again on write)
 		bool done_filter;
+
+		/// true once data has been written, until flush() has been called
+		bool need_flush;
 };
 
 /// Read/write stream applying a filter to another read/write stream.
