@@ -50,6 +50,7 @@ class DLL_EXPORT seg: virtual public inout
 		 *   Parent stream supplying the data.
 		 */
 		seg(std::unique_ptr<inout> parent);
+		virtual ~seg();
 
 		virtual stream::len try_read(uint8_t *buffer, stream::len len);
 		virtual void seekg(stream::delta off, seek_from from);

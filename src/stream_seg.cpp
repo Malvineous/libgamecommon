@@ -43,6 +43,17 @@ seg::seg(std::unique_ptr<inout> parent)
 	this->parent->seekp(0, stream::start);
 }
 
+seg::~seg()
+{
+	if (
+		(this->off_parent != 0)
+		|| (!this->vcSecond.empty())
+		|| (this->psegThird)
+	) {
+		std::cerr << "Warning: stream::seg destroyed without flushing changes first!\n";
+	}
+}
+
 stream::len seg::try_read(uint8_t *buffer, stream::len len)
 {
 	// Make sure open() has been called
@@ -554,6 +565,7 @@ void seg::commit(stream::pos poffWriteFirst)
 
 	if (this->psegThird) {
 		this->off_endparent += this->psegThird->size();
+		this->psegThird->off_parent = 0; // prevent warning in destructor
 		this->psegThird.reset();
 	}
 
