@@ -66,7 +66,7 @@ enum class SuppItem {
 };
 
 /// Convert a supp item into its name as a string.
-std::string DLL_EXPORT suppToString(SuppItem s);
+std::string CAMOTO_GAMECOMMON_API suppToString(SuppItem s);
 
 /// A list of required supplemental files and their filenames.
 typedef std::map<SuppItem, std::string> SuppFilenames;

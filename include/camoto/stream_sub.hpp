@@ -34,7 +34,7 @@ class output_sub;
 typedef std::function<void(output_sub*, len)> fn_truncate_sub;
 
 /// Substream parts in common with read and write
-class DLL_EXPORT sub_core
+class CAMOTO_GAMECOMMON_API sub_core
 {
 	public:
 		virtual ~sub_core();
@@ -91,7 +91,7 @@ class DLL_EXPORT sub_core
 };
 
 /// Read-only stream to access a section within another stream.
-class DLL_EXPORT input_sub:
+class CAMOTO_GAMECOMMON_API input_sub:
 	virtual public input,
 	virtual public sub_core
 {
@@ -121,7 +121,7 @@ class DLL_EXPORT input_sub:
 };
 
 /// Write-only stream to access a section within another stream.
-class DLL_EXPORT output_sub:
+class CAMOTO_GAMECOMMON_API output_sub:
 	virtual public output,
 	virtual public sub_core
 {
@@ -172,7 +172,7 @@ class DLL_EXPORT output_sub:
 };
 
 /// Read/write stream accessing a section within another stream.
-class DLL_EXPORT sub:
+class CAMOTO_GAMECOMMON_API sub:
 	virtual public inout,
 	virtual public input_sub,
 	virtual public output_sub

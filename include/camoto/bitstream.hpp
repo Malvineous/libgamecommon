@@ -24,11 +24,8 @@
 
 #include <memory>
 #include <functional>
+#include <camoto/config.hpp>
 #include <camoto/stream.hpp>
-
-#ifndef DLL_EXPORT
-#define DLL_EXPORT
-#endif
 
 namespace camoto {
 
@@ -36,14 +33,14 @@ typedef std::function<int (uint8_t*)> fn_getnextchar;
 typedef std::function<int (uint8_t)> fn_putnextchar;
 
 /// fn_getnextchar implementation for use in filters.
-int DLL_EXPORT bitstreamFilterNextChar(const uint8_t **in, stream::len *lenIn, stream::len *r, uint8_t *out);
+int CAMOTO_GAMECOMMON_API bitstreamFilterNextChar(const uint8_t **in, stream::len *lenIn, stream::len *r, uint8_t *out);
 
 /// fn_putnextchar implementation for use in filters.
-int DLL_EXPORT bitstreamFilterPutChar(uint8_t **out, const stream::len *lenOut, stream::len *w, uint8_t in);
+int CAMOTO_GAMECOMMON_API bitstreamFilterPutChar(uint8_t **out, const stream::len *lenOut, stream::len *w, uint8_t in);
 
 /// Class for reading and writing to iostreams at the bit level rather than
 /// the byte level.
-class DLL_EXPORT bitstream
+class CAMOTO_GAMECOMMON_API bitstream
 {
 	private:
 		/// Parent stream, where the actual data is read from and written to.

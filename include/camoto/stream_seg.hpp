@@ -41,7 +41,7 @@ class seg;
  *
  * @see insert() and remove()
  */
-class DLL_EXPORT seg: virtual public inout
+class CAMOTO_GAMECOMMON_API seg: virtual public inout
 {
 	public:
 		/// Create a segmented stream backed onto another stream.

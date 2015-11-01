@@ -25,7 +25,7 @@
 
 namespace camoto {
 
-class DLL_EXPORT filter_crop: public filter
+class CAMOTO_GAMECOMMON_API filter_crop: public filter
 {
 	public:
 		filter_crop(stream::pos start);

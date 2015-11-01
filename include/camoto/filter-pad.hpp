@@ -26,7 +26,7 @@
 
 namespace camoto {
 
-class DLL_EXPORT filter_pad: public filter
+class CAMOTO_GAMECOMMON_API filter_pad: public filter
 {
 	public:
 		/// Constructor.

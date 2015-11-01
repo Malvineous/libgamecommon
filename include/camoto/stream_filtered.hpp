@@ -81,7 +81,7 @@ typedef std::function<void(stream::output_filtered*, stream::len)>
 	fn_notify_prefiltered_size;
 
 /// Read-only stream applying a filter to another read-only stream.
-class DLL_EXPORT input_filtered: virtual public input_string
+class CAMOTO_GAMECOMMON_API input_filtered: virtual public input_string
 {
 	public:
 		/// Apply a filter to the given stream.
@@ -133,7 +133,7 @@ class DLL_EXPORT input_filtered: virtual public input_string
 };
 
 /// Write-only stream applying a filter to another write-only stream.
-class DLL_EXPORT output_filtered: virtual public output_string
+class CAMOTO_GAMECOMMON_API output_filtered: virtual public output_string
 {
 	public:
 		/// Apply a filter to the given stream.
@@ -197,7 +197,7 @@ class DLL_EXPORT output_filtered: virtual public output_string
 };
 
 /// Read/write stream applying a filter to another read/write stream.
-class DLL_EXPORT filtered:
+class CAMOTO_GAMECOMMON_API filtered:
 	virtual public inout,
 	virtual public input_filtered,
 	virtual public output_filtered

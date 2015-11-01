@@ -2,6 +2,7 @@ library_includedir = $(includedir)/@camoto_release@/camoto/
 nobase_library_include_HEADERS  = attribute.hpp
 nobase_library_include_HEADERS += bitstream.hpp
 nobase_library_include_HEADERS += byteorder.hpp
+nobase_library_include_HEADERS += config.hpp
 nobase_library_include_HEADERS += debug.hpp
 nobase_library_include_HEADERS += error.hpp
 nobase_library_include_HEADERS += filter.hpp

@@ -29,7 +29,7 @@ namespace camoto {
 namespace stream {
 
 /// String stream parts in common with read and write
-class DLL_EXPORT string_core
+class CAMOTO_GAMECOMMON_API string_core
 {
 	public:
 		std::string data;  ///< String data
@@ -47,7 +47,7 @@ class DLL_EXPORT string_core
 };
 
 /// Read-only stream to access a C++ string.
-class DLL_EXPORT input_string:
+class CAMOTO_GAMECOMMON_API input_string:
 	virtual public input,
 	virtual public string_core
 {
@@ -66,7 +66,7 @@ class DLL_EXPORT input_string:
 };
 
 /// Write-only stream to access a C++ string.
-class DLL_EXPORT output_string:
+class CAMOTO_GAMECOMMON_API output_string:
 	virtual public output,
 	virtual public string_core
 {
@@ -85,7 +85,7 @@ class DLL_EXPORT output_string:
 };
 
 /// Read/write stream accessing a C++ string.
-class DLL_EXPORT string:
+class CAMOTO_GAMECOMMON_API string:
 	virtual public inout,
 	virtual public input_string,
 	virtual public output_string

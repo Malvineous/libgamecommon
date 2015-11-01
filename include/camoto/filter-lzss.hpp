@@ -22,19 +22,14 @@
 #define _CAMOTO_FILTER_LZSS_HPP_
 
 #include <vector>
-#include <deque>
-
+#include <camoto/config.hpp>
 #include <camoto/bitstream.hpp>
 #include <camoto/filter.hpp>
-
-#ifndef DLL_EXPORT
-#define DLL_EXPORT
-#endif
 
 namespace camoto {
 
 /// LZSS decompressor
-class DLL_EXPORT filter_lzss_decompress: public filter
+class CAMOTO_GAMECOMMON_API filter_lzss_decompress: public filter
 {
 	public:
 		/// LZSS decompressor.
@@ -77,7 +72,7 @@ class DLL_EXPORT filter_lzss_decompress: public filter
 };
 
 /// LZSS compressor
-class DLL_EXPORT filter_lzss_compress: public filter
+class CAMOTO_GAMECOMMON_API filter_lzss_compress: public filter
 {
 	public:
 		/// LZSS compression constructor.

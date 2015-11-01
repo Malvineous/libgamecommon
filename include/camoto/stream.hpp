@@ -23,6 +23,7 @@
 
 #include <cstring>
 #include <stdint.h>
+#include <camoto/config.hpp>
 #include <camoto/error.hpp>
 
 namespace camoto {
@@ -47,7 +48,7 @@ typedef unsigned_int_type len;
 typedef signed_int_type delta;
 
 /// Base exception for stream functions.
-class DLL_EXPORT error: public camoto::error
+class CAMOTO_GAMECOMMON_API error: public camoto::error
 {
 	public:
 		/// Constructor.
@@ -59,7 +60,7 @@ class DLL_EXPORT error: public camoto::error
 };
 
 /// Could not read data from stream.
-class DLL_EXPORT read_error: public error
+class CAMOTO_GAMECOMMON_API read_error: public error
 {
 	public:
 		/// Constructor.
@@ -71,7 +72,7 @@ class DLL_EXPORT read_error: public error
 };
 
 /// Could not write data to stream.
-class DLL_EXPORT write_error: public error
+class CAMOTO_GAMECOMMON_API write_error: public error
 {
 	public:
 		/// Constructor.
@@ -83,7 +84,7 @@ class DLL_EXPORT write_error: public error
 };
 
 /// Tried to seek before file start or after file end.
-class DLL_EXPORT seek_error: public error
+class CAMOTO_GAMECOMMON_API seek_error: public error
 {
 	public:
 		/// Constructor.
@@ -95,7 +96,7 @@ class DLL_EXPORT seek_error: public error
 };
 
 /// Not all the expected data could be written to the stream.
-class DLL_EXPORT incomplete_write: public write_error
+class CAMOTO_GAMECOMMON_API incomplete_write: public write_error
 {
 	public:
 		/// Number of bytes written before the error.
@@ -110,7 +111,7 @@ class DLL_EXPORT incomplete_write: public write_error
 };
 
 /// Not all the requested data could be read from the stream.
-class DLL_EXPORT incomplete_read: public read_error
+class CAMOTO_GAMECOMMON_API incomplete_read: public read_error
 {
 	public:
 		/// Number of bytes written before the error.
@@ -135,7 +136,7 @@ enum seek_from {
 /**
  * @post A newly created stream's seek pointer is always at the start (offset 0).
  */
-class DLL_EXPORT input
+class CAMOTO_GAMECOMMON_API input
 {
 	public:
 		virtual ~input() { };
@@ -276,7 +277,7 @@ class DLL_EXPORT input
  * @post A newly created stream's seek pointer is always at the start (offset
  *   0).
  */
-class DLL_EXPORT output
+class CAMOTO_GAMECOMMON_API output
 {
 	public:
 		virtual ~output() { };
@@ -423,7 +424,7 @@ class DLL_EXPORT output
 };
 
 /// Base stream interface for reading and writing data.
-class DLL_EXPORT inout: virtual public input, virtual public output {
+class CAMOTO_GAMECOMMON_API inout: virtual public input, virtual public output {
 };
 
 /// Output stream that automatically expands as needed.
@@ -439,11 +440,11 @@ class DLL_EXPORT inout: virtual public input, virtual public output {
  * truncate_here() at the end, in case the stream started off much larger than
  * the amount of data that was written.
  */
-class DLL_EXPORT expanding_output: virtual public output {
+class CAMOTO_GAMECOMMON_API expanding_output: virtual public output {
 };
 
 /// Base stream interface for reading and writing data.
-class DLL_EXPORT expanding_inout: virtual public inout, virtual public expanding_output {
+class CAMOTO_GAMECOMMON_API expanding_inout: virtual public inout, virtual public expanding_output {
 };
 
 /// Copy one stream into another.
@@ -467,7 +468,7 @@ class DLL_EXPORT expanding_inout: virtual public inout, virtual public expanding
  *   There was an error decoding the data required to perform this
  *   operation.
  */
-void DLL_EXPORT copy(output& dest, input& src);
+void CAMOTO_GAMECOMMON_API copy(output& dest, input& src);
 
 /// Copy possibly overlapping data from one position in a stream to another.
 /**
@@ -500,7 +501,7 @@ void DLL_EXPORT copy(output& dest, input& src);
  *   this function call are now at location \e to.  They may no longer exist at
  *   location \e from, if the regions overlapped.
  */
-void DLL_EXPORT move(inout& data, pos from, pos to, len len);
+void CAMOTO_GAMECOMMON_API move(inout& data, pos from, pos to, len len);
 
 /// iostream-style output function for char strings
 inline output& operator << (output& s, const char *d) {

@@ -25,7 +25,7 @@
 
 namespace camoto {
 
-class DLL_EXPORT filter_dummy: public filter
+class CAMOTO_GAMECOMMON_API filter_dummy: public filter
 {
 	public:
 		filter_dummy();

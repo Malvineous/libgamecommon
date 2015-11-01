@@ -29,13 +29,13 @@ namespace camoto {
 namespace stream {
 
 /// Get an input stream reading from standard input.
-std::unique_ptr<stream::input> DLL_EXPORT open_stdin();
+std::unique_ptr<stream::input> CAMOTO_GAMECOMMON_API open_stdin();
 
 /// Get an output stream writing to standard output.
-std::unique_ptr<stream::output> DLL_EXPORT open_stdout();
+std::unique_ptr<stream::output> CAMOTO_GAMECOMMON_API open_stdout();
 
 /// Exception thrown when a file could not be opened or created.
-class DLL_EXPORT open_error: public error
+class CAMOTO_GAMECOMMON_API open_error: public error
 {
 	public:
 		/// Constructor.
@@ -50,7 +50,7 @@ class DLL_EXPORT open_error: public error
 };
 
 /// File stream parts in common with read and write
-class DLL_EXPORT file_core
+class CAMOTO_GAMECOMMON_API file_core
 {
 	protected:
 		FILE *handle;  ///< stdio file handle
@@ -69,7 +69,7 @@ class DLL_EXPORT file_core
 };
 
 /// Read-only stream to access a local file.
-class DLL_EXPORT input_file: virtual public input,
+class CAMOTO_GAMECOMMON_API input_file: virtual public input,
 	virtual protected file_core
 {
 	public:
@@ -89,14 +89,14 @@ class DLL_EXPORT input_file: virtual public input,
 		virtual stream::pos tellg() const;
 		virtual stream::len size() const;
 
-		friend std::unique_ptr<stream::input> open_stdin();
+		friend std::unique_ptr<stream::input> CAMOTO_GAMECOMMON_API open_stdin();
 
 	protected:
 		input_file();
 };
 
 /// Write-only stream to access a local file.
-class DLL_EXPORT output_file: virtual public output,
+class CAMOTO_GAMECOMMON_API output_file: virtual public output,
 	virtual protected file_core
 {
 	public:
@@ -126,7 +126,7 @@ class DLL_EXPORT output_file: virtual public output,
 		/// Delete the file upon close.
 		void remove();
 
-		friend std::unique_ptr<stream::output> open_stdout();
+		friend std::unique_ptr<stream::output> CAMOTO_GAMECOMMON_API open_stdout();
 
 	protected:
 		bool do_remove;        ///< Delete file on close?
@@ -138,7 +138,7 @@ class DLL_EXPORT output_file: virtual public output,
 };
 
 /// Read/write stream accessing a local file.
-class DLL_EXPORT file: virtual public inout,
+class CAMOTO_GAMECOMMON_API file: virtual public inout,
 	virtual public input_file,
 	virtual public output_file
 {

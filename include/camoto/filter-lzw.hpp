@@ -23,13 +23,9 @@
 
 #include <vector>
 #include <deque>
-
+#include <camoto/config.hpp>
 #include <camoto/bitstream.hpp>
 #include <camoto/filter.hpp>
-
-#ifndef DLL_EXPORT
-#define DLL_EXPORT
-#endif
 
 namespace camoto {
 
@@ -43,7 +39,7 @@ namespace camoto {
 
 typedef char byte;
 // The string element:
-struct DLL_EXPORT CodeString
+struct CAMOTO_GAMECOMMON_API CodeString
 {
 	unsigned prefixIndex;
 
@@ -58,7 +54,7 @@ struct DLL_EXPORT CodeString
 	CodeString(byte newByte = 0, unsigned pI = ~0U);
 };
 
-class DLL_EXPORT Dictionary
+class CAMOTO_GAMECOMMON_API Dictionary
 {
 	std::vector<CodeString> table;
 	unsigned codeStart, newCodeStringIndex;
@@ -78,7 +74,7 @@ public:
 };
 
 /// LZW decompressor
-class DLL_EXPORT filter_lzw_decompress: public filter
+class CAMOTO_GAMECOMMON_API filter_lzw_decompress: public filter
 {
 	protected:
 		const unsigned int maxBits;  ///< Maximum codeword size (dictionary size limit)
@@ -160,7 +156,7 @@ class DLL_EXPORT filter_lzw_decompress: public filter
 };
 
 /// LZW compressor
-class DLL_EXPORT filter_lzw_compress: public filter
+class CAMOTO_GAMECOMMON_API filter_lzw_compress: public filter
 {
 	protected:
 		const unsigned int maxBits;  ///< Maximum codeword size (dictionary size limit)

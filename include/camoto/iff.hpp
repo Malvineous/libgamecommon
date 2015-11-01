@@ -23,15 +23,12 @@
 
 #include <memory>
 #include <vector>
+#include <camoto/config.hpp>
 #include <camoto/stream.hpp>
-
-#ifndef DLL_EXPORT
-#define DLL_EXPORT
-#endif
 
 namespace camoto {
 
-class DLL_EXPORT IFF
+class CAMOTO_GAMECOMMON_API IFF
 {
 	public:
 		typedef std::string fourcc;
@@ -51,7 +48,7 @@ class DLL_EXPORT IFF
 		};
 };
 
-class DLL_EXPORT IFFReader: public IFF
+class CAMOTO_GAMECOMMON_API IFFReader: public IFF
 {
 	public:
 		/// Create a new IFF reader which uses the given stream.
@@ -176,7 +173,7 @@ class DLL_EXPORT IFFReader: public IFF
 		void loadChunks(stream::len lenChunk);
 };
 
-class DLL_EXPORT IFFWriter: public IFF
+class CAMOTO_GAMECOMMON_API IFFWriter: public IFF
 {
 	public:
 		/// Create a new IFF writer which uses the given stream.

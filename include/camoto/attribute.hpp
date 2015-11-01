@@ -24,11 +24,8 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <camoto/config.hpp>
 #include <camoto/stream.hpp>
-
-#ifndef DLL_EXPORT
-#define DLL_EXPORT
-#endif
 
 namespace camoto {
 
@@ -114,7 +111,7 @@ struct Attribute
  * The functions all have no-op defaults, they only need to be overridden for
  * file formats that have special requirements.
  */
-class DLL_EXPORT HasAttributes
+class CAMOTO_GAMECOMMON_API HasAttributes
 {
 	public:
 		/// Get a copy of the attributes for this map.
@@ -169,7 +166,7 @@ class DLL_EXPORT HasAttributes
 } // namespace camoto
 
 /// Convert a metadata item into text.
-DLL_EXPORT std::ostream& operator << (std::ostream& s,
+CAMOTO_GAMECOMMON_API std::ostream& operator << (std::ostream& s,
 	const camoto::Attribute& a);
 
 #endif // _CAMOTO_ATTRIBUTE_HPP_
