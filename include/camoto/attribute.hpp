@@ -114,7 +114,7 @@ struct Attribute
  * The functions all have no-op defaults, they only need to be overridden for
  * file formats that have special requirements.
  */
-class HasAttributes
+class DLL_EXPORT HasAttributes
 {
 	public:
 		/// Get a copy of the attributes for this map.
