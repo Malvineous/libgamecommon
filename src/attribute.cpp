@@ -98,7 +98,7 @@ void HasAttributes::attribute(unsigned int index, const std::string& newValue)
 		case Attribute::Type::Text:
 			if (
 				(a.textMaxLength > 0)
-				&& (newValue.length() >= a.textMaxLength)
+				&& (newValue.length() > a.textMaxLength)
 			) {
 				throw camoto::error(createString("String too long for attribute #" << index
 					<< " - length is " << newValue.length() << ", must be less than "
