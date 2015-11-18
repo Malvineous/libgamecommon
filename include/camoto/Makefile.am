@@ -4,6 +4,7 @@ nobase_library_include_HEADERS += bitstream.hpp
 nobase_library_include_HEADERS += byteorder.hpp
 nobase_library_include_HEADERS += config.hpp
 nobase_library_include_HEADERS += debug.hpp
+nobase_library_include_HEADERS += enum-ops.hpp
 nobase_library_include_HEADERS += error.hpp
 nobase_library_include_HEADERS += filter.hpp
 nobase_library_include_HEADERS += filter-crop.hpp
