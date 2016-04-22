@@ -1,12 +1,24 @@
+sudo: false
+
 language: cpp
+
 compiler:
   - clang
   - gcc
+
+install:
+  - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
+
 before_script:
   - ./autogen.sh
+
 script:
  - ./configure && make && make check
+
 addons:
   apt:
+    sources:
+    - ubuntu-toolchain-r-test
     packages:
+    - g++-4.8
     - libboost-test-dev
