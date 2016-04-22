@@ -1,0 +1,12 @@
+language: cpp
+compiler:
+  - clang
+  - gcc
+before_script:
+  - ./autogen.sh
+script:
+ - ./configure && make && make check
+addons:
+  apt:
+    packages:
+    - libboost-test-dev
