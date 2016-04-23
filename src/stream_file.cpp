@@ -36,8 +36,10 @@ inline std::string strerror_str(int errno2)
 	errno = 0;
 #ifdef WIN32
 	strerror_s(buf, sizeof(buf), errno2);
-#else
+#elif defined(_GNU_SOURCE)
 	pbuf = strerror_r(errno2, buf, sizeof(buf));
+#else
+	strerror_r(errno2, buf, sizeof(buf));
 #endif
 	if (errno != 0) {
 		return createString("[unable to get message for error code " << errno2
