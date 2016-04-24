@@ -70,7 +70,7 @@ null_padded_write::null_padded_write(const std::string& r, stream::len len)
 
 void null_padded_write::write(stream::output& s) const
 {
-	unsigned int lenData = this->r.length();
+	auto lenData = this->r.length();
 	assert(lenData <= this->len);
 
 	// Write the content
@@ -81,7 +81,7 @@ void null_padded_write::write(stream::output& s) const
 	// Pad out to the full length with nulls
 	uint8_t blank[ZEROPAD_BLOCK_SIZE];
 	memset(blank, 0, ZEROPAD_BLOCK_SIZE);
-	int lenRemaining = this->len - lenData;
+	auto lenRemaining = this->len - lenData;
 	int amt = ZEROPAD_BLOCK_SIZE;
 	while (lenRemaining > 0) {
 		if (lenRemaining < ZEROPAD_BLOCK_SIZE) amt = lenRemaining;

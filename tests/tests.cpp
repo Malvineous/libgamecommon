@@ -44,7 +44,7 @@ void default_sample::printNice(boost::test_tools::predicate_result& res,
 	res.message() << c;
 	std::ostringstream text;
 	text << c;
-	unsigned int len = s.length();
+	auto len = s.length();
 	for (unsigned int i = 0; i < len; i++) {
 		if ((i > 0) && (i % this->outputWidth == 0)) {
 			res.message() << ' ' << text.str();

@@ -49,7 +49,7 @@ void Dictionary::fillDecodedString(unsigned code)
 {
 	decodedString.clear();
 	unsigned int safety = 0;
-	unsigned int tableSize = table.size();
+	auto tableSize = table.size();
 	while (code != ~0U) {
 		if (code >= tableSize) throw filter_error("LZW data is corrupted - "
 			"codeword was larger than the number of entries in the dictionary!");
