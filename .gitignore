@@ -41,3 +41,11 @@ doc/*.tag
 # Compiled binaries
 tests/tests
 tests/stdtests
+
+# Windows
+win32/.vs/
+win32/packages/
+win32/**/Debug/
+win32/**/Release/
+win32/**/*.filters
+win32/**/x64/
