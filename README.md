@@ -4,8 +4,8 @@ Copyright 2010-2016 Adam Nielsen <<malvineous@shikadi.net>>
 <http://www.shikadi.net/camoto/>  
 [![Build Status](https://travis-ci.org/Malvineous/libgamecommon.svg?branch=master)](https://travis-ci.org/Malvineous/libgamecommon)
 
-Camoto is a collection of utilities for editing (modding) "classic" DOS
-games - those from the early to mid 1990s.
+Camoto is a collection of utilities for editing (modding) "classic" PC
+games - those running under MS-DOS from the 1980s and 1990s.
 
 This is **libgamecommon**, the lowest-level component of the Camoto suite.  It
 contains shared code and routines used by most of the other Camoto libraries.

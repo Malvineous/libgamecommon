@@ -169,7 +169,7 @@ output_file::output_file(const std::string& filename, bool create)
 	// arbitrary points in the file.
 	//
 	// We also use this function as file::open() which *must* open in
-	// for read+write.
+	// read+write.
 	this->handle = fopen(this->filename.c_str(), create ? "w+b" : "r+b");
 	if ((!this->handle) && (errno == EACCES)) {
 		// Access denied, try read-only
