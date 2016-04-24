@@ -20,7 +20,7 @@
 
 #include <errno.h>
 #include <string.h>
-#ifndef WIN32
+#ifndef _WIN32
 #include <unistd.h>
 #else
 #include <io.h>
@@ -34,7 +34,7 @@ inline std::string strerror_str(int errno2)
 	buf[0] = 0;
 	char *pbuf = buf;
 	errno = 0;
-#ifdef WIN32
+#ifdef _WIN32
 	strerror_s(buf, sizeof(buf), errno2);
 #elif defined(_GNU_SOURCE)
 	pbuf = strerror_r(errno2, buf, sizeof(buf));
@@ -52,7 +52,7 @@ inline std::string strerror_str(int errno2)
 	return std::string(pbuf) + ".";
 }
 
-#ifdef WIN32
+#ifdef _WIN32
 #define unlink(x) _unlink(x)
 #define fileno _fileno
 #endif
@@ -213,7 +213,7 @@ stream::pos output_file::tellp() const
 void output_file::truncate(stream::pos size)
 {
 	int fd = fileno(this->handle);
-#ifndef WIN32
+#ifndef _WIN32
 	if (ftruncate(fd, size) < 0) {
 #else
 	if (_chsize(fd, size) < 0) {

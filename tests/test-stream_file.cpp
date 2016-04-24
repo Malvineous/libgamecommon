@@ -25,7 +25,7 @@
 #include <camoto/stream_file.hpp>
 #include "tests.hpp"
 
-#ifdef WIN32
+#ifdef _WIN32
 #define unlink(x) _unlink(x)
 #endif
 
