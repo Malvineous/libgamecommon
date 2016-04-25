@@ -1,0 +1,50 @@
+nuget {
+	nuspec {
+		id = libgamecommon;
+		version: 2.0;
+		title: libgamecommon;
+		authors: {Adam Nielsen};
+		owners: {Malvineous};
+		licenseUrl: "http://www.gnu.org/licenses/gpl-3.0.en.html";
+		projectUrl: "https://github.com/Malvineous/libgamecommon";
+		iconUrl: "http://www.shikadi.net/gfx/malvineous.png";
+		copyright: "Copyright 2010-2016 Adam Nielsen";
+		requireLicenseAcceptance: false;
+		description: "Common functions for all other Camoto libraries";
+		releaseNotes: "Initial release.";
+		tags: {camoto, native, nativepackage};
+	}
+	files {
+		#defines {
+			SDK_ROOT = "..\\..\\";
+			SolutionDir = "..\\";
+		}
+		include: {
+			"${SDK_ROOT}include\**\*.hpp"
+		};
+		docs: {
+			"${SDK_ROOT}README.md"
+		};
+		[x86,debug] {
+			bin: ${SolutionDir}Debug\${pkgname}.dll;
+			lib: ${SolutionDir}Debug\${pkgname}.lib;
+			symbols: ${SolutionDir}Debug\${pkgname}.pdb;
+		}
+		[x86,release] {
+			bin: ${SolutionDir}Release\${pkgname}.dll;
+			lib: ${SolutionDir}Release\${pkgname}.lib;
+		}
+		[x64,debug] {
+			bin: ${SolutionDir}x64\Debug\${pkgname}.dll;
+			lib: ${SolutionDir}x64\Debug\${pkgname}.lib;
+			symbols: ${SolutionDir}x64\Debug\${pkgname}.pdb;
+		}
+		[x64,release] {
+			bin: ${SolutionDir}x64\Release\${pkgname}.dll;
+			lib: ${SolutionDir}x64\Release\${pkgname}.lib;
+		}
+	}
+	targets {
+		Defines += HAS_LIBGAMECOMMON;
+	}
+}
