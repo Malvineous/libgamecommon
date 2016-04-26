@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(functions_signed)
 	BOOST_CHECK_EQUAL((host_to<int64_t, big_endian>(-2)), *( (int64_t *)"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFE" ));
 }
 
-BOOST_AUTO_TEST_CASE(stream_write)
+BOOST_AUTO_TEST_CASE(iostream_write)
 {
 	{
 		std::stringstream data;
@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE(stream_write)
 
 }
 
-BOOST_AUTO_TEST_CASE(stream_read)
+BOOST_AUTO_TEST_CASE(iostream_read)
 {
 	{
 		std::stringstream data;

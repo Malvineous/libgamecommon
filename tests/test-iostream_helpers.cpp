@@ -107,4 +107,115 @@ BOOST_AUTO_TEST_CASE(null_terminated_read)
 	}
 }
 
+BOOST_AUTO_TEST_CASE(stream_write)
+{
+	{
+		stream::string content;
+		content << u16le(0x0123);
+		BOOST_CHECK_EQUAL((uint8_t)content.data.at(0), 0x23);
+		BOOST_CHECK_EQUAL((uint8_t)content.data.at(1), 0x01);
+	}
+	{
+		stream::string content;
+		content << u32le(0x01234567);
+		BOOST_CHECK_EQUAL((uint8_t)content.data.at(0), 0x67);
+		BOOST_CHECK_EQUAL((uint8_t)content.data.at(1), 0x45);
+		BOOST_CHECK_EQUAL((uint8_t)content.data.at(2), 0x23);
+		BOOST_CHECK_EQUAL((uint8_t)content.data.at(3), 0x01);
+	}
+	{
+		stream::string content;
+		content << u64le(0x0123456789ABCDEF);
+		BOOST_CHECK_EQUAL((uint8_t)content.data.at(0), 0xEF);
+		BOOST_CHECK_EQUAL((uint8_t)content.data.at(1), 0xCD);
+		BOOST_CHECK_EQUAL((uint8_t)content.data.at(2), 0xAB);
+		BOOST_CHECK_EQUAL((uint8_t)content.data.at(3), 0x89);
+		BOOST_CHECK_EQUAL((uint8_t)content.data.at(4), 0x67);
+		BOOST_CHECK_EQUAL((uint8_t)content.data.at(5), 0x45);
+		BOOST_CHECK_EQUAL((uint8_t)content.data.at(6), 0x23);
+		BOOST_CHECK_EQUAL((uint8_t)content.data.at(7), 0x01);
+	}
+
+	{
+		stream::string content;
+		content << u16be(0x0123);
+		BOOST_CHECK_EQUAL((uint8_t)content.data.at(0), 0x01);
+		BOOST_CHECK_EQUAL((uint8_t)content.data.at(1), 0x23);
+	}
+	{
+		stream::string content;
+		content << u32be(0x01234567);
+		BOOST_CHECK_EQUAL((uint8_t)content.data.at(0), 0x01);
+		BOOST_CHECK_EQUAL((uint8_t)content.data.at(1), 0x23);
+		BOOST_CHECK_EQUAL((uint8_t)content.data.at(2), 0x45);
+		BOOST_CHECK_EQUAL((uint8_t)content.data.at(3), 0x67);
+	}
+	{
+		stream::string content;
+		content << u64be(0x0123456789ABCDEF);
+		BOOST_CHECK_EQUAL((uint8_t)content.data.at(0), 0x01);
+		BOOST_CHECK_EQUAL((uint8_t)content.data.at(1), 0x23);
+		BOOST_CHECK_EQUAL((uint8_t)content.data.at(2), 0x45);
+		BOOST_CHECK_EQUAL((uint8_t)content.data.at(3), 0x67);
+		BOOST_CHECK_EQUAL((uint8_t)content.data.at(4), 0x89);
+		BOOST_CHECK_EQUAL((uint8_t)content.data.at(5), 0xAB);
+		BOOST_CHECK_EQUAL((uint8_t)content.data.at(6), 0xCD);
+		BOOST_CHECK_EQUAL((uint8_t)content.data.at(7), 0xEF);
+	}
+
+}
+
+BOOST_AUTO_TEST_CASE(stream_read)
+{
+	{
+		stream::string content;
+		content << std::string("\x01\x23\x45\x67" "\x89\xAB\xCD\xEF", 8);
+		content.seekg(0, stream::start);
+		uint16_t v = 0;
+		content >> u16le(v);
+		BOOST_CHECK_EQUAL(v, 0x2301);
+	}
+	{
+		stream::string content;
+		content << "\x01\x23\x45\x67" "\x89\xAB\xCD\xEF";
+		content.seekg(0, stream::start);
+		uint32_t v = 0;
+		content >> u32le(v);
+		BOOST_CHECK_EQUAL(v, 0x67452301);
+	}
+	{
+		stream::string content;
+		content << "\x01\x23\x45\x67" "\x89\xAB\xCD\xEF";
+		content.seekg(0, stream::start);
+		uint64_t v = 0;
+		content >> u64le(v);
+		BOOST_CHECK_EQUAL(v, 0xEFCDAB8967452301);
+	}
+
+	{
+		stream::string content;
+		content << "\x01\x23\x45\x67" "\x89\xAB\xCD\xEF";
+		content.seekg(0, stream::start);
+		uint16_t v = 0;
+		content >> u16be(v);
+		BOOST_CHECK_EQUAL(v, 0x123);
+	}
+	{
+		stream::string content;
+		content << "\x01\x23\x45\x67" "\x89\xAB\xCD\xEF";
+		content.seekg(0, stream::start);
+		uint32_t v = 0;
+		content >> u32be(v);
+		BOOST_CHECK_EQUAL(v, 0x1234567);
+	}
+	{
+		stream::string content;
+		content << "\x01\x23\x45\x67" "\x89\xAB\xCD\xEF";
+		content.seekg(0, stream::start);
+		uint64_t v = 0;
+		content >> u64be(v);
+		BOOST_CHECK_EQUAL(v, 0x123456789ABCDEF);
+	}
+}
+
 BOOST_AUTO_TEST_SUITE_END()
