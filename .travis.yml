@@ -33,3 +33,7 @@ before_script:
 
 script:
   - ./configure && make && make check
+
+after_failure:
+  - if [ -f tests/tests.log ]; then cat tests/tests.log; fi
+  - if [ -f tests/stdtests.log ]; then cat tests/stdtests.log; fi
