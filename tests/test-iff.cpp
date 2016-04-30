@@ -60,6 +60,7 @@ BOOST_AUTO_TEST_CASE(riff_read)
 	BOOST_REQUIRE_EQUAL(type, "test");
 
 	std::vector<IFF::fourcc> chunks = iff.list();
+	BOOST_REQUIRE_EQUAL(chunks.size(), 5);
 	BOOST_REQUIRE_EQUAL(chunks[0], "one ");
 	BOOST_REQUIRE_EQUAL(chunks[1], "LIST");
 	BOOST_REQUIRE_EQUAL(chunks[2], "two ");
