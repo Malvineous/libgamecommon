@@ -1,0 +1,55 @@
+version: 1.0.{build}
+
+install:
+- ps: >-
+    $msiPath = "$($env:USERPROFILE)\CoApp.Tools.Powershell.msi"
+
+    (New-Object Net.WebClient).DownloadFile('http://coapp.org/files/CoApp.Tools.Powershell.msi', $msiPath)
+
+    Start-Process -FilePath msiexec -ArgumentList /i, $msiPath, /quiet -Wait
+
+    $env:PSModulePath = $env:PSModulePath + ';C:\Program Files (x86)\Outercurve Foundation\Modules'
+
+    Import-Module CoApp
+
+nuget:
+  disable_publish_on_pr: true
+
+build_script:
+- cmd: >-
+    @echo off
+
+
+    "%VS140COMNTOOLS%\VsMSBuildCmd.bat" && ^
+
+    appveyor-retry nuget restore win32\libgamecommon.sln && ^
+
+    msbuild win32\libgamecommon\libgamecommon.vcxproj /p:Configuration=Debug /p:Platform=x86 /p:SolutionDir=..\ /v:minimal /nologo && ^
+
+    msbuild win32\libgamecommon\libgamecommon.vcxproj /p:Configuration=Release /p:Platform=x86 /p:SolutionDir=..\ /v:minimal /nologo && ^
+
+    msbuild win32\libgamecommon\libgamecommon.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:SolutionDir=..\ /v:minimal /nologo && ^
+
+    msbuild win32\libgamecommon\libgamecommon.vcxproj /p:Configuration=Release /p:Platform=x64 /p:SolutionDir=..\ /v:minimal /nologo && ^
+
+    msbuild win32\libgamecommon-tests\libgamecommon-tests.vcxproj /p:Configuration=Debug /p:Platform=x86 /p:SolutionDir=..\ /v:minimal /nologo && ^
+
+    msbuild win32\libgamecommon-tests\libgamecommon-tests.vcxproj /p:Configuration=Release /p:Platform=x86 /p:SolutionDir=..\ /v:minimal /nologo && ^
+
+    msbuild win32\libgamecommon-tests\libgamecommon-tests.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:SolutionDir=..\ /v:minimal /nologo && ^
+
+    msbuild win32\libgamecommon-tests\libgamecommon-tests.vcxproj /p:Configuration=Release /p:Platform=x64 /p:SolutionDir=..\ /v:minimal /nologo
+
+before_deploy:
+- ps: >-
+    Write-NuGetPackage win32\libgamecommon\libgamecommon.autopkg
+
+    Get-ChildItem .\*.nupkg | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
+
+deploy:
+- provider: NuGet
+  api_key:
+    secure: 9Rk3FyZ1qSjw0eyhiyhsfyOpir/jfoV6t1IkPA4L3VA/fLPMpmNdjOxDaniqoDxL
+  artifact: /.*\.nupkg/
+  on:
+    branch: master
