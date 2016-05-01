@@ -1,7 +1,9 @@
 nuget {
 	nuspec {
 		id = libgamecommon;
-		version: 2.0;
+		// "@version" is replaced by the current Appveyor build number in the
+		// pre-deployment script.
+		version: @version;
 		title: libgamecommon;
 		authors: {Adam Nielsen};
 		owners: {Malvineous};

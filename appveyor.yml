@@ -1,12 +1,20 @@
-version: 1.0.{build}
+version: 2.0.{build}
 
 install:
 - ps: >-
+    # Download the CoApp tools.
+
     $msiPath = "$($env:USERPROFILE)\CoApp.Tools.Powershell.msi"
 
     (New-Object Net.WebClient).DownloadFile('http://coapp.org/files/CoApp.Tools.Powershell.msi', $msiPath)
 
+
+    # Install the CoApp tools from the downloaded .msi.
+
     Start-Process -FilePath msiexec -ArgumentList /i, $msiPath, /quiet -Wait
+
+
+    # Make the tools available for later PS scripts to use.
 
     $env:PSModulePath = $env:PSModulePath + ';C:\Program Files (x86)\Outercurve Foundation\Modules'
 
@@ -18,7 +26,6 @@ nuget:
 build_script:
 - cmd: >-
     @echo off
-
 
     "%VS140COMNTOOLS%\VsMSBuildCmd.bat" && ^
 
@@ -42,7 +49,22 @@ build_script:
 
 before_deploy:
 - ps: >-
-    Write-NuGetPackage win32\libgamecommon\libgamecommon.autopkg
+    # This is the CoApp .autopkg file to create.
+
+    $autopkgFile = "win32\libgamecommon\libgamecommon.autopkg"
+
+
+    # Get the ".autopkg.template" file, replace "@version" with the Appveyor version number, then save to the ".autopkg" file.
+
+    cat ($autopkgFile + ".template") | % { $_ -replace "@version", $env:appveyor_build_version } > $autopkgFile
+
+
+    # Use the CoApp tools to create NuGet native packages from the .autopkg.
+
+    Write-NuGetPackage $autopkgFile
+
+
+    # Push all newly created .nupkg files as Appveyor artifacts for later deployment.
 
     Get-ChildItem .\*.nupkg | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
 
