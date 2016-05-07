@@ -2,7 +2,7 @@
  * @file  filter-lzss.cpp
  * @brief Filter for compressing and decompressing data using LZSS.
  *
- * Copyright (C) 2010-2015 Adam Nielsen <malvineous@shikadi.net>
+ * Copyright (C) 2010-2016 Adam Nielsen <malvineous@shikadi.net>
  *
  * LZW algorithm based on GPL code by Juha Nieminen
  *   http://warp.povusers.org/EfficientLZW/
