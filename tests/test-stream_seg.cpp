@@ -393,11 +393,11 @@ BOOST_AUTO_TEST_CASE(segstream_large_insert_gap)
 }
 
 
-bool substreamTruncate(stream::output_sub *sub, stream::pos len,
+void substreamTruncate(stream::output_sub *sub, stream::pos len,
 	std::weak_ptr<stream::seg> w_parent)
 {
 	std::shared_ptr<stream::seg> parent = w_parent.lock();
-	if (!parent) return false;
+	if (!parent) return;
 
 	stream::pos off = sub->sub_start();
 	stream::pos orig = parent->tellp();
@@ -422,10 +422,10 @@ bool substreamTruncate(stream::output_sub *sub, stream::pos len,
 		sub->resize(len);
 	} catch (stream::error& e) {
 		std::cerr << "Error resizing substream: " << e.what() << std::endl;
-		return false;
+		return;
 	}
 	parent->seekp(orig, stream::start);
-	return true;
+	return;
 }
 
 // This reproduces a crash discovered by the fmt-rff-blood archive handler
