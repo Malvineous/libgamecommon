@@ -2,7 +2,8 @@ Camoto: Classic-game Modding Tools
 ==================================
 Copyright 2010-2016 Adam Nielsen <<malvineous@shikadi.net>>  
 <http://www.shikadi.net/camoto/>  
-[![Build Status](https://travis-ci.org/Malvineous/libgamecommon.svg?branch=master)](https://travis-ci.org/Malvineous/libgamecommon)
+Linux/OSX: [![Build Status (Linux/OSX)](https://travis-ci.org/Malvineous/libgamecommon.svg?branch=master)](https://travis-ci.org/Malvineous/libgamecommon)
+Windows: [![Build Status (Windows)](https://ci.appveyor.com/api/projects/status/aw7kjrx99iac8dgo?svg=true)](https://ci.appveyor.com/project/Malvineous/libgamecommon)
 
 Camoto is a collection of utilities for editing (modding) "classic" PC
 games - those running under MS-DOS from the 1980s and 1990s.
