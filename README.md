@@ -54,11 +54,10 @@ and these are run in the usual manner: `make check`
 
 The library is compiled and installed in the usual way:
 
+    ./autogen.sh          # Only if compiling from git
     ./configure && make
+    make check            # Optional, compile and run tests
     sudo make install
     sudo ldconfig
-
-If you downloaded the git release, run `./autogen.sh` before the commands
-above.
 
 This library is released under the GPLv3 license.
