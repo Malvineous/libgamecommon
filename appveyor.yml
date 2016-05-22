@@ -2,6 +2,18 @@ version: 2.0.{build}
 
 install:
 - ps: >-
+    # Download nuget.exe 2.x as default version (3.x) produces corrupted native .nupkg files
+
+    $nugetPath = "$($env:USERPROFILE)\nuget.exe"
+
+    (New-Object Net.WebClient).DownloadFile('https://nuget.org/nuget.exe', $nugetPath)
+
+
+    # Make the nuget.exe folder come first in the path, so it gets picked up before anything else
+
+    $env:Path = $env:USERPROFILE + ";" + $env:Path
+
+
     # Download the CoApp tools.
 
     $msiPath = "$($env:USERPROFILE)\CoApp.Tools.Powershell.msi"
