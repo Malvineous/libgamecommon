@@ -13,7 +13,7 @@ nuget {
 		copyright: "Copyright 2010-2016 Adam Nielsen";
 		requireLicenseAcceptance: false;
 		description: "Common functions for all other Camoto libraries";
-		releaseNotes: "Initial release.";
+		releaseNotes: "Package upstream git version.";
 		tags: {camoto, native, nativepackage};
 	}
 	files {
@@ -21,8 +21,9 @@ nuget {
 			SDK_ROOT = "..\\..\\";
 			SolutionDir = "..\\";
 		}
-		include: {
-			"${SDK_ROOT}include\**\*.hpp"
+		nestedInclude: {
+			#destination = ${d_include}camoto;
+				"${SDK_ROOT}include\camoto\*.hpp"
 		};
 		docs: {
 			"${SDK_ROOT}README.md"
