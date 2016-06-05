@@ -1,3 +1,16 @@
+#define {
+	// Must match the PlatformToolset options in appveyor.yml
+	toolsets: "v140,v140_xp";
+}
+
+configurations {
+	UserPlatformToolset {
+		// Needed for VS2015 support
+		key = "PlatformToolset";
+		choices: ${toolsets};
+	};
+}
+
 nuget {
 	nuspec {
 		id = libgamecommon;
@@ -14,7 +27,7 @@ nuget {
 		requireLicenseAcceptance: false;
 		description: "Common functions for all other Camoto libraries";
 		releaseNotes: "Package upstream git version.";
-		tags: {camoto, native, nativepackage};
+		tags: {camoto, native, nativepackage, ${toolsets}};
 	}
 	files {
 		#defines {
@@ -28,23 +41,12 @@ nuget {
 		docs: {
 			"${SDK_ROOT}README.md"
 		};
-		[x86,debug] {
-			bin: ${SolutionDir}Debug\${pkgname}.dll;
-			lib: ${SolutionDir}Debug\${pkgname}.lib;
-			symbols: ${SolutionDir}Debug\${pkgname}.pdb;
-		}
-		[x86,release] {
-			bin: ${SolutionDir}Release\${pkgname}.dll;
-			lib: ${SolutionDir}Release\${pkgname}.lib;
-		}
-		[x64,debug] {
-			bin: ${SolutionDir}x64\Debug\${pkgname}.dll;
-			lib: ${SolutionDir}x64\Debug\${pkgname}.lib;
-			symbols: ${SolutionDir}x64\Debug\${pkgname}.pdb;
-		}
-		[x64,release] {
-			bin: ${SolutionDir}x64\Release\${pkgname}.dll;
-			lib: ${SolutionDir}x64\Release\${pkgname}.lib;
+		(${toolsets}, "Win32,x64", "release,debug") => {
+			[${0},${1},${2}] {
+				bin: ${SolutionDir}${0}\${1}\${2}\${pkgname}.dll;
+				lib: ${SolutionDir}${0}\${1}\${2}\${pkgname}.lib;
+				symbols: ${SolutionDir}${0}\${1}\${2}\${pkgname}.pdb;
+			}
 		}
 	}
 	targets {
