@@ -41,7 +41,9 @@ build_script:
 
     appveyor-retry nuget restore win32\libgamecommon.sln
 
-    FOR %%T IN (v140,v140_xp) DO ( FOR %%P IN (x86,x64) DO ( FOR %%C IN (Debug,Release) DO ( echo *** Building %%T/%%P/%%C *** && msbuild win32\libgamecommon\libgamecommon.vcxproj /p:Configuration=%%C /p:Platform=%%P /p:PlatformToolset=%%T /p:SolutionDir=..\ /v:minimal /nologo && msbuild win32\libgamecommon-tests\libgamecommon-tests.vcxproj /p:Configuration=%%C /p:Platform=%%P /p:PlatformToolset=%%T /p:SolutionDir=..\ /v:minimal /nologo || EXIT 1 ) ) )
+    appveyor-retry nuget update win32\libgamecommon.sln
+
+    FOR %%T IN (v140,v140_xp) DO ( FOR %%P IN (x86,x64) DO ( FOR %%C IN (Debug,Release) DO ( FOR %%F IN (libgamecommon,libgamecommon-tests) DO ( echo *** Building %%F as %%T/%%P/%%C *** && msbuild win32\%%F\%%F.vcxproj /p:Configuration=%%C /p:Platform=%%P /p:PlatformToolset=%%T /p:SolutionDir=..\ /v:minimal /nologo || EXIT 1 ) ) ) )
 
 before_deploy:
 - ps: >-
