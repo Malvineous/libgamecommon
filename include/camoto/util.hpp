@@ -68,6 +68,9 @@ constexpr unsigned long toNearestMultiple(unsigned long value,
 	return value + ((multiple - (value % multiple)) % multiple);
 }
 
+/// Case sensitive string comparison
+bool icasecmp(const std::string& l, const std::string& r);
+
 /**
 
 \mainpage libgamecommon

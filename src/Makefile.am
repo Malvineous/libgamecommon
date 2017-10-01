@@ -18,6 +18,7 @@ libgamecommon_la_SOURCES += stream_seg.cpp
 libgamecommon_la_SOURCES += stream_string.cpp
 libgamecommon_la_SOURCES += stream_sub.cpp
 libgamecommon_la_SOURCES += suppitem.cpp
+libgamecommon_la_SOURCES += util.cpp
 
 WARNINGS = -Wall -Wextra -Wpedantic -Wno-unused-parameter
 

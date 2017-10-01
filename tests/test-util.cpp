@@ -43,4 +43,15 @@ BOOST_AUTO_TEST_CASE(to_nearest_multiple)
 	BOOST_REQUIRE_EQUAL(toNearestMultiple(5, 2), 6);
 }
 
+BOOST_AUTO_TEST_CASE(icasecmp_check)
+{
+	BOOST_TEST_MESSAGE("icasecmp()");
+
+	BOOST_REQUIRE( icasecmp("abc123!@#", "ABC123!@#"));
+	BOOST_REQUIRE(!icasecmp("abc123!@#", "ABC123!@$"));
+
+	BOOST_REQUIRE( icasecmp("abcdefghijklmnopqrstuvwxyz", "ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
+	BOOST_REQUIRE(!icasecmp("abcdefghijklmnopqrstuvwxyz", "BBCDEFGHIJKLMNOPQRSTUVWXYZ"));
+}
+
 BOOST_AUTO_TEST_SUITE_END()
