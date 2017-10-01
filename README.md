@@ -1,6 +1,6 @@
 Camoto: Classic-game Modding Tools
 ==================================
-Copyright 2010-2016 Adam Nielsen <<malvineous@shikadi.net>>  
+Copyright 2010-2017 Adam Nielsen <<malvineous@shikadi.net>>  
 <http://www.shikadi.net/camoto/>  
 Linux/OSX: [![Build Status (Linux/OSX)](https://travis-ci.org/Malvineous/libgamecommon.svg?branch=master)](https://travis-ci.org/Malvineous/libgamecommon)
 Windows: [![Build Status (Windows)](https://ci.appveyor.com/api/projects/status/aw7kjrx99iac8dgo?svg=true)](https://ci.appveyor.com/project/Malvineous/libgamecommon)
@@ -59,5 +59,11 @@ The library is compiled and installed in the usual way:
     make check            # Optional, compile and run tests
     sudo make install
     sudo ldconfig
+
+If you haven't got any libraries installed in `/usr/local/lib` yet, then don't
+forget to add `/usr/local/lib` to `/etc/ld.so.conf` and rerun `ldconfig`, so
+that this directory will be searched for libraries.  You might also want to add
+`/usr/local/bin` to your $PATH at the same time, if you intend to run the
+command-line tools in the other Camoto libraries.
 
 This library is released under the GPLv3 license.

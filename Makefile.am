@@ -1,7 +1,7 @@
 # "src" must go first so the library is available when the tests compile
 SUBDIRS = src include tests
 
-EXTRA_DIST = @PACKAGE@.pc.in README
+EXTRA_DIST = @PACKAGE@.pc.in README.md
 
 DISTCLEANFILES = @PACKAGE@.pc
 
