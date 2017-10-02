@@ -33,4 +33,16 @@ bool icasecmp(const std::string& l, const std::string& r)
 		);
 }
 
+void uppercase(std::string& s)
+{
+	for (auto& i : s) i = toupper(i);
+	return;
+}
+
+void lowercase(std::string& s)
+{
+	for (auto& i : s) i = tolower(i);
+	return;
+}
+
 } // namespace camoto

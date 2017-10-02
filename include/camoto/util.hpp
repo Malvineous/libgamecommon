@@ -71,6 +71,12 @@ constexpr unsigned long toNearestMultiple(unsigned long value,
 /// Case sensitive string comparison
 bool icasecmp(const std::string& l, const std::string& r);
 
+/// Convert ASCII string to uppercase (for DOS filenames)
+void uppercase(std::string& s);
+
+/// Convert ASCII string to lowercase (for DOS filenames)
+void lowercase(std::string& s);
+
 /**
 
 \mainpage libgamecommon

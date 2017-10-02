@@ -54,4 +54,34 @@ BOOST_AUTO_TEST_CASE(icasecmp_check)
 	BOOST_REQUIRE(!icasecmp("abcdefghijklmnopqrstuvwxyz", "BBCDEFGHIJKLMNOPQRSTUVWXYZ"));
 }
 
+BOOST_AUTO_TEST_CASE(uppercase_check)
+{
+	BOOST_TEST_MESSAGE("uppercase()");
+
+	std::string s;
+
+	s = "abc123!@#";
+	uppercase(s);
+	BOOST_REQUIRE(s.compare("ABC123!@#") == 0);
+
+	s = "abcdefghijklmnopqrstuvwxyz";
+	uppercase(s);
+	BOOST_REQUIRE(s.compare("ABCDEFGHIJKLMNOPQRSTUVWXYZ") == 0);
+}
+
+BOOST_AUTO_TEST_CASE(lowercase_check)
+{
+	BOOST_TEST_MESSAGE("lowercase()");
+
+	std::string s;
+
+	s = "ABC123!@#";
+	lowercase(s);
+	BOOST_REQUIRE(s.compare("abc123!@#") == 0);
+
+	s = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	lowercase(s);
+	BOOST_REQUIRE(s.compare("abcdefghijklmnopqrstuvwxyz") == 0);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
