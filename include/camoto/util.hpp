@@ -23,6 +23,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <vector> // for filesystem impl only
 
 #define TOSTRING_X(x)  #x
 #define TOSTRING(x)    TOSTRING_X(x)
@@ -76,6 +77,34 @@ void uppercase(std::string& s);
 
 /// Convert ASCII string to lowercase (for DOS filenames)
 void lowercase(std::string& s);
+
+/// Temporary std::filesystem implementation until we can move to C++17
+namespace filesystem {
+
+typedef std::string path;
+
+#ifdef WIN32
+constexpr static char separator = '\\';
+#else
+constexpr static char separator = '/';
+#endif
+
+class filesystem_error: public std::exception { };
+
+std::vector<std::string> split_path(const std::string& path);
+
+// Return current dir
+path current_path();
+
+// Change directory
+void current_path(const path& p);
+
+// Does a file exist?
+bool exists(const path& p);
+
+void create_directory(const std::string& d);
+
+} // namespace fs
 
 /**
 

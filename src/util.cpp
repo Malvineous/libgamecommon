@@ -19,6 +19,8 @@
  */
 
 #include <cctype>
+#include <unistd.h>
+#include <sys/stat.h>
 #include <camoto/util.hpp>
 
 namespace camoto {
@@ -44,5 +46,54 @@ void lowercase(std::string& s)
 	for (auto& i : s) i = tolower(i);
 	return;
 }
+
+// basic filesystem implementation until C++17 is standardised
+namespace filesystem {
+
+std::vector<std::string> split_path(const std::string& path)
+{
+	std::vector<std::string> components;
+	std::string segment;
+	for (const auto& i : path) {
+		if (i == separator) {
+			if (!segment.empty()) components.push_back(segment);
+			segment.clear();
+		} else {
+			segment += i;
+		}
+	}
+	if (!segment.empty()) components.push_back(segment);
+	return components;
+}
+
+path current_path()
+{
+	char s[256];
+	getcwd(s, 256);
+	return path(s);
+}
+
+void current_path(const path& p)
+{
+	if (chdir(p.c_str()) < 0) {
+		throw filesystem_error();
+	}
+}
+
+bool exists(const path& p)
+{
+	struct stat buf;
+	if (stat(p.c_str(), &buf) < 0) return false;
+	return true;
+}
+
+void create_directory(const std::string& d)
+{
+	if (mkdir(d.c_str(), 0755) < 0) {
+		throw filesystem_error();
+	}
+}
+
+} // namespace fs
 
 } // namespace camoto
