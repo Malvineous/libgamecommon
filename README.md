@@ -56,7 +56,7 @@ The library is compiled and installed in the usual way:
 
     ./autogen.sh          # Only if compiling from git
     ./configure && make
-    make check            # Optional, compile and run tests
+    make check            # Optional, compile and run tests (requires Boost)
     sudo make install
     sudo ldconfig
 

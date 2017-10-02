@@ -19,7 +19,7 @@ AC_PROG_LIBTOOL
 
 AX_CXX_COMPILE_STDCXX_11(noext, mandatory)
 
-AX_BOOST_BASE([1.46], [], [AC_MSG_ERROR([Could not find Boost])])
+AX_BOOST_BASE([1.46], [], [AC_MSG_WARN([Could not find Boost, unit tests will not be built])])
 AX_BOOST_UNIT_TEST_FRAMEWORK
 
 AC_ARG_ENABLE(debug, AC_HELP_STRING([--enable-debug],[enable extra debugging output]))
