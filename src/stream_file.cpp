@@ -32,12 +32,9 @@ inline std::string strerror_str(int errno2)
 {
 	char buf[256];
 	buf[0] = 0;
-	char *pbuf = buf;
 	errno = 0;
 #ifdef _WIN32
 	strerror_s(buf, sizeof(buf), errno2);
-#elif defined(_GNU_SOURCE)
-	pbuf = strerror_r(errno2, buf, sizeof(buf));
 #else
 	strerror_r(errno2, buf, sizeof(buf));
 #endif
@@ -45,11 +42,11 @@ inline std::string strerror_str(int errno2)
 		return createString("[unable to get message for error code " << errno2
 			<< "]");
 	}
-	if (pbuf[0] == 0) {
+	if (buf[0] == 0) {
 		return createString("[empty string returned with no failure code when "
 			"getting message for error code " << errno2 << "]");
 	}
-	return std::string(pbuf) + ".";
+	return std::string(buf) + ".";
 }
 
 #ifdef _WIN32
