@@ -36,7 +36,7 @@ inline std::string strerror_str(int errno2)
 	errno = 0;
 #ifdef _WIN32
 	strerror_s(buf, sizeof(buf), errno2);
-#elif defined(_GNU_SOURCE) && !defined(__clang__)
+#elif defined(_GNU_SOURCE)
 	pbuf = strerror_r(errno2, buf, sizeof(buf));
 #else
 	int r = strerror_r(errno2, buf, sizeof(buf));
