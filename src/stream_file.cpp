@@ -28,6 +28,17 @@
 #include <camoto/stream_file.hpp>
 #include <camoto/util.hpp> // createString
 
+// POSIX version
+char* handle_strerror_r(int result, char* buffer) {
+	errno = result;
+	return buffer;
+}
+
+// GNU version
+char* handle_strerror_r(char* result, char*) {
+	return result;
+}
+
 inline std::string strerror_str(int errno2)
 {
 	char buf[256];
@@ -36,12 +47,11 @@ inline std::string strerror_str(int errno2)
 	errno = 0;
 #ifdef _WIN32
 	strerror_s(buf, sizeof(buf), errno2);
-#elif defined(_GNU_SOURCE)
-	pbuf = strerror_r(errno2, buf, sizeof(buf));
 #else
-	int r = strerror_r(errno2, buf, sizeof(buf));
-	(void)r;
-	// r is assigned to confirm we are getting the strerror_r() that returns int
+	pbuf = handle_strerror_r(
+		strerror_r(errno2, buf, sizeof(buf)),
+		buf
+	);
 #endif
 	if (errno != 0) {
 		return createString("[unable to get message for error code " << errno2
